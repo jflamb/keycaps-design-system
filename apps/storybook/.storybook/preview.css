@@ -1,0 +1,40 @@
+.sb-show-main,
+.docs-story {
+  background: var(--kc-color-surface);
+  color: var(--kc-color-text);
+}
+
+.kc-docs-canvas {
+  min-block-size: 12rem;
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-body);
+}
+
+.kc-story-stack {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--kc-space-5);
+}
+
+.kc-story-column {
+  display: grid;
+  inline-size: min(100%, 40rem);
+  gap: var(--kc-space-6);
+}
+
+.kc-story-section {
+  display: grid;
+  gap: var(--kc-space-4);
+}
+
+.kc-story-section > h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.kc-story-section > p {
+  max-inline-size: 70ch;
+  margin: 0;
+  color: var(--kc-color-text-muted);
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@jflamb/keycaps-consumer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@jflamb/keycaps-react": "workspace:*",
+    "@jflamb/keycaps-tokens": "workspace:*",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "typescript": "7.0.2",
+    "vite": "8.2.1"
+  },
+  "scripts": {
+    "build": "tsc --noEmit && vite build",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  }
+}

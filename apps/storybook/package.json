@@ -1,0 +1,28 @@
+{
+  "name": "@jflamb/keycaps-storybook",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@jflamb/keycaps-react": "workspace:*",
+    "@jflamb/keycaps-tokens": "workspace:*",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "10.5.7",
+    "@storybook/addon-docs": "10.5.7",
+    "@storybook/react-vite": "10.5.7",
+    "@types/node": "24.10.12",
+    "@types/react": "19.2.14",
+    "storybook": "10.5.7",
+    "typescript": "7.0.2",
+    "vite": "8.2.1"
+  },
+  "scripts": {
+    "build": "STORYBOOK_DISABLE_TELEMETRY=1 storybook build --quiet",
+    "clean": "rm -rf storybook-static",
+    "dev": "STORYBOOK_DISABLE_TELEMETRY=1 storybook dev -p 6006 --host 127.0.0.1 --no-open",
+    "typecheck": "tsc --noEmit"
+  }
+}

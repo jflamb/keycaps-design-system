@@ -1,0 +1,28 @@
+{
+  "name": "keycaps-design-system",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Owned design tokens, React components, and documentation for jflamb.com projects.",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@11.16.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm --filter @jflamb/keycaps-tokens build && pnpm --filter @jflamb/keycaps-react build && pnpm --filter @jflamb/keycaps-storybook build",
+    "audit:high": "pnpm audit --audit-level high",
+    "clean": "pnpm -r clean",
+    "dev": "pnpm --filter @jflamb/keycaps-storybook dev",
+    "storybook": "pnpm --filter @jflamb/keycaps-storybook dev",
+    "test": "pnpm --filter @jflamb/keycaps-react test",
+    "test:unit": "pnpm --filter @jflamb/keycaps-react test",
+    "test:package": "pnpm --filter @jflamb/keycaps-consumer build",
+    "test:e2e": "playwright test",
+    "typecheck": "pnpm --filter @jflamb/keycaps-tokens build && pnpm --filter @jflamb/keycaps-react build && pnpm -r --if-present typecheck",
+    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm test:package && pnpm test:e2e && pnpm audit:high"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.11.0",
+    "@playwright/test": "1.62.1"
+  }
+}

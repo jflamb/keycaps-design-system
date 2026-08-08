@@ -1,0 +1,52 @@
+{
+  "name": "@jflamb/keycaps-react",
+  "version": "0.1.0",
+  "description": "Owned React components for the Keycaps design system.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "sideEffects": ["**/*.css"],
+  "files": ["dist"],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "peerDependencies": {
+    "@jflamb/keycaps-tokens": "^0.1.0",
+    "react": ">=18.2.0 <20.0.0",
+    "react-dom": ">=18.2.0 <20.0.0"
+  },
+  "dependencies": {
+    "react-aria-components": "1.20.0"
+  },
+  "devDependencies": {
+    "@axe-core/react": "4.11.0",
+    "@jflamb/keycaps-tokens": "workspace:*",
+    "@storybook/react-vite": "10.5.7",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.1",
+    "@testing-library/user-event": "14.6.1",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "axe-core": "4.11.0",
+    "jsdom": "28.1.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "tsup": "8.5.1",
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --external react --external react-dom && tsc -p tsconfig.build.json && cp src/styles.css dist/styles.css",
+    "clean": "rm -rf dist coverage",
+    "test": "vitest run --coverage.enabled=false",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  }
+}

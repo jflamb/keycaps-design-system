@@ -1,0 +1,24 @@
+{
+  "name": "@jflamb/keycaps-tokens",
+  "version": "0.1.0",
+  "description": "Framework-neutral Keycaps design tokens and locally hosted fonts.",
+  "license": "UNLICENSED",
+  "sideEffects": ["**/*.css"],
+  "files": ["dist"],
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.css"
+    },
+    "./tokens.css": "./dist/tokens.css",
+    "./fonts.css": "./dist/fonts.css",
+    "./base.css": "./dist/base.css",
+    "./legacy.css": "./dist/legacy.css",
+    "./fonts/*": "./dist/fonts/*"
+  },
+  "scripts": {
+    "build": "node ../../scripts/build-tokens.mjs",
+    "clean": "rm -rf dist"
+  }
+}

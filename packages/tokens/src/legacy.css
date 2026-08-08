@@ -1,0 +1,39 @@
+/* Opt-in aliases for existing jflamb surfaces. New code should use --kc-* tokens. */
+:root {
+  --surface: var(--kc-color-surface);
+  --surface-raised: var(--kc-color-surface-raised);
+  --border: var(--kc-color-border);
+  --divider: var(--kc-color-divider);
+  --muted: var(--kc-color-text-muted);
+  --ink: var(--kc-color-text);
+  --key-face-primary: var(--kc-color-key-face);
+  --key-face-primary-hover: var(--kc-color-key-face-hover);
+  --key-edge-primary: var(--kc-color-key-edge);
+  --key-text-primary: var(--kc-color-on-key);
+  --key-face-neutral-hover: var(--kc-color-surface-hover);
+  --chip-bg: var(--kc-color-accent-surface);
+  --chip-text: var(--kc-color-accent-text);
+  --chip-edge: var(--kc-color-accent-border);
+  --link: var(--kc-color-link);
+  --focus: var(--kc-color-focus);
+  --success-text: var(--kc-color-success-text);
+  --success-bg: var(--kc-color-success-surface);
+  --success-border: var(--kc-color-success-border);
+  --danger-text: var(--kc-color-danger-text);
+  --danger-bg: var(--kc-color-danger-surface);
+  --danger-border: var(--kc-color-danger-border);
+  --warning-text: var(--kc-color-warning-text);
+  --warning-bg: var(--kc-color-warning-surface);
+  --warning-border: var(--kc-color-warning-border);
+  --info-text: var(--kc-color-info-text);
+  --info-bg: var(--kc-color-info-surface);
+  --info-border: var(--kc-color-info-border);
+  --font-display: var(--kc-font-display);
+  --font-body: var(--kc-font-body);
+  --font-mono: var(--kc-font-mono);
+  --radius-key: var(--kc-radius-key);
+  --radius-plate: var(--kc-radius-plate);
+  --edge-w: var(--kc-key-edge-width);
+  --shadow-plate: var(--kc-shadow-plate);
+  --dur-press: var(--kc-duration-press);
+}

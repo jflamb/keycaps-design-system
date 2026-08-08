@@ -1,0 +1,44 @@
+# Keycaps Design System
+
+Keycaps is the owned visual and interaction foundation for future React projects under `jflamb.com`.
+
+It has three layers:
+
+- `@jflamb/keycaps-tokens`: framework-neutral CSS custom properties, local fonts, themes, and base styles.
+- `@jflamb/keycaps-react`: owned React components built on React Aria Components.
+- `@jflamb/keycaps-storybook`: component guidance, interaction examples, and accessibility documentation.
+
+The visual source of truth is `/Users/jaime/Repos/jflamb/app-auth/src/design`. Assistant Workbench is a representative consumer, not a second source of truth. Astryx is not a runtime dependency, and the deprecated MCP console is out of scope.
+
+## Start locally
+
+```sh
+pnpm install
+pnpm dev
+```
+
+Run the complete local gate with:
+
+```sh
+pnpm check
+```
+
+## Consume
+
+```tsx
+import "@jflamb/keycaps-tokens";
+import "@jflamb/keycaps-react/styles.css";
+import { Button, Field } from "@jflamb/keycaps-react";
+```
+
+Import the token layer once near the application root. Component CSS is intentionally separate so non-React consumers can use tokens without React styles.
+
+## Theme contract
+
+Keycaps follows the system color scheme by default. Set `data-theme="light"` or `data-theme="dark"` on the root element for an explicit choice. Existing jflamb apps can retain the `jflamb-theme` preference key; Keycaps only defines the CSS contract and does not write cookies or local storage.
+
+## Status
+
+All components begin at `beta`. A component becomes `stable` only after API review, automated interaction and accessibility checks, responsive and forced-color verification, and manual assistive-technology coverage documented in the release record.
+
+See [Foundation decision](docs/decisions/0001-foundation.md), [component status](docs/component-status.md), and [contributing guidance](docs/contributing/components.md).
