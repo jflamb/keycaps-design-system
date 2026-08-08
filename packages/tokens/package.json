@@ -3,8 +3,17 @@
   "version": "0.1.0",
   "description": "Framework-neutral Keycaps design tokens and locally hosted fonts.",
   "license": "UNLICENSED",
+  "homepage": "https://jflamb.github.io/keycaps-design-system/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jflamb/keycaps-design-system.git",
+    "directory": "packages/tokens"
+  },
+  "bugs": {
+    "url": "https://github.com/jflamb/keycaps-design-system/issues"
+  },
   "sideEffects": ["**/*.css"],
-  "files": ["dist"],
+  "files": ["dist", "README.md"],
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -19,6 +28,12 @@
   },
   "scripts": {
     "build": "node ../../scripts/build-tokens.mjs",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepublishOnly": "pnpm build"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org"
   }
 }

@@ -41,4 +41,10 @@ Keycaps follows the system color scheme by default. Set `data-theme="light"` or 
 
 All components begin at `beta`. A component becomes `stable` only after API review, automated interaction and accessibility checks, responsive and forced-color verification, and manual assistive-technology coverage documented in the release record.
 
-See [Foundation decision](docs/decisions/0001-foundation.md), [component status](docs/component-status.md), and [contributing guidance](docs/contributing/components.md).
+## Documentation and releases
+
+Storybook is the documentation site and deploys to GitHub Pages after the main CI workflow passes. The two public npm packages publish only from a GitHub Release whose tag matches their shared version.
+
+VitePress is deliberately not part of the foundation. Storybook already keeps narrative guidance, live component examples, accessibility checks, and API documentation in one place. A separate standards site is worth reconsidering only when non-component guidance becomes substantial enough that Storybook navigation is the constraint.
+
+See [Foundation decision](docs/decisions/0001-foundation.md), [component status](docs/component-status.md), [publishing](docs/publishing.md), and [contributing guidance](docs/contributing/components.md).

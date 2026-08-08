@@ -1,0 +1,37 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Introduction" />
+
+# Keycaps Design System
+
+Keycaps is the owned visual and interaction foundation for React projects under `jflamb.com`. It keeps brand decisions in framework-neutral CSS tokens and uses React Aria Components for accessible interaction behavior.
+
+## Install
+
+```sh
+pnpm add @jflamb/keycaps-tokens @jflamb/keycaps-react react react-dom
+```
+
+```tsx
+import "@jflamb/keycaps-tokens";
+import "@jflamb/keycaps-react/styles.css";
+import { Button } from "@jflamb/keycaps-react";
+```
+
+## Package boundaries
+
+- `@jflamb/keycaps-tokens` has no framework dependency. It owns fonts, custom properties, semantic themes, base styles, reduced motion, and forced colors.
+- `@jflamb/keycaps-react` owns the public component APIs and styling. React Aria Components remains an implementation detail wherever practical.
+- Storybook is the documentation site: narrative guidance, live examples, accessibility checks, and API reference stay together.
+
+## Theme contract
+
+Keycaps follows the system theme unless the root element has `data-theme="light"` or `data-theme="dark"`. Existing jflamb applications may continue storing the preference under `jflamb-theme`; the packages do not write cookies or browser storage.
+
+## Status
+
+Components are beta until the automated checks and documented manual assistive-technology matrix are complete. See **Foundations / Component showcase** for a representative composition and each component page for usage guidance.
+
+## Publishing
+
+Storybook deploys to GitHub Pages only after the main CI workflow passes. npm packages publish only from a GitHub Release whose `vX.Y.Z` tag exactly matches both package versions.

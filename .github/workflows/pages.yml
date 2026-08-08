@@ -1,0 +1,56 @@
+name: Publish Storybook to Pages
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Keycaps checks"]
+    types: [completed]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the verified revision
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: pnpm/setup@v2
+        with:
+          version: 11.16.0
+          runtime: node@24
+          cache: true
+          install: false
+      - run: pnpm install --frozen-lockfile
+      - name: Build packages and Storybook
+        run: pnpm build
+      - uses: actions/configure-pages@v6
+      - name: Upload Storybook artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: apps/storybook/storybook-static
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy Storybook
+        id: deployment
+        uses: actions/deploy-pages@v5
