@@ -26,23 +26,88 @@
   --kc-color-danger-bright: #f08a80;
 
   /* Typography */
-  --kc-font-display: "Fraunces Variable", Georgia, "Times New Roman", serif;
-  /* Brand constant, not a per-surface control. Changing it changes the voice. */
-  --kc-font-variation-display: "opsz" 11, "SOFT" 80;
-  --kc-font-body: "Nunito Sans", ui-sans-serif, system-ui, -apple-system,
+  /* Piazzolla's `opsz` axis is left to `font-optical-sizing: auto`, so there is
+     no variation-settings token to pin. The face adapts its own drawing between
+     a 1.25rem card title and a 2.5rem page heading, which is precisely why it
+     was chosen. Pinning the axis would throw that away. */
+  --kc-font-display: "Piazzolla", Georgia, "Times New Roman", serif;
+  --kc-font-body: "Sofia Sans", ui-sans-serif, system-ui, -apple-system,
     sans-serif;
-  --kc-font-mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas,
-    monospace;
+  --kc-font-mono: "Lilex", ui-monospace, "Cascadia Mono", "SF Mono", Menlo,
+    Consolas, monospace;
+  /* Inline code is set relative to its parent, not on the size ramp, because it
+     appears inside body, label and table text alike. 0.8em rather than a
+     conventional 0.85em: a monospace advance is ~0.6em against Sofia Sans'
+     ~0.41em average, so code always sets wider than the prose around it and the
+     only remaining lever is size. */
+  --kc-font-size-code: 0.8em;
+  /* A code block has no surrounding prose to match, so the inline correction
+     does not apply: it is read as its own column and wants the size it would
+     have in an editor. Absolute rather than relative for the same reason —
+     nothing is inheriting from. */
+  --kc-font-size-code-block: 0.875rem;
   --kc-font-size-xs: 0.75rem;
   --kc-font-size-sm: 0.875rem;
   --kc-font-size-md: 1rem;
   --kc-font-size-lg: 1.125rem;
   --kc-font-size-xl: 1.25rem;
+  /* All-caps text is governed by cap height, not x-height, and Sofia Sans sets a
+     low cap (0.655em) against a generous x-height (0.488em). Mixed-case text at
+     `xs` is unaffected — it reads off the x-height — but a string that is
+     entirely capitals loses about 7% of its height, which at 0.75rem is the
+     difference between legible and squinting. Every all-caps surface uses this
+     instead. */
+  --kc-font-size-caps: 0.8125rem;
   --kc-line-height-body: 1.55;
   --kc-line-height-heading: 1.2;
+  /* The Label and Micro roles carry their own leading. Both are committed in
+     DESIGN.md and were previously restated as literals in six places, which is
+     drift waiting to happen: a role documented in one place and implemented in
+     six has no single source. Micro is 1 because at 0.75rem uppercase, any
+     leading above the cap height opens a gap the padding never asked for. */
+  --kc-line-height-label: 1.45;
+  --kc-line-height-micro: 1;
+  /* Heading rhythm. In `em`, not rem or a space step, so it scales with
+     whatever size the surface chose — heading sizes are deliberately not
+     tokenized ("the surface decides, the face does not"), and the space around
+     a heading has to obey the same rule or it breaks at the extremes. The
+     2.67:1 ratio is what binds a heading to the section it opens instead of
+     the one it closes. */
+  --kc-space-heading-above: 1.6em;
+  --kc-space-heading-below: 0.6em;
+  /* The generic ladder. Both faces are continuously variable — Piazzolla
+     100–900, Sofia Sans 1–1000 — so every one of these is a real weight in both
+     voices, not a nearest match. This is what a consumer reaches for. */
   --kc-font-weight-regular: 400;
+  --kc-font-weight-medium: 500;
   --kc-font-weight-semibold: 600;
   --kc-font-weight-bold: 700;
+
+  /* Role weights, tuned optically rather than snapped to the ladder.
+     Apparent stroke weight falls as size falls, so one number spanning a 40px
+     heading and a 12px badge does not read as one system. Display and Title are
+     the same intent at 2x the size apart, so they bracket 600 instead of
+     sharing it; Micro carries the most because 12px uppercase has no ascenders
+     or descenders left to help it. Body is deliberately untuned — running text
+     should sit at the face's own text weight. */
+  --kc-font-weight-body: calc(400 + var(--kc-font-weight-shift));
+  --kc-font-weight-display: calc(580 + var(--kc-font-weight-shift));
+  --kc-font-weight-title: calc(640 + var(--kc-font-weight-shift));
+  --kc-font-weight-label: calc(580 + var(--kc-font-weight-shift));
+  --kc-font-weight-micro: calc(760 + var(--kc-font-weight-shift));
+  /* Emphasis is a role, not a rung. `strong` is the most frequent typographic
+     decision a document makes, and reaching for the flat ladder left the one
+     weight that never compensated in dark — widening the gap against body text
+     exactly where irradiation already exaggerates it. */
+  --kc-font-weight-emphasis: calc(700 + var(--kc-font-weight-shift));
+
+  /* Dark-mode optical compensation, and the one thing here that a static face
+     could not do at all. Light glyphs on a dark ground irradiate: the bright
+     stroke bleeds into the surround and reads heavier than the same weight on
+     white. Both faces are low-contrast enough that this, rather than strokes
+     breaking up, is the dominant effect — so dark shaves weight rather than
+     adding it. One value; flip it to 0 to disable the whole behaviour. */
+  --kc-font-weight-shift: 0;
 
   /* Space, shape, elevation, motion */
   --kc-space-1: 0.25rem;
@@ -111,6 +176,9 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
+    /* Light glyphs irradiate on a dark ground and read heavier. See
+       --kc-font-weight-shift. */
+    --kc-font-weight-shift: -20;
     --kc-color-surface: #15181d;
     --kc-color-surface-raised: #1e2228;
     --kc-color-surface-hover: #262b33;
@@ -146,6 +214,9 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
+  /* Light glyphs irradiate on a dark ground and read heavier. See
+     --kc-font-weight-shift. */
+  --kc-font-weight-shift: -20;
   --kc-color-surface: #15181d;
   --kc-color-surface-raised: #1e2228;
   --kc-color-surface-hover: #262b33;
@@ -180,6 +251,8 @@
 
 :root[data-theme="light"] {
   color-scheme: light;
+  /* Explicit light resets the dark optical compensation. */
+  --kc-font-weight-shift: 0;
 }
 
 /* Motion contract. The system preference is authoritative; `data-kc-motion` on

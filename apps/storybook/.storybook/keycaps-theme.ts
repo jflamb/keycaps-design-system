@@ -10,9 +10,9 @@ import { create } from "storybook/theming/create";
  */
 
 const fontBase =
-  '"Nunito Sans", ui-sans-serif, system-ui, -apple-system, sans-serif';
+  '"Sofia Sans", ui-sans-serif, system-ui, -apple-system, sans-serif';
 const fontCode =
-  'ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace';
+  '"Lilex", ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace';
 
 export const keycapsLight = create({
   base: "light",

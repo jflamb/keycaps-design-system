@@ -23,6 +23,7 @@
     "./tokens.css": "./dist/tokens.css",
     "./fonts.css": "./dist/fonts.css",
     "./base.css": "./dist/base.css",
+    "./prose.css": "./dist/prose.css",
     "./legacy.css": "./dist/legacy.css",
     "./fonts/*": "./dist/fonts/*"
   },

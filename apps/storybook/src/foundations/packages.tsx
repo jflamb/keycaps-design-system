@@ -7,9 +7,11 @@ const PURPOSE: Record<string, string> = {
   "@jflamb/keycaps-tokens/tokens.css":
     "The custom properties alone: primitives, both semantic themes, and the forced-colors mapping. No reset, no fonts.",
   "@jflamb/keycaps-tokens/fonts.css":
-    "The @font-face declarations for Fraunces Variable and Nunito Sans. Local WOFF2; nothing is fetched at runtime.",
+    "The @font-face declarations for Piazzolla, Sofia Sans and Lilex. Local WOFF2; nothing is fetched at runtime. Local WOFF2; nothing is fetched at runtime.",
   "@jflamb/keycaps-tokens/base.css":
-    "Box sizing, the 320px floor, body type, heading face, link color, focus ring, .kc-sr-only, and the reduced-motion guard. Zero-specificity :where() selectors, so your own styles win.",
+    "Box sizing, the 320px floor, body type, heading face, link color, focus ring, .kc-sr-only, .kc-skip-link, and the reduced-motion guard. Zero-specificity :where() selectors, so your own styles win.",
+  "@jflamb/keycaps-tokens/prose.css":
+    "Long-form content styling for the elements a CMS or markdown pipeline emits, scoped to .kc-prose. Opt-in and not part of the default import, because a product surface that renders no articles should not pay for it.",
   "@jflamb/keycaps-tokens/legacy.css":
     "Opt-in unprefixed aliases for retrofitting an existing jflamb app. New projects should not import this.",
   "@jflamb/keycaps-tokens/fonts/*":
@@ -75,7 +77,7 @@ export function PackageLicenses() {
       name: manifest.name,
       license: manifest.license,
       ships: manifest.name.endsWith("tokens")
-        ? "Tokens, base styles, and the Fraunces and Nunito Sans WOFF2 binaries."
+        ? "Tokens, base styles, and the Piazzolla, Sofia Sans and Lilex WOFF2 binaries."
         : "Component code and styling. No font binaries.",
     })),
   );

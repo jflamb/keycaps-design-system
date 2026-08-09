@@ -29,6 +29,17 @@ The default `@jflamb/keycaps-tokens` import is `fonts.css`, `tokens.css`, and
 `base.css` together. Import the subpaths individually when you want the custom
 properties without the reset, or the reset without the font faces.
 
+`prose.css` is deliberately not in that default. It styles the bare HTML a CMS
+or a markdown pipeline emits, scoped to a `.kc-prose` container, and a product
+surface that renders no articles should not pay for it:
+
+```css
+@import "@jflamb/keycaps-tokens/prose.css";
+```
+
+See <DocLink to="prose-overview--guidance">Prose</DocLink> for what it covers and
+what the markup still has to supply.
+
 ## Without React
 
 The tokens package is plain CSS and plain custom properties. Any framework, or
@@ -109,9 +120,9 @@ app can adopt the token layer in one commit and rename call sites over time.
 
 ## Visually hidden text
 
-`base.css` ships one utility, and it is the one the accessibility baseline keeps
-needing: `.kc-sr-only` removes an element from the visual layout while leaving it
-in the accessibility tree.
+`base.css` ships two utilities, and they are the ones the accessibility baseline
+keeps needing. `.kc-sr-only` removes an element from the visual layout while
+leaving it in the accessibility tree.
 
 ```html
 <button class="my-key">
@@ -123,6 +134,14 @@ in the accessibility tree.
 Use it when an icon carries the whole meaning. Prefer `aria-label` when the
 element already has no text content at all.
 
+`.kc-skip-link` is the same idea with a focus state: hidden until it takes
+focus, then a seated key at the 44px control floor in the top corner. It has to
+be the first focusable thing in the document to be worth anything.
+
+```html
+<a class="kc-skip-link" href="#main">Skip to main content</a>
+```
+
 ## License
 
 Both packages are MIT. Use them, fork them, ship them in a commercial product —
@@ -130,7 +149,7 @@ no permission needed and no attribution beyond keeping the license notice.
 
 <PackageLicenses />
 
-One carve-out, and it is the font files. Fraunces and Nunito Sans are
+One carve-out, and it is the font files. Piazzolla, Sofia Sans and Lilex are
 redistributed under the **SIL Open Font License 1.1**, which MIT cannot cover,
 so `@jflamb/keycaps-tokens` declares `MIT AND OFL-1.1`. The license texts ship
 beside the binaries at `dist/fonts/`; keep them together if you copy the WOFF2

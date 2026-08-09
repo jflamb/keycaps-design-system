@@ -7,14 +7,21 @@ import { TypeRoles } from "./type";
 
 # Type
 
-A softened transitional serif over a humanist sans. Fraunces ships at `opsz 11`
-and `SOFT 80` — a low optical size with softened terminals, which keeps it warm
-and slightly bookish rather than sharp and editorial. Nunito Sans has rounded
-terminals and open apertures, so the pairing reads friendly at small sizes
-without becoming informal.
+A warm, slightly eccentric serif over a neutral grotesque. Piazzolla carries an
+optical size axis from 8 to 30 and it is left to run automatically, so the face
+redraws itself between a card title and a page heading rather than being scaled.
+Sofia Sans is the quiet half by design — it carries every label, value, button
+and error, and its job is to recede so the serif is the voice.
 
-Both faces are local WOFF2 shipped inside `@jflamb/keycaps-tokens`. Nothing is
-fetched at runtime, including on this page.
+The two were chosen for each other. Measured at a common size their x-heights sit
+within 1.2 percent — 0.482em against 0.488em — which is why they hold together
+where they meet, in a card title above its description.
+
+All three faces are continuously variable — Piazzolla 100–900, Sofia Sans 1–1000,
+Lilex 100–900 — so
+every role carries the weight it needs rather than the nearest hundred. Both are
+local WOFF2 shipped inside `@jflamb/keycaps-tokens`; nothing is fetched at
+runtime, including on this page.
 
 ## The five roles
 
@@ -24,16 +31,25 @@ and the specification underneath is read back off the rendered element.
 <TypeRoles />
 
 <Rule name="The Two Voice Rule.">
-  Fraunces speaks in page headings and card titles. Nunito Sans does everything
-  else — every label, every value, every button, every error. A third face, or
-  Fraunces creeping into body copy, breaks the system.
+  Piazzolla speaks in page headings and card titles. Sofia Sans does everything
+  else — every label, every value, every button, every error. Lilex speaks only
+  in code. Piazzolla creeping into body copy breaks the system.
 </Rule>
 
-<Rule name="The Optical Constant Rule.">
-  Fraunces is always set at <code>opsz 11, SOFT 80</code>. The variable axes are a
-  brand constant, not a per-surface control — they live in a single token,
-  <code>--kc-font-variation-display</code>, so there is one place to read them and
-  one place they could ever change. Changing them changes the voice.
+<Rule name="The Optical Weight Rule.">
+  Roles carry the weight they need, not the nearest hundred. Apparent stroke
+  weight falls as size falls, so Display sits at 580 and Title at 640 — the same
+  intent at twice the size apart, bracketing 600 rather than sharing it. Label
+  is 580, Micro 760, Body an untuned 400. Dark mode subtracts 20 from every one
+  of them, because light glyphs on a dark ground irradiate and read heavier.
+</Rule>
+
+<Rule name="The Optical Sizing Rule.">
+  Piazzolla's <code>opsz</code> axis is never pinned. It runs on
+  <code>font-optical-sizing: auto</code>, so the face draws itself for the size
+  it is set at — heavier detail and looser fit at a card title, finer at a page
+  heading. Pinning it to one value would trade away the small-size drawing that
+  makes the Title role work, which is the reason this face was chosen.
 </Rule>
 
 ## Type tokens
@@ -51,12 +67,12 @@ heading styles win without needing `!important`. That is the contract, and it is
 why this documentation site restates the display face in its own stylesheet
 rather than raising the specificity of the token layer.
 
-If your app wants Fraunces on `h3` too, set it yourself; Keycaps will not fight
+If your app wants Piazzolla on `h3` too, set it yourself; Keycaps will not fight
 you for it.
 
-<Rule name="Don't introduce a third typeface, or let Fraunces into body copy." tone="dont">
-  And don't override the variable axes per surface. If a surface needs a
-  different voice, the surface is wrong, not the axes.
+<Rule name="Don't introduce a third typeface, or let Piazzolla into body copy." tone="dont">
+  And don't pin the optical size axis per surface. If a surface needs a
+  different voice, the surface is wrong, not the axis.
 </Rule>
 
 Next: <DocLink to="foundations-space-shape--guidance">Space &amp; shape</DocLink>.

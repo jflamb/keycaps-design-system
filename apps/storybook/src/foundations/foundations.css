@@ -37,9 +37,9 @@
 :root .kc-rule__name {
   margin: 0;
   color: var(--kc-color-text-muted);
-  font-size: var(--kc-font-size-xs);
-  font-weight: var(--kc-font-weight-bold);
-  line-height: var(--kc-line-height-body);
+  font-size: var(--kc-font-size-caps);
+  font-weight: var(--kc-font-weight-micro);
+  line-height: var(--kc-line-height-micro);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -75,9 +75,9 @@
 :root .kc-scope__label {
   margin: 0;
   color: var(--kc-color-text-muted);
-  font-size: var(--kc-font-size-xs);
-  font-weight: var(--kc-font-weight-bold);
-  line-height: 1;
+  font-size: var(--kc-font-size-caps);
+  font-weight: var(--kc-font-weight-micro);
+  line-height: var(--kc-line-height-micro);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -105,7 +105,7 @@
   padding-inline: 0.28em;
   color: inherit;
   font-family: var(--kc-font-mono);
-  font-size: 0.85em;
+  font-size: var(--kc-font-size-code);
   overflow-wrap: anywhere;
 }
 
@@ -170,14 +170,14 @@
 
 :root .kc-table thead th {
   border-block-end: 1.5px solid var(--kc-color-border);
-  font-size: var(--kc-font-size-xs);
-  font-weight: var(--kc-font-weight-bold);
+  font-size: var(--kc-font-size-caps);
+  font-weight: var(--kc-font-weight-micro);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
 :root .kc-table tbody th {
-  font-weight: var(--kc-font-weight-semibold);
+  font-weight: var(--kc-font-weight-label);
   white-space: nowrap;
 }
 
@@ -226,16 +226,16 @@
 :root .kc-roles__name {
   margin: 0;
   color: var(--kc-color-text-muted);
-  font-size: var(--kc-font-size-xs);
-  font-weight: var(--kc-font-weight-bold);
-  line-height: 1;
+  font-size: var(--kc-font-size-caps);
+  font-weight: var(--kc-font-weight-micro);
+  line-height: var(--kc-line-height-micro);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
 :root .kc-roles__usage {
   margin: 0;
-  max-inline-size: 64ch;
+  max-inline-size: 58ch;
   color: var(--kc-color-text-muted);
   font-size: var(--kc-font-size-sm);
 }
@@ -250,46 +250,47 @@
   color: var(--kc-color-text);
 }
 
-/* The display and title roles restate the brand axes through the token that
-   owns them, so there is still exactly one place the axes are decided. */
+/* The display and title roles set only family, size, weight and leading. The
+   optical size axis is left to `font-optical-sizing: auto` exactly as it is
+   everywhere else, so these samples adapt the same way the real roles do. */
 /* Matched to the page's own h1. A sample smaller than the thing it samples is
    showing you the wrong face at the wrong size. */
 :root .kc-role--display {
   font-family: var(--kc-font-display);
-  font-size: clamp(1.75rem, 1.15rem + 2.4vw, 2.5rem);
-  font-variation-settings: var(--kc-font-variation-display);
-  font-weight: var(--kc-font-weight-semibold);
+  font-size: clamp(1.8rem, 1.15rem + 2.4vw, 2.5rem);
+  font-weight: var(--kc-font-weight-display);
   line-height: var(--kc-line-height-heading);
 }
 
 :root .kc-role--title {
   font-family: var(--kc-font-display);
   font-size: var(--kc-font-size-xl);
-  font-variation-settings: var(--kc-font-variation-display);
-  font-weight: var(--kc-font-weight-semibold);
+  font-weight: var(--kc-font-weight-title);
   line-height: var(--kc-line-height-heading);
 }
 
+/* The Body specimen carries the system's real measure. A sample set wider than
+   the rule it documents teaches the wrong number. */
 :root .kc-role--body {
-  max-inline-size: 68ch;
+  max-inline-size: 58ch;
   font-family: var(--kc-font-body);
   font-size: var(--kc-font-size-md);
-  font-weight: var(--kc-font-weight-regular);
+  font-weight: var(--kc-font-weight-body);
   line-height: var(--kc-line-height-body);
 }
 
 :root .kc-role--label {
   font-family: var(--kc-font-body);
   font-size: var(--kc-font-size-sm);
-  font-weight: var(--kc-font-weight-semibold);
-  line-height: 1.45;
+  font-weight: var(--kc-font-weight-label);
+  line-height: var(--kc-line-height-label);
 }
 
 :root .kc-role--micro {
   font-family: var(--kc-font-body);
   font-size: var(--kc-font-size-xs);
-  font-weight: var(--kc-font-weight-bold);
-  line-height: 1;
+  font-weight: var(--kc-font-weight-micro);
+  line-height: var(--kc-line-height-micro);
 }
 
 :root .kc-scale,
@@ -370,7 +371,7 @@
   background: var(--kc-color-accent-surface);
   color: var(--kc-color-accent-text);
   font-size: var(--kc-font-size-sm);
-  font-weight: var(--kc-font-weight-semibold);
+  font-weight: var(--kc-font-weight-label);
 }
 
 :root .kc-concentric__spec {
@@ -419,22 +420,23 @@
   gap: var(--kc-space-1);
 }
 
-/* Storybook styles docs `dt` as italic; the system owns no italic voice, and
-   this is the page that defines the release vocabulary. */
+/* Storybook styles docs `dt` as italic. The system now owns an italic, but a
+   definition term is not emphasis — it is the term being defined, and this is
+   the page that defines the release vocabulary. Weight carries it instead. */
 :root .kc-ladder-list dt,
 :root .kc-ladder-list dt code {
   font-style: normal;
-  font-weight: var(--kc-font-weight-semibold);
+  font-weight: var(--kc-font-weight-label);
 }
 
 :root .kc-ladder-list dd {
   margin: 0;
-  max-inline-size: 68ch;
+  max-inline-size: 58ch;
   color: var(--kc-color-text-muted);
 }
 
 :root .kc-contract {
   display: grid;
   gap: var(--kc-space-2);
-  max-inline-size: 68ch;
+  max-inline-size: 58ch;
 }

@@ -4,42 +4,34 @@ const favicon =
   "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%23f5f5f3%22%2F%3E%3Crect%20x%3D%226%22%20y%3D%228%22%20width%3D%2220%22%20height%3D%2217%22%20rx%3D%225%22%20fill%3D%22%238f2d1a%22%2F%3E%3Crect%20x%3D%226%22%20y%3D%228%22%20width%3D%2220%22%20height%3D%2214%22%20rx%3D%225%22%20fill%3D%22%23c7452c%22%2F%3E%3C%2Fsvg%3E";
 
 /**
- * Storybook registers its own copy of Nunito Sans from `sb-common-assets` in the
- * manager template, which no configuration hook can remove. These declarations
- * come later in the cascade and claim the same family, so they win the match and
- * the chrome paints with the design system's own files — Storybook's 700 weight
- * is never activated. Measured caveat: the browser still fetches and activates
- * Storybook's 400 weight alongside ours, so one redundant same-origin font
- * request remains. Fraunces is added here for the wordmark.
+ * The manager's own faces. Storybook registers Nunito Sans from
+ * `sb-common-assets` and no configuration hook removes it — previously these
+ * declarations claimed that same family name to win the match, but the system no
+ * longer uses Nunito Sans, so the override is now done honestly instead: these
+ * declare the real families and `keycaps-theme.ts` points `fontBase` at
+ * Sofia Sans. Storybook's own copy stays registered and unused.
  */
 const managerFonts = `
   @font-face {
-    font-family: "Nunito Sans";
+    font-family: "Sofia Sans";
     font-style: normal;
-    font-weight: 400;
+    font-weight: 1 1000;
     font-display: swap;
-    src: url("./kc-fonts/nunito-sans-latin-400-normal.woff2") format("woff2");
+    src: url("./kc-fonts/sofia-sans-latin-wght-normal.woff2") format("woff2-variations");
   }
   @font-face {
-    font-family: "Nunito Sans";
-    font-style: normal;
-    font-weight: 600;
-    font-display: swap;
-    src: url("./kc-fonts/nunito-sans-latin-600-normal.woff2") format("woff2");
-  }
-  @font-face {
-    font-family: "Nunito Sans";
-    font-style: normal;
-    font-weight: 700;
-    font-display: swap;
-    src: url("./kc-fonts/nunito-sans-latin-700-normal.woff2") format("woff2");
-  }
-  @font-face {
-    font-family: "Fraunces Variable";
+    font-family: "Piazzolla";
     font-style: normal;
     font-weight: 100 900;
     font-display: swap;
-    src: url("./kc-fonts/fraunces-latin-full-normal.woff2") format("woff2-variations");
+    src: url("./kc-fonts/piazzolla-latin-opsz-normal.woff2") format("woff2-variations");
+  }
+  @font-face {
+    font-family: "Lilex";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("./kc-fonts/lilex-latin-wght-normal.woff2") format("woff2-variations");
   }
 `;
 
@@ -57,9 +49,8 @@ const managerFonts = `
 const managerChrome = `
   .sidebar-header a[href="./"],
   [class*="sidebar-header"] a[href="./"] {
-    font-family: "Fraunces Variable", Georgia, "Times New Roman", serif;
-    font-variation-settings: "opsz" 11, "SOFT" 80;
-    font-weight: 600;
+    font-family: var(--kc-font-display);
+    font-weight: var(--kc-font-weight-display);
     font-size: 1.15rem;
     letter-spacing: 0.01em;
   }

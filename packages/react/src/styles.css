@@ -13,7 +13,13 @@
   color: var(--kc-color-text);
   font-family: var(--kc-font-body);
   font-size: var(--kc-font-size-sm);
-  font-weight: var(--kc-font-weight-bold);
+  font-weight: var(--kc-font-weight-label);
+  /* The Label role's leading is 1.45, and this is the one place it is not used.
+     At 0.875rem that makes the content box 20.3px, which with 10px padding and
+     the 1px/4px borders totals 45.3px — past `--kc-control-min-size`. The button
+     would then size to its content instead of to the 44px floor, and the press
+     depends on `min-block-size` pinning the border box while the wall
+     compresses. Tighter leading is what keeps that floor doing its job. */
   line-height: 1.2;
   text-decoration: none;
   cursor: pointer;
@@ -23,10 +29,17 @@
     background-color var(--kc-duration-press) var(--kc-ease-press);
 }
 
+/* The small size carries Micro type, not a shrunken Label. Weight has to be
+   restated: inheriting the Label weight from `.kc-button` would leave a small
+   button lighter than a regular one, which is backwards — at 0.75rem there is
+   less stroke to read, not more. Micro's leading of 1 is safe here because 12px
+   of content plus 8px padding and the borders stays under the 36px floor. */
 .kc-button[data-size="small"] {
   --kc-button-min-size: 36px;
   padding: var(--kc-space-2) var(--kc-space-3);
   font-size: var(--kc-font-size-xs);
+  font-weight: var(--kc-font-weight-micro);
+  line-height: var(--kc-line-height-micro);
 }
 
 .kc-button[data-variant="primary"] {
@@ -82,25 +95,43 @@
   cursor: not-allowed;
 }
 
+/* A field is three groups, not five evenly spaced lines. The label and its
+   description are one unit — the description finishes the sentence the label
+   starts — so they sit at step 1. The control is a change of activity, from
+   reading to doing, and takes a real step away. The error binds back to the
+   control it describes, closer than the control is to the text above it.
+   Uniform spacing here read as five unrelated rows, and at the same step the
+   card body used between whole fields, so nothing grouped and nothing separated.
+   Base gap is the tightest value; the two exceptions add to it, which keeps a
+   field with no description correct without a special case. */
 .kc-field,
 .kc-select {
   display: grid;
   inline-size: min(100%, 32rem);
-  gap: var(--kc-space-2);
+  gap: var(--kc-space-1);
   color: var(--kc-color-text);
   font-family: var(--kc-font-body);
+}
+
+.kc-field__input,
+.kc-select__trigger {
+  margin-block-start: calc(var(--kc-space-3) - var(--kc-space-1));
+}
+
+.kc-field__error {
+  margin-block-start: calc(var(--kc-space-2) - var(--kc-space-1));
 }
 
 .kc-field__label {
   display: block;
   font-size: var(--kc-font-size-sm);
-  font-weight: var(--kc-font-weight-semibold);
+  font-weight: var(--kc-font-weight-label);
 }
 
 .kc-field__description {
   color: var(--kc-color-text-muted);
   font-size: var(--kc-font-size-sm);
-  line-height: 1.45;
+  line-height: var(--kc-line-height-label);
 }
 
 .kc-field__input,
@@ -143,7 +174,7 @@
 .kc-field__error {
   color: var(--kc-color-danger-text);
   font-size: var(--kc-font-size-sm);
-  font-weight: var(--kc-font-weight-semibold);
+  font-weight: var(--kc-font-weight-label);
 }
 
 .kc-field__error:empty {
@@ -232,7 +263,7 @@
 }
 
 .kc-select__option [slot="label"] {
-  font-weight: var(--kc-font-weight-semibold);
+  font-weight: var(--kc-font-weight-label);
 }
 
 .kc-select__option [slot="description"] {
@@ -293,7 +324,7 @@
 }
 
 .kc-banner__title {
-  font-weight: var(--kc-font-weight-bold);
+  font-weight: var(--kc-font-weight-emphasis);
 }
 
 .kc-banner__body > :first-child {
@@ -332,8 +363,8 @@
   color: var(--kc-color-text);
   font-family: var(--kc-font-body);
   font-size: var(--kc-font-size-xs);
-  font-weight: var(--kc-font-weight-bold);
-  line-height: 1;
+  font-weight: var(--kc-font-weight-micro);
+  line-height: var(--kc-line-height-micro);
 }
 
 .kc-badge[data-tone="info"] {
@@ -374,18 +405,25 @@
 }
 
 .kc-card__header,
+/* Step 5, because what stacks in a card body is whole components — two fields,
+   a field and a banner — and the Layout section reserves steps 5 and 6 for
+   composition between components while internal rhythm stays in 1–4. At step 2
+   a field's own label sat exactly as far from its description as it did from
+   the next field entirely, so proximity carried no information at all. */
 .kc-card__body {
   display: grid;
-  gap: var(--kc-space-2);
+  gap: var(--kc-space-5);
 }
 
+/* The one place the display face appears inside a component. At 1.25rem the
+   face's optical size axis is doing real work, which is why nothing here pins
+   it. */
 .kc-card__title {
   margin: 0;
   color: var(--kc-color-text);
   font-family: var(--kc-font-display);
   font-size: var(--kc-font-size-xl);
-  font-variation-settings: var(--kc-font-variation-display);
-  font-weight: var(--kc-font-weight-semibold);
+  font-weight: var(--kc-font-weight-title);
   line-height: var(--kc-line-height-heading);
 }
 
