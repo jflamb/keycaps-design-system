@@ -1,0 +1,56 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { DocLink } from "./blocks";
+import { ProjectLinks } from "./packages";
+import {
+  ComponentContract,
+  ComponentStatusMatrix,
+  ReleaseLadder,
+} from "./status";
+
+<Meta title="Foundations/Release status" />
+
+# Release status
+
+Accessibility is a release gate, not a feature. The documented baseline is what
+`beta` means; manual assistive-technology verification is what `stable` costs.
+
+## Where each component stands
+
+<ComponentStatusMatrix />
+
+Every component page states its own status at the top of its guidance.
+
+## The ladder
+
+<ReleaseLadder />
+
+## The contract a component must satisfy
+
+<ComponentContract />
+
+## What is automated today
+
+The browser matrix covers Chromium, explicit light and dark themes, forced
+colors, reduced motion, and 320-CSS-pixel reflow. `pnpm check` runs typechecking,
+unit tests, the build, the GitHub Pages build, a package-consumption test, the
+Playwright end-to-end suite, and a high-severity audit.
+
+The **Accessibility** panel on every story runs axe against the rendered story
+in your own browser, so you can check the claim rather than take it.
+
+## What is not automated
+
+Documented VoiceOver/Safari and Windows screen-reader verification. Until that
+exists and is recorded in a release record, nothing moves past `beta` — and
+nothing on this site claims otherwise. If you can contribute that verification,
+the contributing link below is the place to start.
+
+## Where this lives
+
+<ProjectLinks />
+
+Breaking API changes require a major version after the first public release.
+Before that, `beta` means the API can still change between minor versions — read
+the changelog before upgrading.
+
+Next: <DocLink to="foundations-component-showcase--guidance">Component showcase</DocLink>.

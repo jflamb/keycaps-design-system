@@ -1,0 +1,440 @@
+/* Styling for the Foundations pages. Semantic Keycaps tokens only — this
+   surface is held to the same contract as the components it documents.
+
+   Every selector is prefixed with `:root` on purpose. Storybook styles docs
+   prose by tag inside its content block (`.sbdocs-content p` and friends) and
+   injects those rules at runtime, so a plain single-class selector here loses
+   both the specificity tie and the ordering tie. Without the prefix, a scope
+   label rendered its page's ink instead of its own — light-grey text on a light
+   card at 1.06:1. The `:root` prefix costs one element in specificity and wins. */
+
+/* Matched to the prose measure. A caveat wider than the claim it qualifies
+   outweighs it visually, which is backwards. */
+:root .kc-rule {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  /* Baseline, not start. The label and the body run at different sizes and
+     line-heights, so aligning their box tops lands their baselines 1.7px apart —
+     small enough to read as sloppiness rather than as a decision. Baseline
+     alignment is also the only version that survives a change to either scale. */
+  align-items: baseline;
+  gap: var(--kc-space-3);
+  inline-size: min(100%, 58ch);
+  margin-block: var(--kc-space-5);
+  padding: var(--kc-space-3) var(--kc-space-4);
+  /* A uniform border, not the Banner's 4px leading edge: a rule is not a status
+     message, and in a system where form carries meaning the two should not look
+     alike. The surface is neutral for the same reason — mint means "yes" and red
+     means "error", and spending them on editorial furniture is exactly the
+     dilution the Tone Trio Rule exists to prevent. The label carries the
+     distinction instead. */
+  border: 1px solid var(--kc-color-divider);
+  border-radius: var(--kc-radius-sm);
+  background: var(--kc-color-surface-raised);
+  color: var(--kc-color-text);
+}
+
+:root .kc-rule__name {
+  margin: 0;
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-xs);
+  font-weight: var(--kc-font-weight-bold);
+  line-height: var(--kc-line-height-body);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+:root .kc-rule[data-tone="dont"] .kc-rule__name {
+  color: var(--kc-color-danger-text);
+}
+
+:root .kc-rule__body {
+  margin: 0;
+  font-size: var(--kc-font-size-sm);
+  line-height: 1.5;
+}
+
+:root .kc-panes {
+  display: grid;
+  gap: var(--kc-space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  margin-block: var(--kc-space-5);
+}
+
+:root .kc-scope {
+  display: grid;
+  gap: var(--kc-space-3);
+  padding: var(--kc-space-4);
+  border: 1px solid var(--kc-color-divider);
+  border-radius: var(--kc-radius-plate);
+  background: var(--kc-color-surface);
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-body);
+}
+
+:root .kc-scope__label {
+  margin: 0;
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-xs);
+  font-weight: var(--kc-font-weight-bold);
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+:root .kc-scope__body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--kc-space-4);
+}
+
+:root .kc-popover--static {
+  inline-size: min(100%, 20rem);
+  animation: none;
+}
+
+:root .kc-token,
+:root .kc-table code,
+:root .kc-roles__spec code,
+:root .kc-scale__name,
+:root .kc-scale__value,
+:root .kc-concentric__spec code {
+  border-radius: 4px;
+  background: var(--kc-color-surface-hover);
+  padding-inline: 0.28em;
+  color: inherit;
+  font-family: var(--kc-font-mono);
+  font-size: 0.85em;
+  overflow-wrap: anywhere;
+}
+
+/* Scroll shadows, so a table that is hiding a column says so. macOS overlay
+   scrollbars draw nothing, and on the Color page the hidden column is Dark — on
+   a page whose whole claim is "every token, in both themes". The `local`
+   backgrounds are the covers and the `scroll` ones the shadows underneath, so
+   the hint appears only on the side that actually has more to show. */
+:root .kc-table-scroll {
+  overflow-x: auto;
+  margin-block: var(--kc-space-5);
+  background:
+    linear-gradient(to right, var(--kc-color-surface) 40%, transparent) left center /
+      2rem 100% no-repeat local,
+    linear-gradient(to left, var(--kc-color-surface) 40%, transparent) right center /
+      2rem 100% no-repeat local,
+    radial-gradient(
+        farthest-side at 0 50%,
+        color-mix(in srgb, var(--kc-color-border) 70%, transparent),
+        transparent
+      )
+      left center / 0.75rem 100% no-repeat scroll,
+    radial-gradient(
+        farthest-side at 100% 50%,
+        color-mix(in srgb, var(--kc-color-border) 70%, transparent),
+        transparent
+      )
+      right center / 0.75rem 100% no-repeat scroll;
+}
+
+/* A hex that breaks across lines is a hex that gets mis-transcribed. */
+:root .kc-table code,
+:root .kc-scale__value,
+:root .kc-scale__name {
+  white-space: nowrap;
+}
+
+:root .kc-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-body);
+  font-size: var(--kc-font-size-sm);
+  text-align: start;
+}
+
+:root .kc-table caption {
+  margin-block-end: var(--kc-space-3);
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-sm);
+  line-height: 1.5;
+  text-align: start;
+}
+
+:root .kc-table th,
+:root .kc-table td {
+  padding: var(--kc-space-2) var(--kc-space-3);
+  border-block-end: 1px solid var(--kc-color-divider);
+  text-align: start;
+  vertical-align: top;
+}
+
+:root .kc-table thead th {
+  border-block-end: 1.5px solid var(--kc-color-border);
+  font-size: var(--kc-font-size-xs);
+  font-weight: var(--kc-font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+:root .kc-table tbody th {
+  font-weight: var(--kc-font-weight-semibold);
+  white-space: nowrap;
+}
+
+:root .kc-swatch {
+  display: flex;
+  align-items: center;
+  gap: var(--kc-space-2);
+}
+
+:root .kc-swatch__chip {
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  flex: none;
+  border: 1px solid var(--kc-color-border);
+  border-radius: var(--kc-radius-sm);
+}
+
+:root .kc-swatch__values {
+  display: grid;
+  gap: 2px;
+}
+
+:root .kc-swatch__source {
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-xs);
+}
+
+:root .kc-roles {
+  display: grid;
+  gap: var(--kc-space-6);
+  margin-block: var(--kc-space-5);
+}
+
+:root .kc-roles__item {
+  display: grid;
+  gap: var(--kc-space-2);
+  padding-block-end: var(--kc-space-5);
+  border-block-end: 1px solid var(--kc-color-divider);
+}
+
+:root .kc-roles__item:last-child {
+  border-block-end: 0;
+  padding-block-end: 0;
+}
+
+:root .kc-roles__name {
+  margin: 0;
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-xs);
+  font-weight: var(--kc-font-weight-bold);
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+:root .kc-roles__usage {
+  margin: 0;
+  max-inline-size: 64ch;
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-sm);
+}
+
+:root .kc-roles__spec {
+  margin: 0;
+  font-size: var(--kc-font-size-xs);
+}
+
+:root .kc-role {
+  margin: 0;
+  color: var(--kc-color-text);
+}
+
+/* The display and title roles restate the brand axes through the token that
+   owns them, so there is still exactly one place the axes are decided. */
+/* Matched to the page's own h1. A sample smaller than the thing it samples is
+   showing you the wrong face at the wrong size. */
+:root .kc-role--display {
+  font-family: var(--kc-font-display);
+  font-size: clamp(1.75rem, 1.15rem + 2.4vw, 2.5rem);
+  font-variation-settings: var(--kc-font-variation-display);
+  font-weight: var(--kc-font-weight-semibold);
+  line-height: var(--kc-line-height-heading);
+}
+
+:root .kc-role--title {
+  font-family: var(--kc-font-display);
+  font-size: var(--kc-font-size-xl);
+  font-variation-settings: var(--kc-font-variation-display);
+  font-weight: var(--kc-font-weight-semibold);
+  line-height: var(--kc-line-height-heading);
+}
+
+:root .kc-role--body {
+  max-inline-size: 68ch;
+  font-family: var(--kc-font-body);
+  font-size: var(--kc-font-size-md);
+  font-weight: var(--kc-font-weight-regular);
+  line-height: var(--kc-line-height-body);
+}
+
+:root .kc-role--label {
+  font-family: var(--kc-font-body);
+  font-size: var(--kc-font-size-sm);
+  font-weight: var(--kc-font-weight-semibold);
+  line-height: 1.45;
+}
+
+:root .kc-role--micro {
+  font-family: var(--kc-font-body);
+  font-size: var(--kc-font-size-xs);
+  font-weight: var(--kc-font-weight-bold);
+  line-height: 1;
+}
+
+:root .kc-scale,
+:root .kc-radii {
+  display: grid;
+  gap: var(--kc-space-3);
+  margin-block: var(--kc-space-5);
+  padding: 0;
+  list-style: none;
+}
+
+/* The value sits immediately after the bar it measures. A `1fr` middle column
+   parked every value at the far right, leaving ~470px of gutter between a bar
+   and its own number — each value ended up closer to the next row's than to its
+   own. */
+:root .kc-scale__item {
+  display: grid;
+  grid-template-columns: 5.5rem auto 1fr;
+  align-items: center;
+  gap: var(--kc-space-3);
+}
+
+:root .kc-scale__bar {
+  block-size: 1rem;
+  border-radius: 3px;
+  background: var(--kc-color-accent-border);
+}
+
+/* Sits against the bar rather than stretching across the leftover track. */
+:root .kc-scale__value {
+  justify-self: start;
+}
+
+:root .kc-radii__item {
+  display: flex;
+  align-items: center;
+  gap: var(--kc-space-4);
+}
+
+:root .kc-radii__box {
+  inline-size: 3.5rem;
+  block-size: 3.5rem;
+  flex: none;
+  border: 1.5px solid var(--kc-color-border);
+  background: var(--kc-color-surface-raised);
+}
+
+:root .kc-radii__name,
+:root .kc-radii__job {
+  margin: 0;
+}
+
+:root .kc-radii__job {
+  max-inline-size: 56ch;
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-sm);
+}
+
+:root .kc-concentric {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--kc-space-4);
+  margin-block: var(--kc-space-5);
+}
+
+:root .kc-concentric__outer {
+  padding: var(--kc-space-1);
+  border: 1px solid var(--kc-color-border);
+  border-radius: var(--kc-radius-key);
+  background: var(--kc-color-surface-raised);
+  box-shadow: var(--kc-shadow-overlay);
+}
+
+:root .kc-concentric__inner {
+  padding: var(--kc-space-3);
+  border-radius: calc(var(--kc-radius-key) - 3px);
+  background: var(--kc-color-accent-surface);
+  color: var(--kc-color-accent-text);
+  font-size: var(--kc-font-size-sm);
+  font-weight: var(--kc-font-weight-semibold);
+}
+
+:root .kc-concentric__spec {
+  margin: 0;
+  font-size: var(--kc-font-size-sm);
+  line-height: 1.8;
+}
+
+:root .kc-ladder {
+  display: grid;
+  gap: 0;
+  inline-size: 100%;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--kc-color-divider);
+  border-radius: var(--kc-radius-key);
+  list-style: none;
+  overflow: hidden;
+}
+
+:root .kc-ladder__step {
+  padding: var(--kc-space-3);
+  font-size: var(--kc-font-size-xs);
+}
+
+:root .kc-ladder__step[data-step="surface"] {
+  background: var(--kc-color-surface);
+}
+
+:root .kc-ladder__step[data-step="raised"] {
+  background: var(--kc-color-surface-raised);
+}
+
+:root .kc-ladder__step[data-step="hover"] {
+  background: var(--kc-color-surface-hover);
+}
+
+:root .kc-ladder-list {
+  display: grid;
+  gap: var(--kc-space-3);
+  margin-block: var(--kc-space-5);
+}
+
+:root .kc-ladder-list__item {
+  display: grid;
+  gap: var(--kc-space-1);
+}
+
+/* Storybook styles docs `dt` as italic; the system owns no italic voice, and
+   this is the page that defines the release vocabulary. */
+:root .kc-ladder-list dt,
+:root .kc-ladder-list dt code {
+  font-style: normal;
+  font-weight: var(--kc-font-weight-semibold);
+}
+
+:root .kc-ladder-list dd {
+  margin: 0;
+  max-inline-size: 68ch;
+  color: var(--kc-color-text-muted);
+}
+
+:root .kc-contract {
+  display: grid;
+  gap: var(--kc-space-2);
+  max-inline-size: 68ch;
+}

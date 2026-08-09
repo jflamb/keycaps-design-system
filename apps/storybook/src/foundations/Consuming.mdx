@@ -1,0 +1,147 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { DocLink, Rule } from "./blocks";
+import { PackageExports, PackageLicenses, PeerRange } from "./packages";
+
+<Meta title="Foundations/Consuming Keycaps" />
+
+# Consuming Keycaps
+
+Keycaps ships as two packages. The tokens package has no framework dependency,
+so the visual system is usable without React at all.
+
+## Install
+
+```sh
+pnpm add @jflamb/keycaps-tokens @jflamb/keycaps-react react react-dom
+```
+
+```tsx
+import "@jflamb/keycaps-tokens";
+import "@jflamb/keycaps-react/styles.css";
+import { Button } from "@jflamb/keycaps-react";
+```
+
+## Every export
+
+<PackageExports />
+
+The default `@jflamb/keycaps-tokens` import is `fonts.css`, `tokens.css`, and
+`base.css` together. Import the subpaths individually when you want the custom
+properties without the reset, or the reset without the font faces.
+
+## Without React
+
+The tokens package is plain CSS and plain custom properties. Any framework, or
+none, can consume the visual system:
+
+```css
+@import "@jflamb/keycaps-tokens/tokens.css";
+@import "@jflamb/keycaps-tokens/fonts.css";
+
+.my-key {
+  min-block-size: var(--kc-control-min-size);
+  padding: calc(var(--kc-space-2) + 2px) var(--kc-space-5);
+  border-block-end: var(--kc-key-edge-width) solid var(--kc-color-key-edge);
+  border-radius: var(--kc-radius-key);
+  background: var(--kc-color-key-face);
+  color: var(--kc-color-on-key);
+  font-family: var(--kc-font-body);
+  font-weight: var(--kc-font-weight-bold);
+  transition: transform var(--kc-duration-press) var(--kc-ease-press);
+}
+
+.my-key:active {
+  transform: translateY(var(--kc-press-travel));
+  border-block-end-width: var(--kc-press-edge-width);
+}
+```
+
+That button honors both themes, forced colors, and reduced motion without any
+further work, because all four are token-level contracts.
+
+## Peer range
+
+<PeerRange />
+
+React Aria Components is a dependency of `@jflamb/keycaps-react`, not a peer. It
+is an implementation detail: the public API is owned so the behavior dependency
+can be replaced without a consumer-visible break.
+
+## The theme contract
+
+Keycaps follows the system color scheme by default. Set an attribute on the root
+element for an explicit choice:
+
+```html
+<html>                     <!-- follows prefers-color-scheme -->
+<html data-theme="light">  <!-- explicit light -->
+<html data-theme="dark">   <!-- explicit dark -->
+```
+
+Keycaps defines only the CSS contract. **It writes no cookies and no browser
+storage.** Persisting a preference is the app's job — existing jflamb
+applications may continue storing theirs under the `jflamb-theme` key, and
+Keycaps will not interfere with it.
+
+The attribute belongs on the root element and nowhere else. Nesting a
+`data-theme` inside the page does not scope the theme, because the token
+selectors are `:root`-anchored by design.
+
+<DocLink to="foundations-motion--guidance">Motion</DocLink> uses the same shape:
+`data-kc-motion="reduce"` or `"full"` on the root, system preference otherwise.
+
+## Retrofitting an existing app
+
+`@jflamb/keycaps-tokens/legacy.css` maps the unprefixed variable names that
+existing jflamb surfaces already use onto the canonical `--kc-*` tokens, so an
+app can adopt the token layer in one commit and rename call sites over time.
+
+```css
+@import "@jflamb/keycaps-tokens";
+@import "@jflamb/keycaps-tokens/legacy.css"; /* migration only */
+```
+
+<Rule name="Legacy aliases are a migration path, not an API." tone="dont">
+  New projects should not import <code>legacy.css</code>. Canonical tokens use the{" "}
+  <code>--kc-</code> prefix; anything unprefixed exists only to keep an
+  in-progress retrofit compiling.
+</Rule>
+
+## Visually hidden text
+
+`base.css` ships one utility, and it is the one the accessibility baseline keeps
+needing: `.kc-sr-only` removes an element from the visual layout while leaving it
+in the accessibility tree.
+
+```html
+<button class="my-key">
+  <svg aria-hidden="true">…</svg>
+  <span class="kc-sr-only">Dismiss message</span>
+</button>
+```
+
+Use it when an icon carries the whole meaning. Prefer `aria-label` when the
+element already has no text content at all.
+
+## License
+
+Both packages are MIT. Use them, fork them, ship them in a commercial product —
+no permission needed and no attribution beyond keeping the license notice.
+
+<PackageLicenses />
+
+One carve-out, and it is the font files. Fraunces and Nunito Sans are
+redistributed under the **SIL Open Font License 1.1**, which MIT cannot cover,
+so `@jflamb/keycaps-tokens` declares `MIT AND OFL-1.1`. The license texts ship
+beside the binaries at `dist/fonts/`; keep them together if you copy the WOFF2
+files somewhere else. Neither face declares a Reserved Font Name, so the Latin
+subsetting carries no renaming obligation.
+
+React Aria Components is an Apache-2.0 dependency, installed alongside
+`@jflamb/keycaps-react` under its own terms rather than relicensed through it.
+
+## What "beta" means here
+
+Every component is beta. See
+<DocLink to="foundations-release-status--guidance">Release status</DocLink> for
+what that covers, what `stable` still costs, and the per-component matrix.

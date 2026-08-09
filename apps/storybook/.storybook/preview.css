@@ -1,13 +1,280 @@
+/* The documentation frame, held to the same rules as the components.
+   Storybook styles its docs frame with runtime-injected Emotion classes, which
+   land after this file in the cascade. Class names are doubled here so these
+   rules win on specificity rather than on order. */
+
 .sb-show-main,
 .docs-story {
   background: var(--kc-color-surface);
   color: var(--kc-color-text);
 }
 
-.kc-docs-canvas {
-  min-block-size: 12rem;
+/* ---- Docs frame ground and ink ---------------------------------------- */
+
+.sbdocs.sbdocs-wrapper {
+  padding: var(--kc-space-10) var(--kc-space-8);
+  background: var(--kc-color-surface);
   color: var(--kc-color-text);
   font-family: var(--kc-font-body);
+}
+
+.sbdocs.sbdocs-content {
+  max-inline-size: 60rem;
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-body);
+  font-size: var(--kc-font-size-md);
+  line-height: var(--kc-line-height-body);
+}
+
+.sbdocs.sbdocs-preview,
+.sbdocs.sbdocs-preview .docs-story {
+  border-color: var(--kc-color-divider);
+  border-radius: var(--kc-radius-plate);
+  background: var(--kc-color-surface);
+  box-shadow: none;
+}
+
+/* ---- Headings: Fraunces reaches the docs frame ------------------------- */
+
+/* `base.css` sets the display face at zero specificity so a consuming app's own
+   heading styles win — that is the correct contract and it stays untouched.
+   These rules re-assert it here, for this one surface. Storybook 10.5 emits
+   MDX headings as bare `css-0` Emotion classes with no `.sbdocs-h*` hook, so
+   they are reached as descendants of the content block. */
+.sbdocs.sbdocs-title,
+.sbdocs.sbdocs-content h1,
+.sbdocs.sbdocs-content h2,
+.sbdocs.sbdocs-content h3,
+.sbdocs.sbdocs-content h4 {
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-display);
+  font-variation-settings: var(--kc-font-variation-display);
+  font-weight: var(--kc-font-weight-semibold);
+  line-height: var(--kc-line-height-heading);
+}
+
+.sbdocs.sbdocs-title,
+.sbdocs.sbdocs-content h1 {
+  font-size: clamp(1.75rem, 1.15rem + 2.4vw, 2.5rem);
+}
+
+.sbdocs.sbdocs-content h2 {
+  padding-block-end: var(--kc-space-2);
+  border-block-end: 1px solid var(--kc-color-divider);
+  font-size: clamp(1.35rem, 1.1rem + 1vw, 1.65rem);
+}
+
+.sbdocs.sbdocs-content h3 {
+  font-size: var(--kc-font-size-xl);
+}
+
+.sbdocs.sbdocs-subtitle {
+  max-inline-size: 68ch;
+  color: var(--kc-color-text-muted);
+  font-family: var(--kc-font-body);
+  font-size: var(--kc-font-size-lg);
+}
+
+/* ---- Measure. The Intrinsic Maximum Rule applies to prose too. ---------- */
+
+/* 58ch of Nunito Sans measures ~80 rendered characters. The `ch` unit is the
+   width of "0", which is wider than this face's average glyph, so a 68ch cap
+   was still landing lines at ~97 characters. */
+.sbdocs.sbdocs-content > p,
+.sbdocs.sbdocs-content > ul,
+.sbdocs.sbdocs-content > ol,
+.sbdocs.sbdocs-content > blockquote {
+  max-inline-size: 58ch;
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-body);
+  font-size: var(--kc-font-size-md);
+  line-height: var(--kc-line-height-body);
+}
+
+/* Storybook nests the autodocs component description one level deeper than a
+   direct child, so the rule above never reached it and those paragraphs ran the
+   full 960px content width — ~129 characters a line on every component page.
+   Story canvases keep their own measure. */
+.sbdocs.sbdocs-content p:not([class]):not(.docs-story p) {
+  max-inline-size: 58ch;
+}
+
+/* Storybook paints list items from the static docs theme, which does not follow
+   the theme global. Left alone, dark mode rendered graphite ink on a dark ground. */
+.sbdocs.sbdocs-content li:not([class]) {
+  color: var(--kc-color-text);
+}
+
+.sbdocs.sbdocs-content a {
+  color: var(--kc-color-link);
+  text-underline-offset: 0.18em;
+}
+
+.sbdocs.sbdocs-content a:focus-visible {
+  outline: var(--kc-focus-ring);
+  outline-offset: var(--kc-focus-ring-offset);
+}
+
+/* ---- Code ------------------------------------------------------------- */
+
+/* Storybook nests its own bordered source block inside the markdown `pre`, so
+   styling both produced a box inside an identical box — two concentric 10px
+   corners 26px apart, on the site that publishes The Concentric Radius Rule,
+   with 52–55% of the outer box empty. Only the inner block is an object. */
+.sbdocs.sbdocs-content > pre:has(.docblock-source) {
+  margin: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+}
+
+.sbdocs.sbdocs-content > pre:has(.docblock-source) .docblock-source {
+  margin-block: var(--kc-space-5);
+}
+
+/* The copy button is built for a square bottom-right corner — Storybook gives it
+   `border-radius: 4px 0 0`. Its container now carries the keycap radius and
+   clips, so the button's square corner was being cut. The Concentric Radius Rule
+   gives the answer: the parent's radius minus the 1px border between them. */
+.sbdocs .docblock-source button {
+  border-end-end-radius: calc(var(--kc-radius-key) - 1px);
+}
+
+.sbdocs.sbdocs-content > pre,
+.sbdocs .docblock-source {
+  border: 1px solid var(--kc-color-divider);
+  border-radius: var(--kc-radius-key);
+  background: var(--kc-color-surface-raised);
+  box-shadow: none;
+}
+
+.sbdocs.sbdocs-content pre,
+.sbdocs.sbdocs-content code {
+  font-family: var(--kc-font-mono);
+}
+
+/* `docs.theme` is a single static object, so Storybook's syntax palette cannot
+   follow the theme global on its own — in dark it painted graphite ink on a
+   #1e2228 ground. Re-deriving it from semantic tokens makes it follow. Coral is
+   absent by design: syntax is not a commitment. */
+.sbdocs .prismjs,
+.sbdocs .docblock-source .prismjs {
+  color: var(--kc-color-text);
+  background: transparent;
+}
+
+.sbdocs .prismjs .token.comment,
+.sbdocs .prismjs .token.prolog,
+.sbdocs .prismjs .token.doctype,
+.sbdocs .prismjs .token.cdata,
+.sbdocs .prismjs .token.punctuation {
+  color: var(--kc-color-text-muted);
+}
+
+.sbdocs .prismjs .token.keyword,
+.sbdocs .prismjs .token.atrule,
+.sbdocs .prismjs .token.operator,
+.sbdocs .prismjs .token.tag,
+.sbdocs .prismjs .token.selector {
+  color: var(--kc-color-link);
+}
+
+.sbdocs .prismjs .token.string,
+.sbdocs .prismjs .token.attr-value,
+.sbdocs .prismjs .token.char,
+.sbdocs .prismjs .token.regex,
+.sbdocs .prismjs .token.url {
+  color: var(--kc-color-accent-text);
+}
+
+.sbdocs .prismjs .token.number,
+.sbdocs .prismjs .token.boolean,
+.sbdocs .prismjs .token.constant,
+.sbdocs .prismjs .token.symbol,
+.sbdocs .prismjs .token.property,
+.sbdocs .prismjs .token.attr-name {
+  color: var(--kc-color-warning-text);
+}
+
+.sbdocs .prismjs .token.function,
+.sbdocs .prismjs .token.class-name,
+.sbdocs .prismjs .token.builtin,
+.sbdocs .prismjs .token.variable {
+  color: var(--kc-color-text);
+}
+
+.sbdocs.sbdocs-content p > code,
+.sbdocs.sbdocs-content li > code,
+.sbdocs.sbdocs-content td > code,
+.sbdocs.sbdocs-content th > code {
+  border: 1px solid var(--kc-color-divider);
+  border-radius: 4px;
+  background: var(--kc-color-surface-hover);
+  color: var(--kc-color-text);
+  font-size: 0.85em;
+  overflow-wrap: anywhere;
+}
+
+/* ---- Tables ----------------------------------------------------------- */
+
+.sbdocs.sbdocs-content table,
+.sbdocs .docblock-argstable {
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-body);
+}
+
+.sbdocs.sbdocs-content > table th,
+.sbdocs.sbdocs-content > table td {
+  border-color: var(--kc-color-divider);
+  background: transparent;
+  color: var(--kc-color-text);
+}
+
+/* A wide table scrolls inside its own container. Without this the args table is
+   600px wide at every viewport and takes the whole page horizontal with it,
+   which breaks the 320 Rule on every component page. */
+.sbdocs div:has(> table) {
+  overflow-x: auto;
+}
+
+/* Storybook marks a required prop with `*` in a hardcoded #ff4400, which lands
+   at 3.39:1 on the plate and is not a color this system owns. */
+.sbdocs .docblock-argstable span[title="Required"] {
+  color: var(--kc-color-danger-text);
+}
+
+/* ---- Table of contents -------------------------------------------------- */
+
+.sbdocs.sbdocs-toc--custom {
+  color: var(--kc-color-text-muted);
+  font-family: var(--kc-font-body);
+}
+
+.sbdocs.sbdocs-toc--custom a {
+  color: var(--kc-color-text-muted);
+}
+
+.sbdocs.sbdocs-toc--custom a:hover {
+  color: var(--kc-color-text);
+}
+
+/* Storybook renders the heading even when the page has none to list, which is
+   how the showcase ended up with an "On this page" that pointed nowhere. */
+.sbdocs.sbdocs-toc--custom:not(:has(a)) {
+  display: none;
+}
+
+/* ---- Story canvases ---------------------------------------------------- */
+
+.kc-docs-canvas {
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-body);
+}
+
+/* Only the stories that drop an overlay downward reserve room for it. Every
+   other canvas is the height of what it holds. */
+.kc-docs-canvas[data-canvas="drop"] {
+  min-block-size: 18rem;
 }
 
 .kc-story-stack {
@@ -28,13 +295,69 @@
   gap: var(--kc-space-4);
 }
 
+.kc-story-section > h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 1.05rem + 2.2vw, 2.25rem);
+  line-height: var(--kc-line-height-heading);
+}
+
 .kc-story-section > h2 {
   margin: 0;
   font-size: 1.35rem;
 }
 
-.kc-story-section > p {
+.kc-story-section > p,
+.kc-story-lede {
   max-inline-size: 70ch;
   margin: 0;
   color: var(--kc-color-text-muted);
+}
+
+/* ---- Reflow ------------------------------------------------------------ */
+
+/* Below the tablet breakpoint, code wraps instead of scrolling. Storybook's
+   syntax block sits in a `min-width: fit-content` track inside an
+   `overflow-x: scroll` container, and macOS overlay scrollbars draw nothing —
+   so the install command read as truncated at `@jf` rather than scrollable.
+   Releasing that track is what lets `pre-wrap` take effect. */
+@media (max-width: 48rem) {
+  .sbdocs.sbdocs-content pre,
+  .sbdocs .docblock-source pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  /* Storybook writes `white-space: pre` inline on the highlighted line box. */
+  .sbdocs .prismjs [class*="language-"] {
+    min-width: 0;
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere;
+  }
+
+  /* The track is a Radix scroll-area content wrapper carrying
+     `min-width: fit-content; display: table` as an inline style, so `!important`
+     is the only lever that reaches it. */
+  .sbdocs div:has(> pre.prismjs) {
+    display: block !important;
+    min-width: 0 !important;
+  }
+}
+
+@media (max-width: 30rem) {
+  /* 12px gutters, not 8: enough that body text is not sitting on the viewport
+     edge, and still leaves the story canvas above the system's 320px floor. */
+  .sbdocs.sbdocs-wrapper {
+    padding: var(--kc-space-6) var(--kc-space-3);
+  }
+
+  /* The canvas gives its gutter back to the component, so the story still gets
+     the 320px the system promises to support inside a 375px viewport. */
+  .sbdocs.sbdocs-preview .docs-story,
+  .sbdocs .docs-story {
+    padding: var(--kc-space-3) var(--kc-space-1);
+  }
+
+  .sb-show-main.sb-main-padded {
+    padding: var(--kc-space-2);
+  }
 }

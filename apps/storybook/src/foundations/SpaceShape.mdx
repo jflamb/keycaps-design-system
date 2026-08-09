@@ -1,0 +1,90 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { DocLink, Rule } from "./blocks";
+import { ValueTable } from "./tables";
+import {
+  ConcentricRadius,
+  IntrinsicMaximums,
+  RadiusScale,
+  SpaceScale,
+} from "./shape";
+
+<Meta title="Foundations/Space & shape" />
+
+# Space & shape
+
+Content is measured, not stretched. Spacing is an eight-step rem scale, radii are
+four values with four jobs, and every component declares its own comfortable
+width so it needs no wrapper.
+
+## The space scale
+
+Internal component rhythm concentrates in steps 1–4; composition between
+components uses 5 and 6. Cards use step 6 padding with step 5 gaps, tightening to
+step 5 below 30rem.
+
+<SpaceScale />
+
+## The four radii
+
+<RadiusScale />
+
+The two families are calibrated to the same corner character rather than to the
+same number. A key is 10px on a 44px control, a ratio near 0.23; a badge is 6px
+on a 24px box, near 0.25. The badge is not a softer corner than the key — it is
+the same corner at a smaller size.
+
+<Rule name="The Concentric Radius Rule.">
+  A nested corner is the parent's radius minus the gap between them, computed with
+  <code>calc()</code>. Never restate a nested radius as a literal.
+</Rule>
+
+<ConcentricRadius />
+
+## The bottom edge
+
+A primary key carries a 4px `border-block-end` in `--kc-color-key-edge`; a
+secondary key carries the same 4px in the border color. This is the keycap's side
+wall, and it is what makes a button read as an object with height rather than a
+colored rectangle.
+
+<Rule name="The Pressable Edge Rule.">
+  A bottom edge promises travel. Anything wearing a <code>border-block-end</code>
+  heavier than its other borders must depress when activated. A static element
+  with a weighted bottom edge is a false affordance — which is why Badge, alone
+  among the tone carriers, wears a uniform 1px border on all four sides.
+</Rule>
+
+See <DocLink to="foundations-motion--guidance">Motion</DocLink> for what the edge
+promises and how it pays out.
+
+## Measure
+
+<Rule name="The Intrinsic Maximum Rule.">
+  Components declare their own measure ceiling with <code>min(100%, Xrem)</code>.
+  Never constrain a Keycaps component from the outside when it already knows its
+  comfortable width.
+</Rule>
+
+<IntrinsicMaximums />
+
+<Rule name="The 320 Rule.">
+  Every surface reflows at 320 CSS pixels with no horizontal page scroll.
+  <code>html</code> and <code>body</code> carry <code>min-width: 320px</code> as
+  the floor, and it is verified in the browser matrix — not a guideline, a release
+  gate.
+</Rule>
+
+The system is single-breakpoint. One `max-width: 30rem` query tightens card and
+banner padding; everything else adapts through intrinsic sizing, `min()`, and
+flex wrapping. Logical properties are used throughout — `inline-size`,
+`block-size`, `padding-inline`, `border-block-end` — so the system flips for RTL
+without a stylesheet.
+
+## Shape and size tokens
+
+<ValueTable caption="Spacing" prefix="--kc-space-" />
+<ValueTable caption="Radii" prefix="--kc-radius-" />
+<ValueTable
+  caption="Target size and the key edge"
+  prefix={["--kc-control-", "--kc-key-edge"]}
+/>

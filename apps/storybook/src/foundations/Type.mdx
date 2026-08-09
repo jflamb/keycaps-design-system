@@ -1,0 +1,62 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { DocLink, Rule } from "./blocks";
+import { ValueTable } from "./tables";
+import { TypeRoles } from "./type";
+
+<Meta title="Foundations/Type" />
+
+# Type
+
+A softened transitional serif over a humanist sans. Fraunces ships at `opsz 11`
+and `SOFT 80` — a low optical size with softened terminals, which keeps it warm
+and slightly bookish rather than sharp and editorial. Nunito Sans has rounded
+terminals and open apertures, so the pairing reads friendly at small sizes
+without becoming informal.
+
+Both faces are local WOFF2 shipped inside `@jflamb/keycaps-tokens`. Nothing is
+fetched at runtime, including on this page.
+
+## The five roles
+
+Each sample below is rendered in the face and settings it actually ships with,
+and the specification underneath is read back off the rendered element.
+
+<TypeRoles />
+
+<Rule name="The Two Voice Rule.">
+  Fraunces speaks in page headings and card titles. Nunito Sans does everything
+  else — every label, every value, every button, every error. A third face, or
+  Fraunces creeping into body copy, breaks the system.
+</Rule>
+
+<Rule name="The Optical Constant Rule.">
+  Fraunces is always set at <code>opsz 11, SOFT 80</code>. The variable axes are a
+  brand constant, not a per-surface control — they live in a single token,
+  <code>--kc-font-variation-display</code>, so there is one place to read them and
+  one place they could ever change. Changing them changes the voice.
+</Rule>
+
+## Type tokens
+
+Sizes, weights, and leading are tokenized. Display sizes are not: the surface
+decides how large a heading is, the face does not.
+
+<ValueTable caption="Font families" prefix="--kc-font-" />
+
+## Headings and the consuming app
+
+`@jflamb/keycaps-tokens/base.css` sets the display face on `h1` and `h2` through
+`:where(h1, h2)` — deliberately zero specificity, so a consuming app's own
+heading styles win without needing `!important`. That is the contract, and it is
+why this documentation site restates the display face in its own stylesheet
+rather than raising the specificity of the token layer.
+
+If your app wants Fraunces on `h3` too, set it yourself; Keycaps will not fight
+you for it.
+
+<Rule name="Don't introduce a third typeface, or let Fraunces into body copy." tone="dont">
+  And don't override the variable axes per surface. If a surface needs a
+  different voice, the surface is wrong, not the axes.
+</Rule>
+
+Next: <DocLink to="foundations-space-shape--guidance">Space &amp; shape</DocLink>.

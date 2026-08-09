@@ -1,10 +1,14 @@
 import { Meta } from "@storybook/addon-docs/blocks";
+import { DocLink } from "./foundations/blocks";
 
 <Meta title="Introduction" />
 
 # Keycaps Design System
 
-Keycaps is the owned visual and interaction foundation for React projects under `jflamb.com`. It keeps brand decisions in framework-neutral CSS tokens and uses React Aria Components for accessible interaction behavior.
+A plate, and a small number of solid objects seated on it. Keycaps is the owned
+visual and interaction foundation for React projects under `jflamb.com`: brand
+decisions live in framework-neutral CSS tokens, and accessible interaction
+behavior comes from React Aria Components.
 
 ## Install
 
@@ -18,20 +22,59 @@ import "@jflamb/keycaps-react/styles.css";
 import { Button } from "@jflamb/keycaps-react";
 ```
 
+## Read this next
+
+- <DocLink to="foundations-component-showcase--guidance">**Component showcase**</DocLink> —
+  one composition exercising all seven components. Start here if you want to know
+  what this looks like.
+- <DocLink to="foundations-color--guidance">**Color**</DocLink> — every
+  `--kc-color-*` token in both themes, and the three rules that govern them.
+- <DocLink to="foundations-motion--guidance">**Motion**</DocLink> — the press. It
+  is the one expressive thing the system does, and you can hold it.
+- <DocLink to="foundations-consuming-keycaps--guidance">**Consuming Keycaps**</DocLink> —
+  every package export, the theme contract, non-React usage, and the retrofit path.
+- <DocLink to="foundations-release-status--guidance">**Release status**</DocLink> —
+  what `beta` covers and what `stable` still costs.
+
+Then the component pages, each with guidance, live examples, an API table, and an
+accessibility scan you can run yourself.
+
 ## Package boundaries
 
-- `@jflamb/keycaps-tokens` has no framework dependency. It owns fonts, custom properties, semantic themes, base styles, reduced motion, and forced colors.
-- `@jflamb/keycaps-react` owns the public component APIs and styling. React Aria Components remains an implementation detail wherever practical.
-- Storybook is the documentation site: narrative guidance, live examples, accessibility checks, and API reference stay together.
+- `@jflamb/keycaps-tokens` has no framework dependency. It owns fonts, custom
+  properties, semantic themes, base styles, the reduced-motion substitution, and
+  the forced-colors mapping.
+- `@jflamb/keycaps-react` owns the public component APIs and styling. React Aria
+  Components remains an implementation detail wherever practical.
+- This Storybook is the documentation site: narrative guidance, live examples,
+  accessibility checks, and API reference stay together.
 
-## Theme contract
+## Theme, motion, and forced colors
 
-Keycaps follows the system theme unless the root element has `data-theme="light"` or `data-theme="dark"`. Existing jflamb applications may continue storing the preference under `jflamb-theme`; the packages do not write cookies or browser storage.
+Keycaps follows the system theme unless the root element carries
+`data-theme="light"` or `data-theme="dark"`, and the system motion preference
+unless it carries `data-kc-motion="reduce"` or `"full"`. Existing jflamb
+applications may continue storing a preference under `jflamb-theme`; the packages
+write no cookies and no browser storage themselves.
+
+The three controls in the toolbar above drive those same contracts on this site,
+so what you switch here is what your app would switch.
 
 ## Status
 
-Components are beta until the automated checks and documented manual assistive-technology matrix are complete. See **Foundations / Component showcase** for a representative composition and each component page for usage guidance.
+Every component is `beta` until the automated checks and a documented manual
+assistive-technology matrix are complete. Nothing here has reached `stable`, and
+no page claims otherwise.
 
 ## Publishing
 
-Storybook deploys to GitHub Pages only after the main CI workflow passes. npm packages publish only from a GitHub Release whose `vX.Y.Z` tag exactly matches both package versions.
+Storybook deploys to GitHub Pages only after the main CI workflow passes. npm
+packages publish only from a GitHub Release whose `vX.Y.Z` tag exactly matches
+both package versions.
+
+---
+
+Next: <DocLink to="foundations-component-showcase--guidance">the Component
+showcase</DocLink>, to see what all of this looks like assembled — or{" "}
+<DocLink to="foundations-color--guidance">Color</DocLink>, to start with the
+tokens.

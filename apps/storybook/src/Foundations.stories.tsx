@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   Badge,
@@ -21,8 +20,11 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component:
-          "A realistic composition used for visual, theme, reflow, keyboard, reduced-motion, forced-color, and no-third-party-request verification.",
+        component: [
+          "All seven components in one realistic composition — the shape a Keycaps screen actually takes. Copy the source below: every element is inline, nothing is hidden behind a wrapper.",
+          "",
+          "It doubles as the project's verification fixture, which is why it is shaped as a page: a `main` landmark and a real heading outline, asserted by the axe check and the Playwright keyboard run.",
+        ].join("\n"),
       },
     },
   },
@@ -31,28 +33,21 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-function Showcase() {
-  const [showBanner, setShowBanner] = useState(true);
-
-  return (
+export const Default: Story = {
+  render: () => (
     <main className="kc-story-column" aria-labelledby="showcase-title">
       <header className="kc-story-section">
         <Badge tone="info">Keycaps beta</Badge>
         <h1 id="showcase-title">A calm foundation for consequential work</h1>
-        <p>
-          Locally hosted type, semantic themes, sturdy keycap controls, and clear recovery language.
+        <p className="kc-story-lede">
+          Locally hosted type, semantic themes, sturdy keycap controls, and clear
+          recovery language.
         </p>
       </header>
 
-      {showBanner ? (
-        <Banner
-          onDismiss={() => setShowBanner(false)}
-          title="Draft saved"
-          tone="success"
-        >
-          Your work is local and has not been published.
-        </Banner>
-      ) : null}
+      <Banner title="Draft saved" tone="success">
+        Your work is local and has not been published.
+      </Banner>
 
       <Card aria-labelledby="account-card-title">
         <CardHeader>
@@ -63,8 +58,9 @@ function Showcase() {
         </CardHeader>
         <CardBody>
           <Field
+            defaultValue="Personal assistant / 2026"
             description="Use a name people will recognize later."
-            inputProps={{ placeholder: "Personal assistant" }}
+            errorMessage="Remove the slash — project names can use letters, numbers, spaces and hyphens."
             label="Project name"
           />
           <Select
@@ -81,18 +77,19 @@ function Showcase() {
         <CardFooter>
           <Button>Save settings</Button>
           <PopoverTrigger>
-            <Button variant="secondary">Why this matters</Button>
-            <Popover aria-label="Why the destination matters" placement="top start">
+            <Button variant="quiet">Why this matters</Button>
+            <Popover
+              aria-label="Why the destination matters"
+              placement="top start"
+            >
               <strong>Choose for future retrieval.</strong>
-              <p>The destination does not change who can access the project.</p>
+              <p>
+                The destination does not change who can access the project.
+              </p>
             </Popover>
           </PopoverTrigger>
         </CardFooter>
       </Card>
     </main>
-  );
-}
-
-export const Default: Story = {
-  render: () => <Showcase />,
+  ),
 };

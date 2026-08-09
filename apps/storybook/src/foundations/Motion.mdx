@@ -1,0 +1,89 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { DocLink, Rule, StoryLink } from "./blocks";
+import { MotionValues, OverlayLab, PressLab } from "./motion";
+
+<Meta title="Foundations/Motion" />
+
+# Motion
+
+The system contains real physical feedback and it spends it almost nowhere. One
+gesture moves; everything else holds still. If everything moved, the press would
+mean nothing.
+
+## Hold a key
+
+The left pane is the system's motion. The right pane is the same two keys with
+the reduced-motion substitution applied. Press and hold either.
+
+<PressLab />
+
+A primary key travels `3px` on press while its `4px` bottom edge compresses to
+`1px`, over `120ms`. **The two values are coupled**: the cap descends exactly as
+far as its wall shrinks, so the wall reads as absorbing the travel rather than the
+whole object sliding. That is the illusion — a cap hitting the plate beneath it.
+Change one without the other and the object stops being solid.
+
+**The press is transform-only, and the constraint is the interesting part.**
+`min-block-size` pins the border box, so the wall compresses inside a box that
+never resizes. Animating the height instead would hold the outer edge still on
+paper; in practice it relayouts every frame and re-centers the key inside any
+container that centers its items — measured as a 1.1px upward flick followed by a
+slide landing 1.5px low. A wobble, not a press. Motion that has to move a layout
+property is usually the wrong motion.
+
+When motion is suppressed the travel is removed and the wall stays at its full
+`4px`. A primary key instead fills with `--kc-color-key-edge`. The press is still
+legible; it is expressed in material instead of movement.
+
+<Rule name="The Pressable Edge Rule.">
+  A bottom edge promises travel. Anything wearing a <code>border-block-end</code>
+  heavier than its other borders must depress when activated. A static element
+  with a weighted bottom edge is a false affordance.
+</Rule>
+
+<Rule name="Don't change one press value without the other." tone="dont">
+  <code>--kc-press-travel</code> and <code>--kc-press-edge-width</code> are one
+  gesture. Adjusting either alone breaks the key's physics.
+</Rule>
+
+## The other two things that move
+
+A select chevron turns, and an overlay fades up 4px on entry. Both are suppressed
+the same way.
+
+<OverlayLab />
+
+## Every value, and what it becomes
+
+<MotionValues />
+
+Reduced motion is not handled in component CSS. Travel, edge compression, chevron
+turn, durations, and the pressed key face are all tokens, so
+`@jflamb/keycaps-tokens` owns the entire substitution and no component can opt out
+of it or forget to implement it.
+
+## The motion contract
+
+Keycaps follows the operating system's `prefers-reduced-motion` setting by
+default. An app that offers its own in-product motion preference sets it
+explicitly on the root element, mirroring the theme contract:
+
+```html
+<html data-kc-motion="reduce">
+<html data-kc-motion="full">
+```
+
+`reduce` forces the substitution on. `full` opts a user back into motion even
+when the system asks to reduce it — offer that only behind a deliberate control,
+never as a default. With no attribute, the system preference wins. Keycaps writes
+no cookies or browser storage for this, exactly as with
+<DocLink to="foundations-consuming-keycaps--guidance">`data-theme`</DocLink>.
+
+The **Motion** control in this site's toolbar sets that same attribute on this
+document — it is the shipped contract, not a documentation-only simulation.
+
+## Proof
+
+<StoryLink to="components-button--press-and-hold">Button / Press and hold</StoryLink>{" "}
+drives the gesture from a play function and asserts the pressed state, so the
+Interactions panel shows the press being exercised rather than described.

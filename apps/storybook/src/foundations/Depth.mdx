@@ -1,0 +1,60 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { DocLink, Rule } from "./blocks";
+import { DepthSamples, SurfaceLadder } from "./depth";
+import { ValueTable } from "./tables";
+
+<Meta title="Foundations/Depth & elevation" />
+
+# Depth & elevation
+
+Depth is physical in light and tonal in dark, and this asymmetry is deliberate.
+A shadow on a dark ground reads as grime; a lighter surface reads as closer.
+
+## The same two objects, both physics
+
+The panes below are the real components. Keycaps' theme contract is root-scoped —
+`data-theme` belongs on the document element and nowhere else — so this page
+reads the dark theme's own declarations and applies them to one subtree rather
+than pretending the contract is something it is not.
+
+<DepthSamples />
+
+<Rule name="The Light Lifts, Dark Layers Rule.">
+  Cast shadow belongs to light mode. In dark mode, depth comes from surface tone
+  alone. Adding a plate shadow to a dark surface is a defect, not an enhancement.
+</Rule>
+
+<Rule name="The Overlay Exception Rule.">
+  Only genuinely detached surfaces — popovers, select menus, dialogs — cast in
+  both themes. If it rests on the plate, it does not cast in dark.
+</Rule>
+
+## The dark ladder
+
+What the cast shadow does in light, three steps of surface tone do in dark.
+
+<SurfaceLadder />
+
+## The two shadows
+
+<ValueTable caption="Shadow tokens, resolved in both themes" prefix="--kc-shadow-" />
+
+`--kc-shadow-plate` is a two-layer shadow: a 1px contact shadow at 6% and a 28px
+ambient at 10%, both tinted with the graphite ink rather than black — which is
+what keeps a raised card warm instead of gray. In dark it resolves to `none`.
+
+`--kc-shadow-overlay` survives in both themes and deepens in dark, because a
+popover is genuinely detached from the plate rather than resting on it, and
+detachment has to be legible under both physics.
+
+Under `forced-colors: active` both resolve to `none` and depth is carried
+entirely by system border colors. Switch the **Forced colors** control in the
+toolbar to see it.
+
+<Rule name="Don't drift toward borderless flat minimalism." tone="dont">
+  Shadowless cards, seamless surfaces, objects that dissolve into the page.
+  Keycaps is built on things being seated and visibly distinct from their ground.
+  This is the system's confirmed anti-reference.
+</Rule>
+
+Next: <DocLink to="foundations-motion--guidance">Motion</DocLink>.

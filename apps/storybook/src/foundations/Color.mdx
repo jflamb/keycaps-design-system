@@ -1,0 +1,67 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { DocLink, Rule } from "./blocks";
+import { ColorTokens } from "./tables";
+
+<Meta title="Foundations/Color" />
+
+# Color
+
+A warm-neutral plate carrying four semantic hues: coral for commitment, mint for
+affirmation, mustard for caution, and signal blue for information and links.
+
+## Two layers, and only one of them is an interface
+
+**Brand primitives** name pigments — `--kc-color-coral-key`, `--kc-color-fog`.
+They do not change between themes and they are not the interface.
+
+**Semantic tokens** name jobs — `--kc-color-key-face`, `--kc-color-danger-border`.
+They point at primitives, they swap when the theme swaps, and they are what
+component CSS is allowed to reach for. The table below marks which primitive each
+semantic token currently points at, in each theme.
+
+<Rule name="The Commitment Rule.">
+  The coral key face is worn only by actions that commit or confirm. Multiple
+  commitments on one screen may all wear it — coral marks a <em>kind</em> of
+  action, not a rank. The plate stays quiet because genuine commitments are rare,
+  not because a budget caps them.
+</Rule>
+
+<Rule name="The Tone Trio Rule.">
+  Every status tone sets surface, border, and text together. A tone expressed by
+  only one of the three is incomplete, and a status expressed by color alone is a
+  defect — there is always a label, an icon, or a role carrying the same meaning.
+</Rule>
+
+<Rule name="The Warm Neutral Rule.">
+  No pure grays, no <code>#000</code>, no <code>#fff</code>. Every neutral in the
+  system carries a warm or cool bias; a value with equal RGB channels has escaped
+  the palette.
+</Rule>
+
+<Rule name="Don't use coral for anything but a committing action." tone="dont">
+  Not for emphasis, not for decoration, not for a hover state on something that
+  is not a key. And never write a raw color value in component CSS — if a needed
+  color has no token, add the token.
+</Rule>
+
+## Every color token, in both themes
+
+Read out of the stylesheet this page is running on, so it cannot drift from the
+tokens package.
+
+<ColorTokens />
+
+## Dark is not an inversion
+
+The plate becomes `#15181d`, raised surfaces `#1e2228`, hover `#262b33` — a
+three-step tonal ladder that does the job the cast shadow does in light. Every
+semantic hue swaps to its `-bright` variant for text and its deep variant for
+borders, so contrast direction reverses without the hue identity changing. See
+<DocLink to="foundations-depth-elevation--guidance">Depth &amp; elevation</DocLink>{" "}
+for why the shadow disappears rather than inverting.
+
+Under `forced-colors: active` every token above resolves to a system color
+instead. Switch the **Forced colors** control in the toolbar to see the mapping
+applied, and read
+<DocLink to="foundations-consuming-keycaps--guidance">Consuming Keycaps</DocLink>{" "}
+for the whole contract.
