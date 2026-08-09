@@ -67,6 +67,18 @@ const preview: Preview = {
     theme: "light",
     motion: "system",
     forcedColors: "off",
+    // The a11y addon runs axe inside the preview the moment a story renders.
+    // The browser suite runs axe against these same stories through
+    // `@axe-core/playwright`, and two axe engines in one frame collide — the
+    // second caller gets "Axe is already running". It is a race, so it passed
+    // locally and failed on a slower CI runner, which made it look like a flake
+    // in the test rather than a misconfiguration here.
+    //
+    // `manual` stops the automatic run, not the addon: the panel still checks on
+    // demand during development. No accessibility coverage is lost, because the
+    // authority is the Playwright suite, which runs on every push and fails the
+    // build rather than tinting a panel.
+    a11y: { manual: true },
   },
   parameters: {
     a11y: {},

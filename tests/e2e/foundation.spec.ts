@@ -511,13 +511,20 @@ test("the new surfaces reflow at 320 CSS pixels", async ({ page }) => {
   }
 });
 
-test("the Tier 1 surfaces are axe-clean in light and dark", async ({ page }) => {
-  for (const theme of ["light", "dark"]) {
+// One test per theme rather than a loop inside one test, and the reason is not
+// style. AxeBuilder injects axe into every frame and recurses through them; when
+// a second `goto` reuses the same page, a frame can still carry the previous
+// run's flag and the next `analyze()` fails with "Axe is already running". It is
+// timing-dependent, so it passes locally and fails on a slower CI runner — the
+// worst shape of flake. A separate `test()` gets a fresh page from the fixture,
+// which removes the shared state instead of waiting longer for it to settle.
+for (const theme of ["light", "dark"] as const) {
+  test(`the Tier 1 surfaces are axe-clean in ${theme}`, async ({ page }) => {
     await page.goto(
       `/iframe.html?id=components-app-shell--default&viewMode=story&globals=theme:${theme}`,
     );
     await expect(page.getByRole("main")).toBeVisible();
     const accessibility = await new AxeBuilder({ page }).analyze();
     expect(accessibility.violations, theme).toEqual([]);
-  }
-});
+  });
+}

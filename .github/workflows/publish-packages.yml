@@ -31,13 +31,13 @@ jobs:
         run: pnpm release:verify
       - name: Verify source, packages, and browser behavior
         run: pnpm check
-      - name: Configure initial npm token when present
-        run: |
-          if [ -n "${NPM_TOKEN:-}" ]; then
-            npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN" --location=user
-          fi
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # Authentication is npm trusted publishing: the `id-token: write` permission
+      # above plus the `npm` environment are exchanged for a short-lived token at
+      # publish time, and both packages disallow bypass-2FA tokens. The bootstrap
+      # step that configured a stored NPM_TOKEN is gone with the secret it read —
+      # a package can only be trusted once it exists, so v0.1.0 needed one and
+      # nothing since does. Leaving the step would mean any future NPM_TOKEN
+      # secret silently took precedence over the OIDC identity.
       - name: Publish tokens
         run: pnpm --filter @jflamb/keycaps-tokens publish --access public --provenance --no-git-checks
       - name: Publish React components
