@@ -2,7 +2,7 @@
   "name": "@jflamb/keycaps-tokens",
   "version": "0.1.0",
   "description": "Framework-neutral Keycaps design tokens and locally hosted fonts.",
-  "license": "UNLICENSED",
+  "license": "MIT AND OFL-1.1",
   "homepage": "https://jflamb.github.io/keycaps-design-system/",
   "repository": {
     "type": "git",
@@ -13,7 +13,7 @@
     "url": "https://github.com/jflamb/keycaps-design-system/issues"
   },
   "sideEffects": ["**/*.css"],
-  "files": ["dist", "README.md"],
+  "files": ["dist", "LICENSE", "README.md"],
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {

@@ -15,3 +15,12 @@ New projects should use the `--kc-*` properties. Existing jflamb applications ca
 ```
 
 Documentation: <https://jflamb.github.io/keycaps-design-system/>
+
+## License
+
+MIT for the tokens, base styles, and build output — see `LICENSE`.
+
+The bundled font binaries are not MIT. Fraunces and Nunito Sans remain under
+the SIL Open Font License 1.1, which is why this package declares
+`MIT AND OFL-1.1`. Keep `LICENSE-FRAUNCES.txt` and `LICENSE-NUNITO-SANS.txt`
+with the WOFF2 files if you copy them out of `dist/fonts/`.

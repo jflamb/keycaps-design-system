@@ -2,7 +2,7 @@
   "name": "@jflamb/keycaps-react",
   "version": "0.1.0",
   "description": "Owned React components for the Keycaps design system.",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "homepage": "https://jflamb.github.io/keycaps-design-system/",
   "repository": {
     "type": "git",
@@ -14,7 +14,7 @@
   },
   "type": "module",
   "sideEffects": ["**/*.css"],
-  "files": ["dist", "README.md"],
+  "files": ["dist", "LICENSE", "README.md"],
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",

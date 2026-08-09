@@ -48,3 +48,14 @@ Storybook is the documentation site and deploys to GitHub Pages after the main C
 VitePress is deliberately not part of the foundation. Storybook already keeps narrative guidance, live component examples, accessibility checks, and API documentation in one place. A separate standards site is worth reconsidering only when non-component guidance becomes substantial enough that Storybook navigation is the constraint.
 
 See [Foundation decision](docs/decisions/0001-foundation.md), [component status](docs/component-status.md), [publishing](docs/publishing.md), and [contributing guidance](docs/contributing/components.md).
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+The Latin WOFF2 assets redistributed in `packages/tokens/fonts` are the one
+exception: Fraunces and Nunito Sans stay under the SIL Open Font License 1.1,
+and their license texts ship beside the binaries in
+`@jflamb/keycaps-tokens/dist/fonts/`. Neither font declares a Reserved Font
+Name, so the Latin subsetting and WOFF2 conversion carry no renaming
+obligation.
