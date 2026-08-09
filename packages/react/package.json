@@ -1,6 +1,6 @@
 {
   "name": "@jflamb/keycaps-react",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Owned React components for the Keycaps design system.",
   "license": "MIT",
   "homepage": "https://jflamb.github.io/keycaps-design-system/",
@@ -13,8 +13,14 @@
     "url": "https://github.com/jflamb/keycaps-design-system/issues"
   },
   "type": "module",
-  "sideEffects": ["**/*.css"],
-  "files": ["dist", "LICENSE", "README.md"],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -33,7 +39,7 @@
     "./static.css": "./dist/static.css"
   },
   "peerDependencies": {
-    "@jflamb/keycaps-tokens": "^0.1.0",
+    "@jflamb/keycaps-tokens": "^0.1.1",
     "react": ">=18.2.0 <20.0.0",
     "react-dom": ">=18.2.0 <20.0.0"
   },
