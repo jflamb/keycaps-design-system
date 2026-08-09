@@ -26,11 +26,13 @@
  *     "allowTokens": ["--chart-*"]
  *   }
  *
- * `allowFiles` is how a repo declares its pre-migration debt. Every entry is
- * meant to be deleted by the phase that migrates that file, so the list is a
- * ratchet and its length is a progress bar. `include` takes any extension on
- * purpose: two consumers keep their CSS inside a TypeScript string or in a
- * directory their other tooling never looks at.
+ * `allowFiles` is how a repo declares its pre-migration token and color debt.
+ * It never permits a `.kc-` selector: redefining Keycaps' vocabulary is new
+ * divergence, not migration debt. Every entry is meant to be deleted by the
+ * phase that migrates that file, so the list is a ratchet and its length is a
+ * progress bar. `include` takes any extension on purpose: two consumers keep
+ * their CSS inside a TypeScript string or in a directory their other tooling
+ * never looks at.
  */
 
 import { readFile } from "node:fs/promises";
@@ -172,18 +174,22 @@ const files = new Set();
 for (const pattern of include) {
   for await (const entry of glob(pattern, { cwd: root })) files.add(entry);
 }
+if (files.size === 0) {
+  process.stderr.write(
+    `keycaps-css-lint: ${CONFIG_NAME} "include" patterns matched no files\n`,
+  );
+  process.exit(2);
+}
 
 const report = [];
 let skipped = 0;
 for (const file of [...files].sort()) {
-  if (allowFiles.has(file)) {
-    skipped += 1;
-    continue;
-  }
   const source = withoutComments(await readFile(path.join(root, file), "utf8"));
+  const isAllowedDebt = allowFiles.has(file);
+  if (isAllowedDebt) skipped += 1;
   const findings = [
-    ...checkColors(source, allowTokens),
-    ...checkTokens(source, allowTokens),
+    ...(isAllowedDebt ? [] : checkColors(source, allowTokens)),
+    ...(isAllowedDebt ? [] : checkTokens(source, allowTokens)),
     ...checkKcSelectors(source),
   ].sort((a, b) => a.line - b.line);
   if (findings.length > 0) report.push({ file, findings });
@@ -193,7 +199,7 @@ if (skipped > 0) {
   // Never silent about what was not checked. An allowlist that stops being
   // visible stops being temporary.
   process.stdout.write(
-    `keycaps-css-lint: ${skipped} file(s) allowlisted as pre-migration debt\n`,
+    `keycaps-css-lint: ${skipped} file(s) allowlisted for pre-migration token and color debt\n`,
   );
 }
 

@@ -110,13 +110,23 @@ describe("keycaps-css-lint", () => {
     assert.equal(code, 0, stdout);
   });
 
-  it("honors a file allowlisted as pre-migration debt, and says so out loud", async () => {
+  it("honors a file allowlisted for token and color debt, and says so out loud", async () => {
     const { code, stdout } = await lint(`.panel { color: #c7452c; }\n`, {
       allowFiles: ["app.css"],
     });
     assert.equal(code, 0, stdout);
     // Silent truncation would let an allowlist quietly become permanent.
-    assert.match(stdout, /1 file\(s\) allowlisted as pre-migration debt/);
+    assert.match(stdout, /1 file\(s\) allowlisted for pre-migration token and color debt/);
+  });
+
+  it("still fails a .kc- override in a file allowlisted for migration debt", async () => {
+    const { code, stdout } = await lint(
+      `.kc-button { color: #c7452c; }\n`,
+      { allowFiles: ["app.css"] },
+    );
+    assert.equal(code, 1);
+    assert.match(stdout, /kc-override/);
+    assert.doesNotMatch(stdout, /raw-color/);
   });
 
   it("exits 2 rather than 0 when it has nothing to check", async () => {
@@ -127,6 +137,13 @@ describe("keycaps-css-lint", () => {
       "utf8",
     );
     const { code } = await lint(`.panel { color: #c7452c; }\n`, { include: [] });
+    assert.equal(code, 2);
+  });
+
+  it("exits 2 when configured include globs match no files", async () => {
+    const { code } = await lint(`.panel { color: #c7452c; }\n`, {
+      include: ["missing/**/*.css"],
+    });
     assert.equal(code, 2);
   });
 });
