@@ -38,6 +38,7 @@ Keycaps owns its CSS tokens, styling, React wrapper APIs, documentation, and rel
 - Components: Button, Field, Select, Popover, Banner, Badge, Card — all currently `beta`.
 - Component contract: semantic tokens rather than raw colors; React Aria behavior where a matching primitive exists; visible focus indicator and 44×44 CSS-pixel minimum target where practical; support for system, explicit light, explicit dark, reduced-motion, and forced-color preferences; reflow without horizontal scrolling at 320 CSS pixels; no third-party runtime requests; API guidance, representative states, unit tests, an axe check, and browser interaction proof.
 - Theme contract: follows the system color scheme by default; `data-theme="light"` or `data-theme="dark"` on the root element for an explicit choice. Keycaps defines only the CSS contract and does not write cookies or local storage. Apps may retain the existing `jflamb-theme` preference key.
+- Motion contract: the system `prefers-reduced-motion` preference is authoritative; `data-kc-motion="reduce"` or `"full"` on the root element is the explicit override, mirroring `data-theme`. Every value the substitution touches is a token, so the tokens package owns the whole switch and component CSS carries no reduced-motion branch. See the Motion Contract rule in `DESIGN.md`.
 - Token naming: canonical tokens use the `--kc-` prefix. Unprefixed jflamb aliases exist only through the opt-in legacy export.
 - Release statuses: `experimental`, `beta`, `stable`, `deprecated`. A component reaches `stable` only after API review, automated interaction and accessibility checks, responsive and forced-color verification, and manual assistive-technology coverage documented in the release record.
 - API policy: prefer small owned props over re-exporting primitive parts. Breaking API changes require a major version after the first public release.
@@ -58,8 +59,11 @@ Keycaps owns its CSS tokens, styling, React wrapper APIs, documentation, and rel
 - `docs/component-status.md` — per-component status and automated coverage.
 - `docs/contributing/components.md` — the component contract and release-status definitions.
 - `docs/research/design-system-foundation-options.md` — foundation research behind the ADR.
-- `/Users/jaime/Repos/jflamb/app-auth/src/design` — the historical origin of the visual language. **Superseded:** Keycaps is now the visual authority. The "canonical visual source" framing in `README.md` and ADR 0001 is stale and describes origin, not current authority.
-- `/Users/jaime/Repos/jflamb/assistant-workbench` — a representative consumer, never a second source of truth.
+- `DESIGN.md` — the visual specification, and the authority for palette, type, motion, depth, and the named rules.
+- The `app-auth` design directory — the historical origin of the visual language. **Superseded:** Keycaps is now the visual authority. `README.md` and ADR 0001 previously framed it as the canonical visual source; both were corrected on 2026-08-08 to record it as origin rather than current authority.
+- Assistant Workbench — a representative consumer, never a second source of truth.
+
+Local filesystem paths are deliberately omitted here: this repository is public, and the two projects above are private and not resolvable by a reader.
 
 Absences future work must not fabricate: there are no external users, no adoption metrics, no testimonials, no case studies, no benchmarks, and no published stable release. No component has reached `stable`.
 

@@ -11,9 +11,13 @@ Packages are separated so framework-neutral tokens can be consumed without React
 
 ## Sources
 
-- Canonical visual source: `/Users/jaime/Repos/jflamb/app-auth/src/design`.
-- Representative usage: `/Users/jaime/Repos/jflamb/assistant-workbench/apps/web/public`.
+- Visual source at the time of this decision: the `app-auth` design directory.
+- Representative usage at the time of this decision: the Assistant Workbench web app.
 - Foundation research: `docs/research/design-system-foundation-options.md`.
+
+Both source references are historical. Keycaps became the visual authority once
+`DESIGN.md` existed, so neither is a source to check current behavior against.
+This note records that shift rather than rewriting the decision.
 
 ## Consequences
 

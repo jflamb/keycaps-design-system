@@ -8,7 +8,9 @@ It has three layers:
 - `@jflamb/keycaps-react`: owned React components built on React Aria Components.
 - `@jflamb/keycaps-storybook`: component guidance, interaction examples, and accessibility documentation.
 
-The visual source of truth is `/Users/jaime/Repos/jflamb/app-auth/src/design`. Assistant Workbench is a representative consumer, not a second source of truth. Astryx is not a runtime dependency, and the deprecated MCP console is out of scope.
+Keycaps is the visual authority for the projects that consume it. [DESIGN.md](DESIGN.md) is the specification — palette and its semantic reservations, the type pairing, press physics, and the named rules components are held to. The visual language originated in the `app-auth` design directory, but that is history rather than a source to check against.
+
+Consuming projects are consumers, never second sources of truth. Astryx is not a runtime dependency, and the deprecated MCP console is out of scope.
 
 ## Start locally
 
