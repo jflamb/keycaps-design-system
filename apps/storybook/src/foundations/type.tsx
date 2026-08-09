@@ -17,7 +17,7 @@ const ROLES: Role[] = [
   {
     id: "title",
     name: "Title",
-    usage: "Card titles. The only place Fraunces appears inside a component.",
+    usage: "Card titles. The only place Piazzolla appears inside a component.",
     sample: "Project settings",
   },
   {

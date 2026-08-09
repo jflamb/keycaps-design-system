@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-08T00:00:00.000Z",
+  "generatedAt": "2026-08-09T15:44:44.000Z",
   "title": "Design System: Keycaps",
   "extensions": {
     "colorMeta": {
@@ -8,113 +8,252 @@
         "role": "neutral",
         "displayName": "Cloud",
         "canonical": "oklch(96.2% 0.003 100)",
-        "tonalRamp": ["oklch(15% 0.003 100)", "oklch(26% 0.003 100)", "oklch(37% 0.003 100)", "oklch(48% 0.003 100)", "oklch(59% 0.003 100)", "oklch(70% 0.003 100)", "oklch(85% 0.003 100)", "oklch(96.2% 0.003 100)"]
+        "tonalRamp": [
+          "oklch(15% 0.003 100)",
+          "oklch(26% 0.003 100)",
+          "oklch(37% 0.003 100)",
+          "oklch(48% 0.003 100)",
+          "oklch(59% 0.003 100)",
+          "oklch(70% 0.003 100)",
+          "oklch(85% 0.003 100)",
+          "oklch(96.2% 0.003 100)"
+        ]
       },
       "plate": {
         "role": "neutral",
         "displayName": "Plate",
         "canonical": "oklch(98.7% 0.004 100)",
-        "tonalRamp": ["oklch(15% 0.004 100)", "oklch(26% 0.004 100)", "oklch(37% 0.004 100)", "oklch(48% 0.004 100)", "oklch(59% 0.004 100)", "oklch(72% 0.004 100)", "oklch(86% 0.004 100)", "oklch(98.7% 0.004 100)"]
+        "tonalRamp": [
+          "oklch(15% 0.004 100)",
+          "oklch(26% 0.004 100)",
+          "oklch(37% 0.004 100)",
+          "oklch(48% 0.004 100)",
+          "oklch(59% 0.004 100)",
+          "oklch(72% 0.004 100)",
+          "oklch(86% 0.004 100)",
+          "oklch(98.7% 0.004 100)"
+        ]
       },
       "fog": {
         "role": "neutral",
         "displayName": "Fog",
         "canonical": "oklch(82.1% 0.017 255)",
-        "tonalRamp": ["oklch(15% 0.017 255)", "oklch(26% 0.017 255)", "oklch(37% 0.017 255)", "oklch(48% 0.017 255)", "oklch(60% 0.017 255)", "oklch(71% 0.017 255)", "oklch(82.1% 0.017 255)", "oklch(93% 0.017 255)"]
+        "tonalRamp": [
+          "oklch(15% 0.017 255)",
+          "oklch(26% 0.017 255)",
+          "oklch(37% 0.017 255)",
+          "oklch(48% 0.017 255)",
+          "oklch(60% 0.017 255)",
+          "oklch(71% 0.017 255)",
+          "oklch(82.1% 0.017 255)",
+          "oklch(93% 0.017 255)"
+        ]
       },
       "slate": {
         "role": "neutral",
         "displayName": "Slate",
         "canonical": "oklch(48.9% 0.021 260)",
-        "tonalRamp": ["oklch(15% 0.021 260)", "oklch(26% 0.021 260)", "oklch(37% 0.021 260)", "oklch(48.9% 0.021 260)", "oklch(60% 0.021 260)", "oklch(71% 0.021 260)", "oklch(83% 0.021 260)", "oklch(94% 0.021 260)"]
+        "tonalRamp": [
+          "oklch(15% 0.021 260)",
+          "oklch(26% 0.021 260)",
+          "oklch(37% 0.021 260)",
+          "oklch(48.9% 0.021 260)",
+          "oklch(60% 0.021 260)",
+          "oklch(71% 0.021 260)",
+          "oklch(83% 0.021 260)",
+          "oklch(94% 0.021 260)"
+        ]
       },
       "graphite": {
         "role": "neutral",
         "displayName": "Graphite",
         "canonical": "oklch(34.2% 0.014 265)",
-        "tonalRamp": ["oklch(15% 0.014 265)", "oklch(24% 0.014 265)", "oklch(34.2% 0.014 265)", "oklch(45% 0.014 265)", "oklch(57% 0.014 265)", "oklch(69% 0.014 265)", "oklch(82% 0.014 265)", "oklch(94% 0.014 265)"]
+        "tonalRamp": [
+          "oklch(15% 0.014 265)",
+          "oklch(24% 0.014 265)",
+          "oklch(34.2% 0.014 265)",
+          "oklch(45% 0.014 265)",
+          "oklch(57% 0.014 265)",
+          "oklch(69% 0.014 265)",
+          "oklch(82% 0.014 265)",
+          "oklch(94% 0.014 265)"
+        ]
       },
       "coral-key": {
         "role": "primary",
         "displayName": "Coral Key",
         "canonical": "oklch(56.4% 0.163 33)",
-        "tonalRamp": ["oklch(20% 0.163 33)", "oklch(30% 0.163 33)", "oklch(40% 0.163 33)", "oklch(48% 0.163 33)", "oklch(56.4% 0.163 33)", "oklch(68% 0.150 33)", "oklch(80% 0.110 33)", "oklch(92% 0.055 33)"]
+        "tonalRamp": [
+          "oklch(20% 0.163 33)",
+          "oklch(30% 0.163 33)",
+          "oklch(40% 0.163 33)",
+          "oklch(48% 0.163 33)",
+          "oklch(56.4% 0.163 33)",
+          "oklch(68% 0.150 33)",
+          "oklch(80% 0.110 33)",
+          "oklch(92% 0.055 33)"
+        ]
       },
       "coral": {
         "role": "primary",
         "displayName": "Coral",
         "canonical": "oklch(64.4% 0.163 35)",
-        "tonalRamp": ["oklch(20% 0.163 35)", "oklch(31% 0.163 35)", "oklch(42% 0.163 35)", "oklch(53% 0.163 35)", "oklch(64.4% 0.163 35)", "oklch(75% 0.135 35)", "oklch(85% 0.095 35)", "oklch(94% 0.045 35)"]
+        "tonalRamp": [
+          "oklch(20% 0.163 35)",
+          "oklch(31% 0.163 35)",
+          "oklch(42% 0.163 35)",
+          "oklch(53% 0.163 35)",
+          "oklch(64.4% 0.163 35)",
+          "oklch(75% 0.135 35)",
+          "oklch(85% 0.095 35)",
+          "oklch(94% 0.045 35)"
+        ]
       },
       "coral-edge": {
         "role": "primary",
         "displayName": "Coral Edge",
         "canonical": "oklch(43.5% 0.150 33)",
-        "tonalRamp": ["oklch(18% 0.150 33)", "oklch(28% 0.150 33)", "oklch(43.5% 0.150 33)", "oklch(53% 0.150 33)", "oklch(63% 0.150 33)", "oklch(74% 0.130 33)", "oklch(84% 0.090 33)", "oklch(93% 0.045 33)"]
+        "tonalRamp": [
+          "oklch(18% 0.150 33)",
+          "oklch(28% 0.150 33)",
+          "oklch(43.5% 0.150 33)",
+          "oklch(53% 0.150 33)",
+          "oklch(63% 0.150 33)",
+          "oklch(74% 0.130 33)",
+          "oklch(84% 0.090 33)",
+          "oklch(93% 0.045 33)"
+        ]
       },
       "mint": {
         "role": "secondary",
         "displayName": "Mint",
         "canonical": "oklch(72.8% 0.101 168)",
-        "tonalRamp": ["oklch(20% 0.101 168)", "oklch(31% 0.101 168)", "oklch(42% 0.101 168)", "oklch(53% 0.101 168)", "oklch(63% 0.101 168)", "oklch(72.8% 0.101 168)", "oklch(84% 0.075 168)", "oklch(94% 0.038 168)"]
+        "tonalRamp": [
+          "oklch(20% 0.101 168)",
+          "oklch(31% 0.101 168)",
+          "oklch(42% 0.101 168)",
+          "oklch(53% 0.101 168)",
+          "oklch(63% 0.101 168)",
+          "oklch(72.8% 0.101 168)",
+          "oklch(84% 0.075 168)",
+          "oklch(94% 0.038 168)"
+        ]
       },
       "mint-deep": {
         "role": "secondary",
         "displayName": "Mint Deep",
         "canonical": "oklch(45.1% 0.081 168)",
-        "tonalRamp": ["oklch(18% 0.081 168)", "oklch(28% 0.081 168)", "oklch(38% 0.081 168)", "oklch(45.1% 0.081 168)", "oklch(58% 0.081 168)", "oklch(70% 0.081 168)", "oklch(82% 0.062 168)", "oklch(94% 0.032 168)"]
+        "tonalRamp": [
+          "oklch(18% 0.081 168)",
+          "oklch(28% 0.081 168)",
+          "oklch(38% 0.081 168)",
+          "oklch(45.1% 0.081 168)",
+          "oklch(58% 0.081 168)",
+          "oklch(70% 0.081 168)",
+          "oklch(82% 0.062 168)",
+          "oklch(94% 0.032 168)"
+        ]
       },
       "mustard": {
         "role": "tertiary",
         "displayName": "Mustard",
         "canonical": "oklch(80.8% 0.132 85)",
-        "tonalRamp": ["oklch(22% 0.132 85)", "oklch(33% 0.132 85)", "oklch(44% 0.132 85)", "oklch(55% 0.132 85)", "oklch(66% 0.132 85)", "oklch(74% 0.132 85)", "oklch(80.8% 0.132 85)", "oklch(93% 0.060 85)"]
+        "tonalRamp": [
+          "oklch(22% 0.132 85)",
+          "oklch(33% 0.132 85)",
+          "oklch(44% 0.132 85)",
+          "oklch(55% 0.132 85)",
+          "oklch(66% 0.132 85)",
+          "oklch(74% 0.132 85)",
+          "oklch(80.8% 0.132 85)",
+          "oklch(93% 0.060 85)"
+        ]
       },
       "mustard-ink": {
         "role": "tertiary",
         "displayName": "Mustard Ink",
         "canonical": "oklch(45.6% 0.086 82)",
-        "tonalRamp": ["oklch(18% 0.086 82)", "oklch(28% 0.086 82)", "oklch(38% 0.086 82)", "oklch(45.6% 0.086 82)", "oklch(58% 0.086 82)", "oklch(70% 0.086 82)", "oklch(82% 0.070 82)", "oklch(94% 0.035 82)"]
+        "tonalRamp": [
+          "oklch(18% 0.086 82)",
+          "oklch(28% 0.086 82)",
+          "oklch(38% 0.086 82)",
+          "oklch(45.6% 0.086 82)",
+          "oklch(58% 0.086 82)",
+          "oklch(70% 0.086 82)",
+          "oklch(82% 0.070 82)",
+          "oklch(94% 0.035 82)"
+        ]
       },
       "signal-deep": {
         "role": "tertiary",
         "displayName": "Signal Deep",
         "canonical": "oklch(48.2% 0.093 234)",
-        "tonalRamp": ["oklch(18% 0.093 234)", "oklch(28% 0.093 234)", "oklch(38% 0.093 234)", "oklch(48.2% 0.093 234)", "oklch(59% 0.093 234)", "oklch(71% 0.085 234)", "oklch(83% 0.060 234)", "oklch(94% 0.030 234)"]
+        "tonalRamp": [
+          "oklch(18% 0.093 234)",
+          "oklch(28% 0.093 234)",
+          "oklch(38% 0.093 234)",
+          "oklch(48.2% 0.093 234)",
+          "oklch(59% 0.093 234)",
+          "oklch(71% 0.085 234)",
+          "oklch(83% 0.060 234)",
+          "oklch(94% 0.030 234)"
+        ]
       },
       "signal-bright": {
         "role": "tertiary",
         "displayName": "Signal Bright",
         "canonical": "oklch(80.2% 0.096 226)",
-        "tonalRamp": ["oklch(20% 0.096 226)", "oklch(31% 0.096 226)", "oklch(42% 0.096 226)", "oklch(53% 0.096 226)", "oklch(64% 0.096 226)", "oklch(72% 0.096 226)", "oklch(80.2% 0.096 226)", "oklch(93% 0.045 226)"]
+        "tonalRamp": [
+          "oklch(20% 0.096 226)",
+          "oklch(31% 0.096 226)",
+          "oklch(42% 0.096 226)",
+          "oklch(53% 0.096 226)",
+          "oklch(64% 0.096 226)",
+          "oklch(72% 0.096 226)",
+          "oklch(80.2% 0.096 226)",
+          "oklch(93% 0.045 226)"
+        ]
       },
       "danger": {
         "role": "tertiary",
         "displayName": "Danger",
         "canonical": "oklch(52.4% 0.192 27)",
-        "tonalRamp": ["oklch(19% 0.192 27)", "oklch(29% 0.192 27)", "oklch(40% 0.192 27)", "oklch(52.4% 0.192 27)", "oklch(63% 0.175 27)", "oklch(74% 0.140 27)", "oklch(85% 0.095 27)", "oklch(94% 0.045 27)"]
+        "tonalRamp": [
+          "oklch(19% 0.192 27)",
+          "oklch(29% 0.192 27)",
+          "oklch(40% 0.192 27)",
+          "oklch(52.4% 0.192 27)",
+          "oklch(63% 0.175 27)",
+          "oklch(74% 0.140 27)",
+          "oklch(85% 0.095 27)",
+          "oklch(94% 0.045 27)"
+        ]
       }
     },
     "typographyMeta": {
       "display": {
         "displayName": "Display",
-        "purpose": "Page-level h1 and h2 only. Fraunces at opsz 11 / SOFT 80; size is set by the surface, not by a token."
+        "purpose": "Page-level h1 and h2 only. Piazzolla with optical sizing left automatic, at weight 580 — lighter than Title because it is set twice the size. Size is set by the surface, not by a token."
       },
       "title": {
         "displayName": "Title",
-        "purpose": "Card titles — the only place the display face appears inside a component."
+        "purpose": "Card titles — the only place the display face appears inside a component. Weight 640, heavier than Display so that at 1.25rem it reads as the same weight."
       },
       "body": {
         "displayName": "Body",
-        "purpose": "Running text and input values. The 1.55 leading is what keeps dense forms breathable."
+        "purpose": "Running text and input values, Sofia Sans at an untuned 400. The 1.55 leading is what keeps dense forms breathable."
       },
       "label": {
         "displayName": "Label",
-        "purpose": "Field labels, button text, and descriptions. Semibold so a label is findable without being loud."
+        "purpose": "Field labels, button text, and descriptions. Weight 580 — just under semibold, so a label is findable without being loud."
       },
       "micro": {
         "displayName": "Micro",
-        "purpose": "Badges and small keys. Bold and tight-leaded, because at 0.75rem weight is the only surviving hierarchy signal."
+        "purpose": "Badges and small keys. Weight 760 and tight-leaded: at 0.75rem in all-caps there are no ascenders or descenders left, so weight is the only surviving hierarchy signal."
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "Inline code and code blocks, in Lilex. Inline is 0.8em relative to its parent; blocks are 0.875rem absolute. Lilex is bundled rather than left to a system monospace stack, which was three different faces with three different x-heights depending on the reader's platform."
       }
     },
     "shadows": [
@@ -174,7 +313,7 @@
       "refersTo": "button-primary",
       "description": "The committing action. A coral keycap with a 4px side wall that compresses as the cap travels.",
       "html": "<button class=\"ds-btn ds-btn-primary\">Save changes</button>",
-      "css": ".ds-btn { display: inline-flex; min-block-size: var(--kc-control-min-size, 44px); inline-size: fit-content; align-items: center; justify-content: center; gap: var(--kc-space-2, 0.5rem); padding: calc(var(--kc-space-2, 0.5rem) + 2px) var(--kc-space-5, 1.25rem); border: 1px solid transparent; border-block-end: var(--kc-key-edge-width, 4px) solid transparent; border-radius: var(--kc-radius-key, 10px); font-family: var(--kc-font-body); font-size: var(--kc-font-size-sm, 0.875rem); font-weight: var(--kc-font-weight-bold, 700); line-height: 1.2; cursor: pointer; transition: transform var(--kc-duration-press, 120ms) var(--kc-ease-press, ease), border-block-end-width var(--kc-duration-press, 120ms) var(--kc-ease-press, ease), background-color var(--kc-duration-press, 120ms) var(--kc-ease-press, ease); } .ds-btn-primary { background: var(--kc-color-key-face); color: var(--kc-color-on-key); border-block-end-color: var(--kc-color-key-edge); } .ds-btn-primary:hover { background: var(--kc-color-key-face-hover); } .ds-btn-primary:active { transform: translateY(3px); border-block-end-width: 1px; } .ds-btn-primary:focus-visible { outline: var(--kc-focus-ring, 3px solid var(--kc-color-focus)); outline-offset: var(--kc-focus-ring-offset, 3px); } @media (prefers-reduced-motion: reduce) { .ds-btn-primary:active { transform: none; border-block-end-width: var(--kc-key-edge-width, 4px); background: var(--kc-color-key-edge); } }"
+      "css": ".ds-btn { display: inline-flex; min-block-size: var(--kc-control-min-size, 44px); inline-size: fit-content; align-items: center; justify-content: center; gap: var(--kc-space-2, 0.5rem); padding: calc(var(--kc-space-2, 0.5rem) + 2px) var(--kc-space-5, 1.25rem); border: 1px solid transparent; border-block-end: var(--kc-key-edge-width, 4px) solid transparent; border-radius: var(--kc-radius-key, 10px); font-family: var(--kc-font-body); font-size: var(--kc-font-size-sm, 0.875rem); font-weight: var(--kc-font-weight-label, 580); line-height: 1.2; cursor: pointer; transition: transform var(--kc-duration-press, 120ms) var(--kc-ease-press, ease), border-block-end-width var(--kc-duration-press, 120ms) var(--kc-ease-press, ease), background-color var(--kc-duration-press, 120ms) var(--kc-ease-press, ease); } .ds-btn-primary { background: var(--kc-color-key-face); color: var(--kc-color-on-key); border-block-end-color: var(--kc-color-key-edge); } .ds-btn-primary:hover { background: var(--kc-color-key-face-hover); } .ds-btn-primary:active { transform: translateY(3px); border-block-end-width: 1px; } .ds-btn-primary:focus-visible { outline: var(--kc-focus-ring, 3px solid var(--kc-color-focus)); outline-offset: var(--kc-focus-ring-offset, 3px); } @media (prefers-reduced-motion: reduce) { .ds-btn-primary:active { transform: none; border-block-end-width: var(--kc-key-edge-width, 4px); background: var(--kc-color-key-edge); } }"
     },
     {
       "name": "Secondary Button",
@@ -198,7 +337,7 @@
       "refersTo": "field-input",
       "description": "Label, description, control, and error stacked in a grid, capped at a 32rem measure.",
       "html": "<div class=\"ds-field\"><label class=\"ds-field-label\" for=\"ds-field-1\">Workspace name</label><span class=\"ds-field-description\">Shown to everyone you invite.</span><input class=\"ds-field-input\" id=\"ds-field-1\" type=\"text\" placeholder=\"Acme Research\" /></div>",
-      "css": ".ds-field { display: grid; inline-size: min(100%, 32rem); gap: var(--kc-space-2, 0.5rem); color: var(--kc-color-text); font-family: var(--kc-font-body); } .ds-field-label { font-size: var(--kc-font-size-sm, 0.875rem); font-weight: var(--kc-font-weight-semibold, 600); } .ds-field-description { color: var(--kc-color-text-muted); font-size: var(--kc-font-size-sm, 0.875rem); line-height: 1.45; } .ds-field-input { inline-size: 100%; min-block-size: 50px; padding-inline: var(--kc-space-4, 1rem); border: 1.5px solid var(--kc-color-border); border-radius: var(--kc-radius-key, 10px); background: var(--kc-color-surface-raised); color: var(--kc-color-text); font-family: var(--kc-font-body); font-size: var(--kc-font-size-md, 1rem); } .ds-field-input::placeholder { color: var(--kc-color-text-muted); opacity: 1; } .ds-field-input:hover { border-color: var(--kc-color-text-muted); } .ds-field-input:focus-visible { outline: var(--kc-focus-ring, 3px solid var(--kc-color-focus)); outline-offset: var(--kc-focus-ring-offset, 3px); }"
+      "css": ".ds-field { display: grid; inline-size: min(100%, 32rem); gap: var(--kc-space-2, 0.5rem); color: var(--kc-color-text); font-family: var(--kc-font-body); } .ds-field-label { font-size: var(--kc-font-size-sm, 0.875rem); font-weight: var(--kc-font-weight-label, 580); } .ds-field-description { color: var(--kc-color-text-muted); font-size: var(--kc-font-size-sm, 0.875rem); line-height: 1.45; } .ds-field-input { inline-size: 100%; min-block-size: 50px; padding-inline: var(--kc-space-4, 1rem); border: 1.5px solid var(--kc-color-border); border-radius: var(--kc-radius-key, 10px); background: var(--kc-color-surface-raised); color: var(--kc-color-text); font-family: var(--kc-font-body); font-size: var(--kc-font-size-md, 1rem); } .ds-field-input::placeholder { color: var(--kc-color-text-muted); opacity: 1; } .ds-field-input:hover { border-color: var(--kc-color-text-muted); } .ds-field-input:focus-visible { outline: var(--kc-focus-ring, 3px solid var(--kc-color-focus)); outline-offset: var(--kc-focus-ring-offset, 3px); }"
     },
     {
       "name": "Select Trigger",
@@ -214,7 +353,7 @@
       "refersTo": "card",
       "description": "The plate itself. Largest radius in the system, divider-weight border, and the only component that casts a plate shadow.",
       "html": "<div class=\"ds-card\"><div class=\"ds-card-header\"><h3 class=\"ds-card-title\">Release checklist</h3><p class=\"ds-card-description\">Every item is verified before a component reaches stable.</p></div><div class=\"ds-card-footer\"><button class=\"ds-btn ds-btn-primary\">Publish</button><button class=\"ds-btn ds-btn-quiet\">Review later</button></div></div>",
-      "css": ".ds-card { display: grid; inline-size: min(100%, 42rem); gap: var(--kc-space-5, 1.25rem); padding: var(--kc-space-6, 1.5rem); border: 1px solid var(--kc-color-divider); border-radius: var(--kc-radius-plate, 18px); background: var(--kc-color-surface-raised); color: var(--kc-color-text); box-shadow: var(--kc-shadow-plate); font-family: var(--kc-font-body); } .ds-card-header { display: grid; gap: var(--kc-space-2, 0.5rem); } .ds-card-title { margin: 0; font-family: var(--kc-font-display); font-size: var(--kc-font-size-xl, 1.25rem); font-variation-settings: \"opsz\" 11, \"SOFT\" 80; font-weight: var(--kc-font-weight-semibold, 600); line-height: var(--kc-line-height-heading, 1.2); } .ds-card-description { margin: 0; color: var(--kc-color-text-muted); } .ds-card-footer { display: flex; flex-wrap: wrap; gap: var(--kc-space-3, 0.75rem); align-items: center; padding-block-start: var(--kc-space-4, 1rem); border-block-start: 1px solid var(--kc-color-divider); } @media (max-width: 30rem) { .ds-card { padding: var(--kc-space-5, 1.25rem); } }"
+      "css": ".ds-card { display: grid; inline-size: min(100%, 42rem); gap: var(--kc-space-5, 1.25rem); padding: var(--kc-space-6, 1.5rem); border: 1px solid var(--kc-color-divider); border-radius: var(--kc-radius-plate, 18px); background: var(--kc-color-surface-raised); color: var(--kc-color-text); box-shadow: var(--kc-shadow-plate); font-family: var(--kc-font-body); } .ds-card-header { display: grid; gap: var(--kc-space-2, 0.5rem); } .ds-card-title { margin: 0; font-family: var(--kc-font-display); font-size: var(--kc-font-size-xl, 1.25rem); font-weight: var(--kc-font-weight-title, 640); line-height: var(--kc-line-height-heading, 1.2); } .ds-card-description { margin: 0; color: var(--kc-color-text-muted); } .ds-card-footer { display: flex; flex-wrap: wrap; gap: var(--kc-space-3, 0.75rem); align-items: center; padding-block-start: var(--kc-space-4, 1rem); border-block-start: 1px solid var(--kc-color-divider); } @media (max-width: 30rem) { .ds-card { padding: var(--kc-space-5, 1.25rem); } }"
     },
     {
       "name": "Banner",
@@ -222,7 +361,7 @@
       "refersTo": "banner-info",
       "description": "A strip of tone laid across the plate. Surface, border, and text move together; the 4px leading edge carries the tone.",
       "html": "<div class=\"ds-banner\" role=\"status\"><div class=\"ds-banner-content\"><span class=\"ds-banner-title\">Storybook deployed</span><span>The documentation site updated after CI passed on main.</span></div><button class=\"ds-banner-dismiss\" aria-label=\"Dismiss\"><svg viewBox=\"0 0 18 18\" fill=\"none\" aria-hidden=\"true\"><path d=\"M4.5 4.5 13.5 13.5M13.5 4.5 4.5 13.5\" /></svg></button></div>",
-      "css": ".ds-banner { display: flex; inline-size: min(100%, 48rem); align-items: flex-start; justify-content: space-between; gap: var(--kc-space-3, 0.75rem); padding: var(--kc-space-3, 0.75rem) var(--kc-space-4, 1rem); border: 1px solid var(--kc-color-info-border); border-inline-start-width: 4px; border-radius: var(--kc-radius-sm, 6px); background: var(--kc-color-info-surface); color: var(--kc-color-info-text); font-family: var(--kc-font-body); } .ds-banner-content { display: grid; gap: var(--kc-space-1, 0.25rem); } .ds-banner-title { font-weight: var(--kc-font-weight-bold, 700); } .ds-banner-dismiss { min-inline-size: var(--kc-control-min-size, 44px); min-block-size: var(--kc-control-min-size, 44px); flex: none; margin: calc(var(--kc-space-1, 0.25rem) * -1); display: inline-flex; align-items: center; justify-content: center; border: none; background: transparent; color: inherit; cursor: pointer; } .ds-banner-dismiss svg { inline-size: 1.125rem; block-size: 1.125rem; stroke: currentColor; stroke-width: 2; stroke-linecap: round; } .ds-banner-dismiss:focus-visible { outline: var(--kc-focus-ring, 3px solid var(--kc-color-focus)); outline-offset: 2px; } @media (max-width: 30rem) { .ds-banner { padding-inline: var(--kc-space-3, 0.75rem); } }"
+      "css": ".ds-banner { display: flex; inline-size: min(100%, 48rem); align-items: flex-start; justify-content: space-between; gap: var(--kc-space-3, 0.75rem); padding: var(--kc-space-3, 0.75rem) var(--kc-space-4, 1rem); border: 1px solid var(--kc-color-info-border); border-inline-start-width: 4px; border-radius: var(--kc-radius-sm, 6px); background: var(--kc-color-info-surface); color: var(--kc-color-info-text); font-family: var(--kc-font-body); } .ds-banner-content { display: grid; gap: var(--kc-space-1, 0.25rem); } .ds-banner-title { font-weight: var(--kc-font-weight-label, 580); } .ds-banner-dismiss { min-inline-size: var(--kc-control-min-size, 44px); min-block-size: var(--kc-control-min-size, 44px); flex: none; margin: calc(var(--kc-space-1, 0.25rem) * -1); display: inline-flex; align-items: center; justify-content: center; border: none; background: transparent; color: inherit; cursor: pointer; } .ds-banner-dismiss svg { inline-size: 1.125rem; block-size: 1.125rem; stroke: currentColor; stroke-width: 2; stroke-linecap: round; } .ds-banner-dismiss:focus-visible { outline: var(--kc-focus-ring, 3px solid var(--kc-color-focus)); outline-offset: 2px; } @media (max-width: 30rem) { .ds-banner { padding-inline: var(--kc-space-3, 0.75rem); } }"
     },
     {
       "name": "Badge",
@@ -230,7 +369,7 @@
       "refersTo": "badge",
       "description": "A label, not a control. Micro type, concentric radius, uniform 1px border — no weighted bottom edge, because a badge never travels.",
       "html": "<span class=\"ds-badge\">Neutral</span> <span class=\"ds-badge ds-badge-success\">Stable</span> <span class=\"ds-badge ds-badge-warning\">Beta</span>",
-      "css": ".ds-badge { display: inline-flex; inline-size: fit-content; min-block-size: 1.5rem; align-items: center; padding: var(--kc-space-1, 0.25rem) calc(var(--kc-space-2, 0.5rem) + 2px); border: 1px solid var(--kc-color-border); border-radius: var(--kc-radius-sm, 6px); background: var(--kc-color-surface-raised); color: var(--kc-color-text); font-family: var(--kc-font-body); font-size: var(--kc-font-size-xs, 0.75rem); font-weight: var(--kc-font-weight-bold, 700); line-height: 1; } .ds-badge-success { border-color: var(--kc-color-success-border); background: var(--kc-color-success-surface); color: var(--kc-color-success-text); } .ds-badge-warning { border-color: var(--kc-color-warning-border); background: var(--kc-color-warning-surface); color: var(--kc-color-warning-text); }"
+      "css": ".ds-badge { display: inline-flex; inline-size: fit-content; min-block-size: 1.5rem; align-items: center; padding: var(--kc-space-1, 0.25rem) calc(var(--kc-space-2, 0.5rem) + 2px); border: 1px solid var(--kc-color-border); border-radius: var(--kc-radius-sm, 6px); background: var(--kc-color-surface-raised); color: var(--kc-color-text); font-family: var(--kc-font-body); font-size: var(--kc-font-size-xs, 0.75rem); font-weight: var(--kc-font-weight-micro, 760); line-height: 1; } .ds-badge-success { border-color: var(--kc-color-success-border); background: var(--kc-color-success-surface); color: var(--kc-color-success-text); } .ds-badge-warning { border-color: var(--kc-color-warning-border); background: var(--kc-color-warning-surface); color: var(--kc-color-warning-text); }"
     },
     {
       "name": "Popover",
@@ -243,7 +382,7 @@
   ],
   "narrative": {
     "northStar": "The Quiet Plate",
-    "overview": "Keycaps is a plate, and a small number of solid objects seated on it. The plate is the protagonist: a warm near-white ground (cloud #f5f5f3) that asks for nothing, holds everything, and stays quiet under whatever is placed on it. Objects that sit on the plate are unmistakably objects — they have a border, a radius, a bottom edge, and a shadow that says they occupy space rather than float above it. Nothing dissolves into the page.\n\nThe system is tactile but restrained. It contains real physical feedback, and it spends it almost nowhere. A primary key travels 3px on press while its 4px bottom edge compresses to 1px, so the cap descends and bottoms out while its lower boundary stays exactly where it was — the motion of a key hitting the plate beneath it. That press is the single most expressive thing the system does, it lasts 120ms, and it is the reason the rest of the interface holds still. If everything moved, the press would mean nothing.\n\nWarmth comes from material, not from saturation. The neutrals are warm-shifted rather than gray (plate #fdfdfb, divider #e7e7e3), the display face is Fraunces held at a constant optical size with softened terminals, and the accent is coral rather than blue. Coral appears at full strength on exactly one kind of thing — an action that commits — which is why the plate reads as calm. The scarcity is semantic, not budgeted: commitments are rare, so the color that marks them is rare.",
+    "overview": "Keycaps is a plate, and a small number of solid objects seated on it. The plate is the protagonist: a warm near-white ground (cloud #f5f5f3) that asks for nothing, holds everything, and stays quiet under whatever is placed on it. Objects that sit on the plate are unmistakably objects — they have a border, a radius, a bottom edge, and a shadow that says they occupy space rather than float above it. Nothing dissolves into the page.\n\nThe system is tactile but restrained. It contains real physical feedback, and it spends it almost nowhere. A primary key travels 3px on press while its 4px bottom edge compresses to 1px, so the cap descends and bottoms out while its lower boundary stays exactly where it was — the motion of a key hitting the plate beneath it. That press is the single most expressive thing the system does, it lasts 120ms, and it is the reason the rest of the interface holds still. If everything moved, the press would mean nothing.\n\nWarmth comes from material, not from saturation. The neutrals are warm-shifted rather than gray (plate #fdfdfb, divider #e7e7e3), the display face is Piazzolla drawing itself for the size it is set at over a quiet Sofia Sans, and the accent is coral rather than blue. Coral appears at full strength on exactly one kind of thing — an action that commits — which is why the plate reads as calm. The scarcity is semantic, not budgeted: commitments are rare, so the color that marks them is rare.",
     "keyCharacteristics": [
       "Warm near-white ground; nothing is pure gray and nothing is pure white",
       "Objects are seated, not floating — border, radius, and edge are the default vocabulary",
@@ -270,12 +409,37 @@
       },
       {
         "name": "The Two Voice Rule",
-        "body": "Fraunces speaks in page headings and card titles. Nunito Sans does everything else — every label, every value, every button, every error. A third face, or Fraunces creeping into body copy, breaks the system.",
+        "body": "Piazzolla speaks in page headings and card titles. Sofia Sans does everything else — every label, every value, every button, every error. Lilex speaks only in code. Piazzolla creeping into body copy breaks the system, and three faces is the ceiling: display, body, code.",
         "section": "typography"
       },
       {
-        "name": "The Optical Constant Rule",
-        "body": "Fraunces is always set at font-variation-settings: \"opsz\" 11, \"SOFT\" 80. The variable axes are a brand constant, not a per-surface control. Changing them changes the voice.",
+        "name": "The Optical Sizing Rule",
+        "body": "Piazzolla's opsz axis is never pinned. It runs on font-optical-sizing: auto, so the face draws itself for the size it is set at, and there is no font-variation-settings anywhere in the system. Its range of 8–30 spans a 1.25rem card title through a 2.5rem page heading; pinning it would trade away the small-size drawing that makes the Title role work. Replaces the Optical Constant Rule, which pinned the previous display face's SOFT and WONK axes.",
+        "section": "typography"
+      },
+      {
+        "name": "The Optical Weight Rule",
+        "body": "Roles carry the weight they need, not the nearest hundred. Apparent stroke weight falls as size falls, so a single number spanning a 40px heading and a 12px badge does not read as one system. Display sits at 580 and Title at 640 — the same intent at twice the size apart, bracketing 600 rather than sharing it. Label is 580, findable without being loud. Micro carries 760 because 12px uppercase has no ascenders or descenders left to help it. Body is deliberately untuned at 400. The generic ladder (400/500/600/700) remains for consumers; both faces are variable, so every rung is a real weight in both voices.",
+        "section": "typography"
+      },
+      {
+        "name": "The Inline Code Rule",
+        "body": "Code is set in Lilex at --kc-font-size-code (0.8em), relative to its parent rather than on the size ramp, because it appears inside body, label and table text alike. Code blocks take --kc-font-size-code-block (0.875rem) instead: a block has no surrounding prose to match. The size is doing work a face cannot — monospace convention is a ~0.6em advance against Sofia Sans' ~0.41em average, and every monospace candidate measured on this system landed at 0.6em. What a face can fix is apparent size: the previous system stack set a 0.547em x-height against the body's 0.488em, so code read a size larger than its surroundings. Lilex sets 0.516em. Bundling it also ends a quieter problem — a system stack is not one face, and the pairing had only ever been judged on macOS.",
+        "section": "typography"
+      },
+      {
+        "name": "Dark mode shaves weight.",
+        "body": "Light glyphs on a dark ground irradiate: the bright stroke bleeds into its surround and reads heavier than the same weight on white. Every role weight is calc(base + var(--kc-font-weight-shift)), where the shift is 0 in light and -20 in dark. Only a variable face can do this. The direction is a judgment about these two faces — both are low-contrast enough that irradiation, rather than thin strokes breaking up, dominates; a high-contrast face would want the opposite sign.",
+        "section": "typography"
+      },
+      {
+        "name": "The No Faux Type Rule",
+        "body": "font-synthesis: none is on, so the browser never fakes a weight or a slant. Shipped coverage is the real contract. Sofia Sans is variable across its whole range in both upright and italic, so every weight and every emphasis combination in the body voice is real — including emphasis inside bold copy, which under the previous static body face fell back to upright. Piazzolla ships upright only, so italic inside a heading still renders upright rather than being synthesized.",
+        "section": "typography"
+      },
+      {
+        "name": "The Heading Rhythm Rule",
+        "body": "A heading gets more space above it than below — --kc-space-heading-above (1.6em) against --kc-space-heading-below (0.6em), a ratio near 2.67:1, so the heading belongs to the section it opens rather than the one it closes. Both values are em, so they scale with whatever size the surface chose. Spatial contrast is doing real hierarchy work here: the size ramp steps by a constant 0.125rem, so its largest ratio is 1.167:1 — below the threshold at which a size change reads as a role change on its own.",
         "section": "typography"
       },
       {
@@ -304,6 +468,11 @@
         "section": "shapes"
       },
       {
+        "name": "The Leading Edge Rule",
+        "body": "A heavier border-inline-start marks a block that is quoted from or attributed to something outside the flow — a Banner's tone, a callout, a blockquote, a samp showing real program output. It is the one place the system uses a weighted side border, always on the inline-start edge so it flips for RTL, and never decoration. Deliberately not the keycap's bottom edge: that promises travel and belongs to things that depress, while a leading edge promises provenance and belongs to things that do not move. A considered exception to the general advice against colored side borders, because the convention predates the system and the alternative is spending a second color to say the same thing.",
+        "section": "shapes"
+      },
+      {
         "name": "The Concentric Radius Rule",
         "body": "A nested corner is the parent's radius minus the gap between them, computed with calc(). Never restate a nested radius as a literal.",
         "section": "shapes"
@@ -323,12 +492,14 @@
       "Don't put a weighted bottom edge on something that doesn't depress. The edge promises travel; a static element wearing one is a false affordance.",
       "Don't add a plate shadow in dark mode. Depth there is the surface ladder, not a cast.",
       "Don't use coral for anything but a committing action. Not for emphasis, not for decoration, not for a hover state on something that isn't a key.",
-      "Don't introduce a third typeface, or let Fraunces into body copy.",
-      "Don't override Fraunces' opsz 11 / SOFT 80 per surface. The axes are brand constants.",
+      "Don't introduce a fourth typeface, or let Piazzolla into body copy. Three faces is the ceiling: display, body, code.",
+      "Don't pin Piazzolla's opsz axis, per surface or globally. Optical sizing runs automatically; fixing it to one value breaks the Title role.",
       "Don't write raw color values in component CSS. If a needed color has no token, add the token.",
       "Don't fetch anything at runtime — fonts, styles, or icons. Everything ships with the package.",
       "Don't remove or restyle the focus ring below 3px at 3px offset.",
-      "Don't use pure gray, pure black, or pure white. Every neutral carries a bias."
+      "Don't use pure gray, pure black, or pure white. Every neutral carries a bias.",
+      "Don't set symmetric margins on a heading, or leave it on the UA default, which is symmetric. More space above than below is what makes a heading read as opening its section.",
+      "Don't pin Piazzolla's opsz axis, and don't put a weighted side border on anything that is not quoting or attributing."
     ]
   }
 }

@@ -1,0 +1,120 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import { DocLink, Rule, StoryLink } from "../foundations/blocks";
+
+<Meta title="Prose/Overview" />
+
+# Prose
+
+Long-form content is the one surface a design system cannot reach with
+components. An article arrives as bare `h2`, `blockquote`, `table`, `kbd` —
+elements a CMS emitted, a markdown pipeline rendered, or an author typed — and
+none of them can be passed a prop. So this layer styles them by tag, and the
+handful of class hooks exist only where HTML has no element for the job.
+
+```css
+@import "@jflamb/keycaps-tokens/prose.css";
+```
+
+```html
+<article class="kc-prose">…</article>
+```
+
+It is **opt-in and not part of the default import**. A product surface that
+renders no articles should not pay for it, and everything in the file is scoped
+to `.kc-prose`, so importing it changes nothing until that class appears.
+
+## What it covers
+
+Headings and rhythm, the semantic inline set (`abbr`, `kbd`, `mark`, `samp`,
+`var`, `output`, `dfn`, `del`, `ins`, `q`, `time`, `sub`, `sup`, `small`), code
+blocks with a copy control, quotes and floated asides, all five list kinds,
+native `details` disclosures, tables with a scroll container, callouts in four
+tones, `progress` and `meter`, a table of contents, footnotes with backlinks,
+back-to-top, external-link marking, print, and forced colors.
+
+Start with <StoryLink to="prose-article--full-page">Article</StoryLink>, which
+puts all of it on one page in the proportions a real document uses. The other
+stories show each element clean; that one shows whether they hold together.
+
+## The two decisions worth knowing about
+
+**`kbd` does not get the keycap's bottom edge.** A keycap design system
+rendering a keyboard key as an actual keycap is the obvious move, and the
+Pressable Edge Rule forbids it: the edge is a promise that the object travels
+when activated, and a `kbd` never travels because it is a picture of a key on a
+different device. This is the same reasoning that denies the Badge an edge. It
+costs the system its most obvious joke and it is the right call.
+
+**`summary` does get it.** A disclosure is a real control, so it wears the edge
+and keeps the promise — 3px down, 4px compressing to 1px, from the same tokens a
+Button reads. The implementation differs, because a Button pins its border box
+with `min-block-size` and a `summary` wraps to as many lines as its label needs.
+The padding does that job instead: the edge gives up exactly what the padding
+takes, over the same duration, so the border box is the same height on every
+frame and nothing below the disclosure reflows while the key is down.
+
+<Rule name="The Pressable Edge Rule applies to prose too.">
+  It is not a component rule. Any element in an article wearing a{" "}
+  <code>border-block-end</code> heavier than its other borders has to depress
+  when activated, and any element that cannot be activated must not wear one.
+</Rule>
+
+## Measure
+
+`.kc-prose` caps itself at `--kc-prose-measure`, which defaults to `58ch` —
+about 80 rendered characters in Sofia Sans. The `ch` unit is the width of "0",
+which is wider than this face's average glyph, so the number is lower than it
+looks; a 68ch cap measured out at roughly 97 characters a line.
+
+That is the <DocLink to="foundations-space-shape--guidance">Intrinsic Maximum
+Rule</DocLink> applied to text: the container knows its own comfortable width,
+so do not constrain it from outside. Override the property instead — a page with
+wide tables sets `--kc-prose-measure` and everything inside keeps deriving from
+it.
+
+## Sizes live here, not in the tokens
+
+The token package deliberately ships no heading sizes. The surface decides how
+large a heading is; the face does not. A prose stylesheet **is** a surface, so it
+decides, and `--kc-prose-h1` through `--kc-prose-h6` are declared on `.kc-prose`
+as the override point.
+
+The floors are set together rather than independently. At the narrow end every
+heading is clamped to its minimum, so the minimums alone decide whether the
+ladder still reads: `h2` at 1.35rem would sit 1.08:1 against `h3`'s 1.25rem,
+which is no step at all when weight and face also match.
+
+## What the markup still has to supply
+
+CSS cannot add a role, a name, or an `id`. Four patterns in this stylesheet are
+incomplete without markup doing its half:
+
+- **Table scroll containers** need `tabindex="0"`, a `role`, and an accessible
+  name. A scrollable region a keyboard cannot reach is a 2.1.1 failure; one
+  without a name is a 4.1.2 failure.
+- **Code blocks** need `tabindex="0"` on the `pre`, for the same reason: long
+  lines scroll by default, and a mouse is not the only way people read code. The
+  stylesheet supplies the focus ring; it cannot supply the attribute.
+- **Callouts** need `role="note"` and a label. The icon shape is the tone's
+  second carrier visually, but it is decorative in the accessibility tree.
+- **External links** are marked by `target="_blank"` — not by hostname, because a
+  design system does not know which domain is yours. Pair the glyph with a
+  `.kc-sr-only` "opens in a new tab"; screen readers do not announce a mask.
+- **Backlinks and icon-only links** need a `.kc-sr-only` label. An arrow alone is
+  an unnamed link, and two of them are two links with the same non-name.
+
+<Rule name="Don't express a status in an article with color alone." tone="dont">
+  Every tone here sets a surface, a border, ink, and a distinct icon{" "}
+  <em>shape</em> — not the same shape in a different color. That is what survives
+  forced colors, monochrome print, and color vision deficiency.
+</Rule>
+
+## What it does not carry
+
+No reduced-motion branch, because `base.css` already collapses every transition
+and animation in the document when the preference is set. No dark-mode branch,
+because every color here is a semantic token that flips on its own. No coral
+anywhere, because nothing in an article commits to anything.
+
+Next: <DocLink to="foundations-consuming-keycaps--guidance">Consuming
+Keycaps</DocLink>.

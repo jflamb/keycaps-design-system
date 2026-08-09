@@ -2,6 +2,10 @@ import type { Decorator, Preview } from "@storybook/react-vite";
 import { KeycapsDocsContainer } from "./docs-container";
 import "./globals";
 import "@jflamb/keycaps-tokens";
+// The prose layer is an opt-in subpath for consumers, and this site is one of
+// its consumers. Imported here rather than inside a story file so it is loaded
+// the way an application would load it.
+import "@jflamb/keycaps-tokens/prose.css";
 import "@jflamb/keycaps-react/styles.css";
 import "../src/foundations/foundations.css";
 import "./preview.css";
@@ -76,6 +80,15 @@ const preview: Preview = {
       // without in-page navigation is a scroll, not a reference.
       toc: {
         headingSelector: "h2, h3",
+        // A card's title, or a heading inside a specimen panel, is a heading in
+        // the document outline — correctly — but it is the component's or the
+        // sample's structure, not the page's, and it does not belong in the
+        // page index. Demo blocks repeating the same title would otherwise fill
+        // the contents with identical entries. The prose samples are the acute
+        // case: an article specimen is nothing but headings, and every one of
+        // them landed in the index of the page documenting it.
+        ignoreSelector:
+          ".kc-card__title, .kc-pair__heading, .kc-prose h1, .kc-prose h2, .kc-prose h3",
         title: "On this page",
       },
     },
@@ -96,6 +109,21 @@ const preview: Preview = {
             "Component showcase",
           ],
           "Components",
+          "Prose",
+          [
+            "Overview",
+            "Typography",
+            "Inline elements",
+            "Lists",
+            "Quotes & asides",
+            "Code block",
+            "Table",
+            "Details",
+            "Callout",
+            "Progress & meter",
+            "Navigation",
+            "Article",
+          ],
         ],
       },
     },

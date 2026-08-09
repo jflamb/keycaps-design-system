@@ -35,6 +35,14 @@ import { Button, Field } from "@jflamb/keycaps-react";
 
 Import the token layer once near the application root. Component CSS is intentionally separate so non-React consumers can use tokens without React styles.
 
+Long-form content — articles, CMS output, rendered markdown — has its own opt-in layer:
+
+```css
+@import "@jflamb/keycaps-tokens/prose.css";
+```
+
+It styles bare HTML inside a `.kc-prose` container and is not part of the default import, because a product surface that renders no articles should not pay for it.
+
 ## Theme contract
 
 Keycaps follows the system color scheme by default. Set `data-theme="light"` or `data-theme="dark"` on the root element for an explicit choice. Existing jflamb apps can retain the `jflamb-theme` preference key; Keycaps only defines the CSS contract and does not write cookies or local storage.
@@ -56,7 +64,7 @@ See [Foundation decision](docs/decisions/0001-foundation.md), [component status]
 MIT — see [LICENSE](LICENSE).
 
 The Latin WOFF2 assets redistributed in `packages/tokens/fonts` are the one
-exception: Fraunces and Nunito Sans stay under the SIL Open Font License 1.1,
+exception: Piazzolla, Sofia Sans and Lilex stay under the SIL Open Font License 1.1,
 and their license texts ship beside the binaries in
 `@jflamb/keycaps-tokens/dist/fonts/`. Neither font declares a Reserved Font
 Name, so the Latin subsetting and WOFF2 conversion carry no renaming

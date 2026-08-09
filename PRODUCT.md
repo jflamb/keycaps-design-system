@@ -44,7 +44,7 @@ Keycaps owns its CSS tokens, styling, React wrapper APIs, documentation, and rel
 - API policy: prefer small owned props over re-exporting primitive parts. Breaking API changes require a major version after the first public release.
 - Peer range: React >= 18.2 < 20.
 - Astryx is a future evaluation candidate, not a dependency. The deprecated MCP console is out of scope.
-- Licensing: **MIT**, decided 2026-08-08. `@jflamb/keycaps-react` declares `MIT`; `@jflamb/keycaps-tokens` declares `MIT AND OFL-1.1` because it redistributes Fraunces and Nunito Sans WOFF2 binaries under the SIL Open Font License 1.1, which MIT cannot cover. The OFL texts ship beside the binaries in `dist/fonts/`, and neither face declares a Reserved Font Name. The runtime dependency tree is permissive throughout — Apache-2.0 for React Aria, MIT and 0BSD for the rest — so nothing forced the choice. This removes the last blocker on external adoption readiness.
+- Licensing: **MIT**, decided 2026-08-08. `@jflamb/keycaps-react` declares `MIT`; `@jflamb/keycaps-tokens` declares `MIT AND OFL-1.1` because it redistributes Piazzolla, Sofia Sans and Lilex WOFF2 binaries under the SIL Open Font License 1.1, which MIT cannot cover. The OFL texts ship beside the binaries in `dist/fonts/`, and neither face declares a Reserved Font Name. The runtime dependency tree is permissive throughout — Apache-2.0 for React Aria, MIT and 0BSD for the rest — so nothing forced the choice. This removes the last blocker on external adoption readiness.
 
 ## Brand Commitments
 

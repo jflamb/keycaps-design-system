@@ -1,0 +1,1393 @@
+/* Long-form content: the elements a CMS, a markdown pipeline, or a hand-written
+   article emits, styled from the same tokens the components use.
+
+   Opt-in. `@import "@jflamb/keycaps-tokens/prose.css"` and put `.kc-prose` on
+   the element wrapping the content. Everything below is scoped to that class, so
+   the stylesheet is inert on a page that never sets it.
+
+   Two constraints shaped every decision here:
+
+   - There are no components in this file. Prose arrives as bare `h2`, `blockquote`,
+     `table`, `kbd` — elements an author cannot pass props to — so the styling has
+     to reach them by tag. The handful of class hooks (`kc-prose__*`) exist only
+     where HTML has no element for the job: a callout, a table of contents, a
+     scroll container around a wide table.
+   - It is held to the same named rules as the components. Coral appears nowhere,
+     because nothing in an article commits to anything. `kbd` does not get the
+     keycap's bottom edge, for reasons stated where it is declared. Every color is
+     a semantic token, so both themes, forced colors, and reduced motion follow
+     without a branch in this file. */
+
+.kc-prose {
+  /* 58ch of Sofia Sans measures ~80 rendered characters. The `ch` unit is the
+     width of "0", which is wider than this face's average glyph — a 68ch cap was
+     still landing lines near 97 characters when this was measured on the docs
+     frame. Override the property, not the rule, when a surface wants a different
+     measure. */
+  --kc-prose-measure: 58ch;
+  /* The gap between blocks. One body line is 1.55rem, so a 1.5rem gap reads as
+     very nearly a blank line — the classic paragraph rhythm, expressed on the
+     spacing scale rather than in leading multiples. */
+  --kc-prose-flow: var(--kc-space-6);
+
+  /* The heading ladder. Sizes are deliberately absent from the token package —
+     "the surface decides, the face does not" — and a prose stylesheet is a
+     surface, so it decides here and nowhere else.
+
+     The floors are set together rather than independently. At the narrow end
+     every heading is clamped to its minimum, so the minimums alone decide
+     whether the ladder still reads: h2 at 1.35rem would sit 1.08:1 against h3's
+     1.25rem, which is no step at all when weight and face also match. h2 floors
+     at 1.5rem for a true 1.2 against h3, and h1 at 1.8rem so raising h2 does not
+     move the collision one rung up. */
+  --kc-prose-h1: clamp(1.8rem, 1.15rem + 2.4vw, 2.5rem);
+  --kc-prose-h2: clamp(1.5rem, 1.1rem + 1vw, 1.65rem);
+  /* Below h2 the ramp runs out of room: xl/lg/md would step 1.111 and 1.125,
+     under the ~1.2 at which size alone reads as a role change — and unlike the
+     h2/h3 case that was fixed by raising a clamp floor, this one held at every
+     viewport. Size carries the ladder as far as h4, then other attributes take
+     over: h5 changes weight, h6 changes case and colour. Every adjacent pair
+     now differs by at least two things. */
+  --kc-prose-h3: var(--kc-font-size-xl);
+  --kc-prose-h4: var(--kc-font-size-md);
+  --kc-prose-h5: var(--kc-font-size-sm);
+  --kc-prose-h6: var(--kc-font-size-caps);
+
+  /* Icons are drawn here, inline, rather than fetched. Nothing in Keycaps loads
+     at runtime — fonts, styles, or glyphs — and a callout that silently loses its
+     icon behind a corporate proxy is a status expressed by color alone, which the
+     Tone Trio Rule calls a defect. Each is a mask, so the shape takes the tone's
+     ink from `background-color` and needs no per-theme variant. */
+  --kc-prose-icon-info: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='8.2' fill='none' stroke='%23000' stroke-width='1.6'/%3E%3Cpath d='M10 9.1v5.1' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3Ccircle cx='10' cy='5.9' r='1.05' fill='%23000'/%3E%3C/svg%3E");
+  --kc-prose-icon-success: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='8.2' fill='none' stroke='%23000' stroke-width='1.6'/%3E%3Cpath d='m6.1 10.3 2.7 2.7 5.1-5.6' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --kc-prose-icon-warning: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M10 2.4 19 17.6H1z' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'/%3E%3Cpath d='M10 8v3.9' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3Ccircle cx='10' cy='14.7' r='1.05' fill='%23000'/%3E%3C/svg%3E");
+  --kc-prose-icon-danger: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M6.9 1.7h6.2l4.2 4.2v6.2l-4.2 4.2H6.9l-4.2-4.2V5.9z' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'/%3E%3Cpath d='M10 5.9v4.6' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3Ccircle cx='10' cy='13.6' r='1.05' fill='%23000'/%3E%3C/svg%3E");
+  /* The same path the ChevronDownIcon component draws, so the disclosure in an
+     article and the chevron on a Select are one glyph. */
+  --kc-prose-icon-caret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='m5.5 7.5 4.5 4.5 4.5-4.5' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --kc-prose-icon-external: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M6.6 13.4 13.4 6.6M7.8 6.6h5.6v5.6' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --kc-prose-icon-arrow-up: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M10 16V4.6M5 9.4 10 4.4l5 5' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+
+  max-inline-size: var(--kc-prose-measure);
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-body);
+  font-size: var(--kc-font-size-md);
+  font-weight: var(--kc-font-weight-body);
+  line-height: var(--kc-line-height-body);
+  /* Avoids the one-word last line. Cheap, and the failure mode of not having it
+     is visible in every second paragraph. */
+  text-wrap: pretty;
+  hanging-punctuation: first allow-end last;
+  /* Lets the disclosure animation below interpolate to `auto`. Declared on the
+     container because the property inherits and `details` needs it in scope. */
+  interpolate-size: allow-keywords;
+}
+
+/* ---- Flow -------------------------------------------------------------- */
+
+/* Bottom-only margins, on purpose. With a top margin as well, the two collapse
+   and the larger wins — a paragraph's gap would silently override the
+   `--kc-space-heading-below` a heading asked for, flattening the 2.67:1 ratio
+   the Heading Rhythm Rule exists to produce. */
+.kc-prose p,
+.kc-prose ul,
+.kc-prose ol,
+.kc-prose dl,
+.kc-prose pre,
+.kc-prose blockquote,
+.kc-prose figure,
+.kc-prose table,
+.kc-prose details,
+.kc-prose address {
+  margin-block: 0 var(--kc-prose-flow);
+}
+
+.kc-prose > *:first-child {
+  margin-block-start: 0;
+}
+
+.kc-prose > *:last-child {
+  margin-block-end: 0;
+}
+
+/* ---- Headings ---------------------------------------------------------- */
+
+/* `base.css` puts the display face on `h1` and `h2` through `:where()`, at zero
+   specificity, so a consuming app wins without `!important`. That contract is
+   left alone; these rules restate the face for this surface at ordinary
+   specificity, which is the documented way to opt in. h3 and below stay in the
+   body voice — the Two Voice Rule keeps Piazzolla in page headings. */
+/* Rhythm is restated here rather than inherited. `base.css` sets it through
+   `:where(h1…h6)` at zero specificity, which is the right contract for a token
+   package — but it means any consuming app's own `h2 { margin }` silently
+   strips the Heading Rhythm Rule out of `.kc-prose` while everything else in
+   this file holds.
+
+   The `max()` is the other half. `--kc-space-heading-above` is 1.6em so it
+   scales with the heading, but a small heading measured against the fixed
+   24px flow margin below it produces almost no extra separation: at h5 it
+   added 1.6px and at h6 nothing at all, which is precisely where the ladder
+   leans on space because the sizes are closest. The floor keeps that from
+   collapsing. */
+.kc-prose :is(h1, h2, h3, h4, h5, h6) {
+  margin-block: max(var(--kc-space-heading-above), var(--kc-space-8))
+    var(--kc-space-heading-below);
+  color: var(--kc-color-text);
+  line-height: var(--kc-line-height-heading);
+  text-wrap: balance;
+  /* Headings balance rather than break, so a long unbroken token — a URL, a
+     CamelCase identifier, a compound noun after localization — would otherwise
+     run past a 320px viewport. */
+  overflow-wrap: break-word;
+}
+
+.kc-prose h1,
+.kc-prose h2 {
+  font-family: var(--kc-font-display);
+  font-weight: var(--kc-font-weight-display);
+}
+
+.kc-prose h3,
+.kc-prose h4 {
+  font-family: var(--kc-font-body);
+  /* The Title weight, not the Display one. These are the body face at close to
+     body size, where 580 reads as barely emphasized; 640 is the same intent the
+     card title carries at the same scale. */
+  font-weight: var(--kc-font-weight-title);
+}
+
+/* h5 is where size stops doing the work. It sits one ramp step under h4 — 1.143,
+   not enough on its own — so it takes the Micro weight while staying in sentence
+   case. Weight is the differentiator here; case is what separates h6 below it. */
+.kc-prose h5 {
+  font-family: var(--kc-font-body);
+  font-weight: var(--kc-font-weight-micro);
+}
+
+.kc-prose h1 {
+  font-size: var(--kc-prose-h1);
+}
+
+/* The hairline belongs to the h2, not between blocks — it sits inside the box on
+   padding, so the tight space above it reads as part of the heading while the
+   margin below separates the section it opens. */
+.kc-prose h2 {
+  padding-block-end: var(--kc-space-2);
+  border-block-end: 1px solid var(--kc-color-divider);
+  font-size: var(--kc-prose-h2);
+}
+
+.kc-prose h3 {
+  font-size: var(--kc-prose-h3);
+}
+
+.kc-prose h4 {
+  font-size: var(--kc-prose-h4);
+}
+
+.kc-prose h5 {
+  font-size: var(--kc-prose-h5);
+}
+
+/* h6 is a compact label rather than a rung on the ladder — at this depth a
+   document is naming a field, not opening a section. It takes the Micro role
+   whole, which is also the only heading level where weight has to do all the
+   hierarchy work on its own. */
+.kc-prose h6 {
+  color: var(--kc-color-text-muted);
+  font-family: var(--kc-font-body);
+  font-size: var(--kc-prose-h6);
+  font-weight: var(--kc-font-weight-micro);
+  line-height: var(--kc-line-height-micro);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* A heading immediately under a heading is a subtitle, not a new section: it has
+   nothing above it to separate from. */
+.kc-prose :is(h1, h2, h3, h4, h5) + :is(h2, h3, h4, h5, h6) {
+  margin-block-start: var(--kc-space-heading-below);
+}
+
+/* Every class hook in this file that lands on an element the stylesheet also
+   styles by tag is written as `.kc-prose .kc-prose__thing`. A single class is
+   (0,1,0) and loses to `.kc-prose p` at (0,1,1) no matter what order they are
+   in, which silently reverts the hook to the element's own rhythm — a lead
+   paragraph keeping the flow margin, a numeric cell keeping `text-align: start`.
+   The extra class costs nothing and removes the whole category of bug. */
+.kc-prose .kc-prose__lead {
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-lg);
+}
+
+/* ---- Inline semantics -------------------------------------------------- */
+
+.kc-prose strong,
+.kc-prose b {
+  font-weight: var(--kc-font-weight-emphasis);
+}
+
+.kc-prose dfn {
+  font-style: italic;
+  font-weight: var(--kc-font-weight-title);
+}
+
+.kc-prose abbr[title],
+.kc-prose time[datetime][title] {
+  text-decoration: underline dotted;
+  text-decoration-color: var(--kc-color-text-muted);
+  text-underline-offset: 0.18em;
+  cursor: help;
+}
+
+.kc-prose q {
+  quotes: "\201c" "\201d" "\2018" "\2019";
+}
+
+.kc-prose small {
+  color: var(--kc-color-text-muted);
+  font-size: 0.875em;
+}
+
+.kc-prose sub,
+.kc-prose sup {
+  position: relative;
+  font-size: 0.75em;
+  /* Zero, so a superscript cannot open the line it sits on. */
+  line-height: 0;
+  vertical-align: baseline;
+}
+
+.kc-prose sup {
+  inset-block-start: -0.5em;
+}
+
+.kc-prose sub {
+  inset-block-end: -0.25em;
+}
+
+.kc-prose mark {
+  padding-inline: 0.2em;
+  border-radius: 3px;
+  background: var(--kc-color-warning-surface);
+  color: var(--kc-color-warning-text);
+}
+
+/* An edit is a status, so it follows the Tone Trio Rule: surface, and ink, and a
+   line-through or underline that survives when color does not. */
+.kc-prose del {
+  padding-inline: 0.2em;
+  border-radius: 3px;
+  background: var(--kc-color-danger-surface);
+  color: var(--kc-color-danger-text);
+  text-decoration-line: line-through;
+  text-decoration-color: currentcolor;
+}
+
+.kc-prose ins {
+  padding-inline: 0.2em;
+  border-radius: 3px;
+  background: var(--kc-color-success-surface);
+  color: var(--kc-color-success-text);
+  text-decoration-line: underline;
+  text-decoration-color: currentcolor;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+/* ---- Monospace family -------------------------------------------------- */
+
+/* Matched to the inline code treatment the documentation frame already uses, so
+   a token name reads the same in an article as it does on a component page. */
+.kc-prose code,
+.kc-prose samp,
+.kc-prose var,
+.kc-prose output {
+  border-radius: 4px;
+  font-family: var(--kc-font-mono);
+  font-size: var(--kc-font-size-code);
+  overflow-wrap: anywhere;
+}
+
+.kc-prose code {
+  padding-inline: 0.28em;
+  border: 1px solid var(--kc-color-divider);
+  background: var(--kc-color-surface-hover);
+  color: var(--kc-color-text);
+}
+
+/* Machine output, distinguished from code by a leading edge rather than by a
+   different fill — two mono spans on the same surface are not distinguishable,
+   and form is the system's carrier when color is spent. */
+.kc-prose samp {
+  padding-inline: 0.3em;
+  border-inline-start: 3px solid var(--kc-color-border);
+  border-radius: 0 4px 4px 0;
+  background: var(--kc-color-surface-hover);
+}
+
+.kc-prose var {
+  font-style: italic;
+}
+
+.kc-prose output {
+  padding-inline: 0.3em;
+  border: 1px solid var(--kc-color-border);
+  background: var(--kc-color-surface-raised);
+  font-variant-numeric: tabular-nums;
+}
+
+/* `kbd` is the one element in this file the system is most tempted to break its
+   own rule for. A keycap design system rendering a key as an actual keycap —
+   bottom edge and all — is the obvious joke, and the Pressable Edge Rule forbids
+   it: a weighted `border-block-end` promises travel, and `kbd` never depresses
+   because it is a picture of a key on some other device. This is the same
+   reasoning that denies the Badge an edge. It gets the keycap's radius, its
+   seated surface, and its border on all four sides, and it stays still. */
+.kc-prose kbd {
+  padding: 0.1em 0.4em;
+  border: 1px solid var(--kc-color-border);
+  border-radius: var(--kc-radius-sm);
+  background: var(--kc-color-surface-raised);
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-mono);
+  font-size: var(--kc-font-size-code);
+  white-space: nowrap;
+}
+
+/* ---- Code blocks ------------------------------------------------------- */
+
+/* Give every `pre` a `tabindex="0"` in the markup. A block that scrolls and
+   cannot be focused is a 2.1.1 failure, and long code lines scroll by default —
+   the same requirement the table wrapper carries, for the same reason. CSS
+   cannot add the attribute, so all it can do is make the focus visible when the
+   markup does its half. */
+.kc-prose pre {
+  padding: var(--kc-space-4) var(--kc-space-5);
+  border: 1px solid var(--kc-color-divider);
+  border-radius: var(--kc-radius-key);
+  background: var(--kc-color-surface-raised);
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-mono);
+  font-size: var(--kc-font-size-code-block);
+  line-height: var(--kc-line-height-body);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.kc-prose pre:focus-visible {
+  outline: var(--kc-focus-ring);
+  outline-offset: var(--kc-focus-ring-offset);
+}
+
+/* One box, not two. A `code` inside a `pre` would otherwise draw its own border
+   and fill inside an identical one. */
+.kc-prose pre code {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: inherit;
+  overflow-wrap: normal;
+}
+
+.kc-prose pre[data-wrap] {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* The control sits in a row above the block rather than floating over its
+   top-right corner, and both halves of that follow from one decision.
+
+   It is visible at rest, deliberately: the usual pattern reveals a copy button
+   on hover, which hides it from every touch user and from anyone navigating by
+   keyboard until focus happens to land inside. But a control that is always
+   there and also overlaid is always covering the first line of code — the
+   overlay only works because hover keeps it out of the way most of the time.
+   Taking it out of the overlay costs one row of vertical space and occludes
+   nothing.
+
+   Markup order is control, then block, so the visual order and the tab order
+   agree. */
+.kc-prose__code {
+  display: grid;
+  justify-items: end;
+  gap: var(--kc-space-2);
+  margin-block-end: var(--kc-prose-flow);
+}
+
+.kc-prose .kc-prose__code pre {
+  inline-size: 100%;
+  margin-block-end: 0;
+}
+
+.kc-prose__copy {
+  /* The visual chip stays tight; the hit area does not. Same negative-margin
+     approach the Banner dismiss uses, so a 44px target sits inside a control
+     that still reads as small. */
+  min-block-size: var(--kc-control-min-size);
+  min-inline-size: var(--kc-control-min-size);
+  padding: var(--kc-space-1) var(--kc-space-3);
+  border: 1px solid var(--kc-color-border);
+  border-radius: var(--kc-radius-sm);
+  background: var(--kc-color-surface);
+  color: var(--kc-color-text-muted);
+  font-family: var(--kc-font-body);
+  font-size: var(--kc-font-size-caps);
+  font-weight: var(--kc-font-weight-micro);
+  line-height: var(--kc-line-height-micro);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.kc-prose__copy:hover {
+  background: var(--kc-color-surface-hover);
+  color: var(--kc-color-text);
+}
+
+.kc-prose__copy[data-copied] {
+  border-color: var(--kc-color-success-border);
+  background: var(--kc-color-success-surface);
+  color: var(--kc-color-success-text);
+}
+
+/* ---- Quotes and asides -------------------------------------------------- */
+
+/* A leading rule and no fill. The aside below takes a fill and no rule — two
+   editorial devices that should not look alike, distinguished by form rather
+   than by spending a second color on the difference. */
+.kc-prose blockquote {
+  padding: var(--kc-space-1) var(--kc-space-5);
+  border-inline-start: 4px solid var(--kc-color-border);
+  margin-inline: 0;
+}
+
+.kc-prose blockquote > *:last-child {
+  margin-block-end: 0;
+}
+
+.kc-prose blockquote blockquote {
+  border-inline-start-color: var(--kc-color-divider);
+}
+
+.kc-prose blockquote cite {
+  display: block;
+  margin-block-start: var(--kc-space-2);
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-sm);
+  font-style: normal;
+}
+
+.kc-prose aside {
+  float: inline-end;
+  inline-size: 45%;
+  margin: 0 0 var(--kc-space-4) var(--kc-space-5);
+  padding: var(--kc-space-4);
+  border: 1px solid var(--kc-color-divider);
+  border-radius: var(--kc-radius-sm);
+  background: var(--kc-color-surface-raised);
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-sm);
+}
+
+.kc-prose aside > *:last-child {
+  margin-block-end: 0;
+}
+
+/* ---- Lists -------------------------------------------------------------- */
+
+.kc-prose ul,
+.kc-prose ol {
+  padding-inline-start: var(--kc-space-5);
+}
+
+/* Number markers are wider than bullets, so equal padding lands the text of an
+   ordered list closer to its marker than an unordered one. */
+.kc-prose ol {
+  padding-inline-start: 1.75rem;
+}
+
+.kc-prose ol[type="a"],
+.kc-prose ol[type="A"] {
+  padding-inline-start: 2rem;
+}
+
+.kc-prose ol[type="i"],
+.kc-prose ol[type="I"] {
+  padding-inline-start: 2.25rem;
+}
+
+.kc-prose li {
+  margin-block-end: var(--kc-space-1);
+}
+
+.kc-prose li:last-child {
+  margin-block-end: 0;
+}
+
+/* A nested list belongs to the item above it, so it sits tight under its parent
+   and the gap opens between siblings instead. Proximity is what says which
+   bullet a sub-list belongs to; without this the two gaps are equal and the
+   grouping is guesswork. */
+.kc-prose li > ul,
+.kc-prose li > ol {
+  margin-block: var(--kc-space-1) 0;
+}
+
+.kc-prose li:has(> ul) + li,
+.kc-prose li:has(> ol) + li,
+.kc-prose li:has(> p) + li {
+  margin-block-start: var(--kc-space-4);
+}
+
+.kc-prose li p {
+  margin-block-end: var(--kc-space-1);
+}
+
+.kc-prose li p:last-child {
+  margin-block-end: 0;
+}
+
+/* A task list has its own markers already. */
+.kc-prose ul:has(> li > input[type="checkbox"]) {
+  padding-inline-start: 0;
+  list-style: none;
+}
+
+.kc-prose li > input[type="checkbox"] {
+  margin-inline-end: var(--kc-space-2);
+  accent-color: var(--kc-color-accent-border);
+  vertical-align: -0.1em;
+}
+
+.kc-prose dt {
+  margin-block: var(--kc-space-4) var(--kc-space-1);
+  font-weight: var(--kc-font-weight-title);
+}
+
+.kc-prose dt:first-child {
+  margin-block-start: 0;
+}
+
+.kc-prose dd {
+  margin-block-end: var(--kc-space-3);
+  margin-inline-start: var(--kc-space-6);
+  color: var(--kc-color-text-muted);
+}
+
+.kc-prose dd:last-child {
+  margin-block-end: 0;
+}
+
+/* ---- Disclosure --------------------------------------------------------- */
+
+/* The one element in this file that genuinely is a control, and therefore the
+   one that earns the keycap's bottom edge. Under the Pressable Edge Rule the
+   edge is not decoration — it is a promise, and `summary` keeps it: the key
+   travels on press exactly as a Button does, from the same tokens. */
+.kc-prose summary {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--kc-space-3);
+  padding: var(--kc-space-3) var(--kc-space-4);
+  border: 1px solid var(--kc-color-border);
+  border-block-end: var(--kc-key-edge-width) solid var(--kc-color-border);
+  border-radius: var(--kc-radius-key);
+  background: var(--kc-color-surface-raised);
+  color: var(--kc-color-text);
+  font-weight: var(--kc-font-weight-label);
+  list-style: none;
+  cursor: pointer;
+  transition:
+    transform var(--kc-duration-press) var(--kc-ease-press),
+    border-block-end-width var(--kc-duration-press) var(--kc-ease-press),
+    padding-block-end var(--kc-duration-press) var(--kc-ease-press),
+    background-color var(--kc-duration-press) var(--kc-ease-press);
+}
+
+.kc-prose summary::-webkit-details-marker {
+  display: none;
+}
+
+.kc-prose summary::marker {
+  content: "";
+}
+
+.kc-prose summary:hover {
+  background: var(--kc-color-surface-hover);
+}
+
+/* The press. A Button pins its border box with `min-block-size` and lets the
+   compressing wall redistribute space inside it; a summary wraps to as many
+   lines as its label needs, so it has no fixed height to pin. The padding does
+   the same job instead: the edge gives up exactly what the padding takes, both
+   over the same duration, so the border box is the same height on every frame
+   and nothing below the disclosure reflows while the key is down. */
+.kc-prose summary:active {
+  transform: translateY(var(--kc-press-travel));
+  border-block-end-width: var(--kc-press-edge-width);
+  padding-block-end: calc(
+    var(--kc-space-3) + var(--kc-key-edge-width) - var(--kc-press-edge-width)
+  );
+}
+
+.kc-prose summary:focus-visible {
+  outline: var(--kc-focus-ring);
+  outline-offset: var(--kc-focus-ring-offset);
+}
+
+.kc-prose summary::after {
+  content: "";
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  flex: none;
+  margin-inline-start: auto;
+  background-color: currentcolor;
+  mask-image: var(--kc-prose-icon-caret);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  transition: transform var(--kc-duration-press) var(--kc-ease-press);
+}
+
+/* `--kc-chevron-open-turn` resolves to `0deg` under reduced motion, which is the
+   same token the Select trigger reads. The open state stays legible either way:
+   the content below it is the signal, the rotation is the flourish. */
+.kc-prose details[open] > summary::after {
+  transform: rotate(var(--kc-chevron-open-turn));
+}
+
+.kc-prose details > *:not(summary) {
+  padding-inline: var(--kc-space-4);
+}
+
+.kc-prose details > *:last-child {
+  margin-block-end: 0;
+}
+
+/* `::details-content` is what lets a native disclosure animate on every open and
+   close rather than only the first expansion. Browsers without it keep the
+   instant native toggle, which is a fine outcome rather than a broken one. The
+   reduced-motion substitution is not written here: `base.css` collapses every
+   transition and animation in the document when the preference is set. */
+@supports selector(details::details-content) {
+  .kc-prose details::details-content {
+    display: block;
+    block-size: 0;
+    padding-block-start: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition:
+      block-size var(--kc-duration-overlay) var(--kc-ease-overlay),
+      padding-block-start var(--kc-duration-overlay) var(--kc-ease-overlay),
+      opacity var(--kc-duration-overlay) var(--kc-ease-overlay),
+      content-visibility var(--kc-duration-overlay) var(--kc-ease-overlay)
+        allow-discrete;
+  }
+
+  .kc-prose details[open]::details-content {
+    block-size: auto;
+    padding-block-start: var(--kc-space-3);
+    opacity: 1;
+  }
+}
+
+/* ---- Rules, media, figures ---------------------------------------------- */
+
+.kc-prose hr {
+  margin-block: var(--kc-space-10);
+  border: 0;
+  border-block-start: 1px solid var(--kc-color-divider);
+}
+
+.kc-prose img,
+.kc-prose video {
+  display: block;
+  max-inline-size: 100%;
+  block-size: auto;
+  border-radius: var(--kc-radius-key);
+}
+
+.kc-prose figure {
+  margin-inline: 0;
+}
+
+.kc-prose figcaption {
+  margin-block-start: var(--kc-space-3);
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-sm);
+}
+
+.kc-prose__embed {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  margin-block-end: var(--kc-prose-flow);
+  border-radius: var(--kc-radius-key);
+  overflow: hidden;
+}
+
+.kc-prose__embed > iframe,
+.kc-prose__embed > video {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  border: 0;
+}
+
+.kc-prose audio {
+  inline-size: 100%;
+  margin-block-end: var(--kc-prose-flow);
+}
+
+/* A linked image takes the focus ring on the image itself. The anchor's own box
+   is only as tall as its line, so a ring on it would cut the picture in half. */
+.kc-prose a:has(> img) {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.kc-prose a:has(> img):focus-visible {
+  outline: none;
+}
+
+.kc-prose a:has(> img):focus-visible > img {
+  outline: var(--kc-focus-ring);
+  outline-offset: var(--kc-focus-ring-offset);
+}
+
+/* ---- Tables ------------------------------------------------------------- */
+
+/* The scroll container is focusable so a keyboard user can reach a table that is
+   wider than the measure. `tabindex="0"` belongs in the markup, with a role and
+   an accessible name — a scrollable region that cannot be focused is a 2.1.1
+   failure, and one without a name is a 4.1.2 one. */
+.kc-prose__table-wrap {
+  margin-block-end: var(--kc-prose-flow);
+  overflow-x: auto;
+  scrollbar-gutter: stable;
+}
+
+.kc-prose .kc-prose__table-wrap table {
+  margin-block-end: 0;
+}
+
+.kc-prose__table-wrap:focus-visible {
+  outline: var(--kc-focus-ring);
+  outline-offset: var(--kc-focus-ring-offset);
+  border-radius: var(--kc-radius-sm);
+}
+
+.kc-prose table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--kc-font-size-sm);
+}
+
+.kc-prose caption {
+  padding-block-end: var(--kc-space-2);
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-sm);
+  font-weight: var(--kc-font-weight-label);
+  text-align: start;
+  caption-side: top;
+}
+
+/* The header is a raised surface with a weighted rule beneath it, not a band of
+   brand color. Coral marks a commitment and a table header commits to nothing;
+   the raised tone is the same device a Card uses to sit above the plate, and it
+   inverts correctly in dark without a second declaration. */
+.kc-prose thead th {
+  padding: var(--kc-space-3) var(--kc-space-4);
+  border-block-end: 2px solid var(--kc-color-border);
+  background: var(--kc-color-surface-raised);
+  color: var(--kc-color-text);
+  font-weight: var(--kc-font-weight-label);
+  text-align: start;
+  vertical-align: bottom;
+}
+
+.kc-prose tbody td,
+.kc-prose tbody th {
+  padding: var(--kc-space-3) var(--kc-space-4);
+  border-block-end: 1px solid var(--kc-color-divider);
+  vertical-align: top;
+}
+
+.kc-prose tbody th {
+  color: var(--kc-color-text);
+  font-weight: var(--kc-font-weight-label);
+  text-align: start;
+}
+
+.kc-prose tbody tr:last-child > * {
+  border-block-end: 0;
+}
+
+.kc-prose tbody tr:hover {
+  background: var(--kc-color-surface-hover);
+}
+
+/* Zebra striping is opt-in. Row rules already separate the rows, and a second
+   separator on top of the first is noise on a table short enough to scan. */
+.kc-prose table[data-zebra] tbody tr:nth-child(even) {
+  background: var(--kc-color-surface-hover);
+}
+
+/* `text-align: start` rather than the UA's centered `th`. A totals row reads as
+   a continuation of the column above it, and a centered label in a table of
+   start-aligned ones is the kind of thing nobody names but everybody sees. */
+.kc-prose tfoot th,
+.kc-prose tfoot td {
+  padding: var(--kc-space-3) var(--kc-space-4);
+  border-block-start: 2px solid var(--kc-color-border);
+  background: var(--kc-color-surface-raised);
+  font-weight: var(--kc-font-weight-label);
+  text-align: start;
+}
+
+/* Figures compare by digit position, so they align on their end edge and take
+   lining, fixed-width numerals. */
+.kc-prose .kc-prose__numeric {
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+/* ---- Callouts ----------------------------------------------------------- */
+
+/* Deliberately the Banner's shape — small radius, a 4px leading edge in the
+   tone's border color, the tone's surface and ink. A reader should not have to
+   learn that an admonition in an article and a message in an app are the same
+   thing. What differs is that this one is built from bare markup, so a markdown
+   pipeline can emit it. */
+.kc-prose__callout {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--kc-space-3);
+  margin-block-end: var(--kc-prose-flow);
+  padding: var(--kc-space-3) var(--kc-space-4);
+  border: 1px solid var(--kc-color-info-border);
+  border-inline-start-width: 4px;
+  border-radius: var(--kc-radius-sm);
+  background: var(--kc-color-info-surface);
+  color: var(--kc-color-info-text);
+}
+
+/* The icon is the tone's second carrier. Each variant is a different shape, not
+   the same shape in a different color, so the distinction survives forced colors,
+   monochrome printing, and color vision deficiency. It is decorative in the
+   accessibility tree — the accessible name comes from the markup's own label. */
+.kc-prose__callout::before {
+  content: "";
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  flex: none;
+  margin-block-start: 0.15em;
+  background-color: currentcolor;
+  mask-image: var(--kc-prose-icon-info);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+/* The content sits in a single wrapper so the icon can be a flex sibling of the
+   whole block rather than of its first paragraph. Both levels are reset, so the
+   padding stays the padding whether an author wrapped their content or dropped
+   one paragraph straight in. */
+.kc-prose__callout > * {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.kc-prose .kc-prose__callout > :first-child,
+.kc-prose .kc-prose__callout > * > :first-child {
+  margin-block-start: 0;
+}
+
+.kc-prose .kc-prose__callout > :last-child,
+.kc-prose .kc-prose__callout > * > :last-child {
+  margin-block-end: 0;
+}
+
+.kc-prose .kc-prose__callout-title {
+  margin-block-end: var(--kc-space-1);
+  font-weight: var(--kc-font-weight-emphasis);
+}
+
+.kc-prose__callout[data-tone="success"] {
+  border-color: var(--kc-color-success-border);
+  background: var(--kc-color-success-surface);
+  color: var(--kc-color-success-text);
+}
+
+.kc-prose__callout[data-tone="success"]::before {
+  mask-image: var(--kc-prose-icon-success);
+}
+
+.kc-prose__callout[data-tone="warning"] {
+  border-color: var(--kc-color-warning-border);
+  background: var(--kc-color-warning-surface);
+  color: var(--kc-color-warning-text);
+}
+
+.kc-prose__callout[data-tone="warning"]::before {
+  mask-image: var(--kc-prose-icon-warning);
+}
+
+.kc-prose__callout[data-tone="danger"] {
+  border-color: var(--kc-color-danger-border);
+  background: var(--kc-color-danger-surface);
+  color: var(--kc-color-danger-text);
+}
+
+.kc-prose__callout[data-tone="danger"]::before {
+  mask-image: var(--kc-prose-icon-danger);
+}
+
+/* ---- Progress and meter -------------------------------------------------- */
+
+.kc-prose__gauge {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--kc-space-1) var(--kc-space-3);
+  margin-block-end: var(--kc-prose-flow);
+}
+
+.kc-prose__gauge > label {
+  grid-column: 1 / -1;
+  font-size: var(--kc-font-size-sm);
+  font-weight: var(--kc-font-weight-label);
+}
+
+.kc-prose__gauge-value {
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-sm);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.kc-prose progress,
+.kc-prose meter {
+  inline-size: 100%;
+  block-size: 0.625rem;
+  appearance: none;
+  border: 0;
+  border-radius: var(--kc-radius-pill);
+  background: var(--kc-color-divider);
+  overflow: hidden;
+}
+
+/* The four vendor pseudo-elements below cannot be grouped in one rule: an
+   unrecognized selector invalidates the whole list, so WebKit would drop the
+   Firefox halves and vice versa. They are repetitive on purpose. */
+.kc-prose progress::-webkit-progress-bar {
+  border-radius: var(--kc-radius-pill);
+  background: var(--kc-color-divider);
+}
+
+.kc-prose progress::-webkit-progress-value {
+  border-radius: var(--kc-radius-pill);
+  background: var(--kc-color-accent-text);
+}
+
+.kc-prose progress::-moz-progress-bar {
+  border-radius: var(--kc-radius-pill);
+  background: var(--kc-color-accent-text);
+}
+
+@keyframes kc-prose-indeterminate {
+  to {
+    background-position: 1.5rem 0;
+  }
+}
+
+/* The stops are percentages of the tile, not lengths, and the gradient is not a
+   repeating one. That is the whole fix: a `repeating-linear-gradient` with px
+   stops does not divide evenly into the tile `background-size` gives it. At -45°
+   the gradient line across a 1.5rem square is 1.5rem × √2 ≈ 33.9px, and a 12px
+   stripe period fits 2.83 times — so every tile boundary cut a stripe in half
+   and the bar carried a seam every 1.5rem. Percentage stops complete exactly
+   once per tile, so the pattern is continuous and one tile of travel loops
+   seamlessly. */
+.kc-prose progress:indeterminate {
+  background-image: linear-gradient(
+    -45deg,
+    var(--kc-color-border) 0 25%,
+    var(--kc-color-divider) 25% 50%,
+    var(--kc-color-border) 50% 75%,
+    var(--kc-color-divider) 75% 100%
+  );
+  background-size: 1.5rem 1.5rem;
+  animation: kc-prose-indeterminate 800ms linear infinite;
+}
+
+.kc-prose progress:indeterminate::-webkit-progress-bar,
+.kc-prose progress:indeterminate::-webkit-progress-value {
+  background: transparent;
+}
+
+.kc-prose progress:indeterminate::-moz-progress-bar {
+  background: transparent;
+}
+
+/* A meter is a measurement against a range, so it speaks in the status tones:
+   the same mint, mustard, and red a Banner uses for the same three verdicts. */
+.kc-prose meter::-webkit-meter-bar {
+  border: 0;
+  border-radius: var(--kc-radius-pill);
+  background: var(--kc-color-divider);
+}
+
+.kc-prose meter::-webkit-meter-optimum-value {
+  border-radius: var(--kc-radius-pill);
+  background: var(--kc-color-success-text);
+}
+
+.kc-prose meter::-webkit-meter-suboptimum-value {
+  border-radius: var(--kc-radius-pill);
+  background: var(--kc-color-warning-text);
+}
+
+.kc-prose meter::-webkit-meter-even-less-good-value {
+  border-radius: var(--kc-radius-pill);
+  background: var(--kc-color-danger-text);
+}
+
+.kc-prose meter:-moz-meter-optimum::-moz-meter-bar {
+  border-radius: var(--kc-radius-pill);
+  background: var(--kc-color-success-text);
+}
+
+.kc-prose meter:-moz-meter-sub-optimum::-moz-meter-bar {
+  border-radius: var(--kc-radius-pill);
+  background: var(--kc-color-warning-text);
+}
+
+.kc-prose meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
+  border-radius: var(--kc-radius-pill);
+  background: var(--kc-color-danger-text);
+}
+
+/* ---- Links --------------------------------------------------------------- */
+
+.kc-prose a {
+  color: var(--kc-color-link);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-skip-ink: auto;
+  text-underline-offset: 0.18em;
+}
+
+/* Thickening the underline rather than changing the color: the link color is
+   already the only blue in the system, and a hover that also shifts hue makes
+   visited and hovered hard to tell apart. */
+.kc-prose a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.kc-prose a:focus-visible {
+  outline: var(--kc-focus-ring);
+  outline-offset: var(--kc-focus-ring-offset);
+  border-radius: 2px;
+}
+
+/* Marked by `target`, not by hostname. A design system does not know which
+   domain is "ours", and the attribute that changes where the link opens is
+   exactly the thing the reader needs warning about. Pair it with a
+   `.kc-sr-only` "opens in a new tab" in the markup — the glyph is decorative and
+   screen readers do not announce it. */
+.kc-prose a[target="_blank"]::after {
+  content: "";
+  display: inline-block;
+  inline-size: 0.75em;
+  block-size: 0.75em;
+  margin-inline-start: 0.25em;
+  background-color: currentcolor;
+  mask-image: var(--kc-prose-icon-external);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  vertical-align: baseline;
+}
+
+/* ---- Table of contents --------------------------------------------------- */
+
+.kc-prose__toc {
+  margin-block-end: var(--kc-prose-flow);
+}
+
+/* A paragraph, not a heading — a list of destinations should not appear in the
+   document outline as a section of the article. The Micro role is what makes it
+   read as a label anyway. */
+.kc-prose .kc-prose__toc-title {
+  margin-block-end: var(--kc-space-3);
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-caps);
+  font-weight: var(--kc-font-weight-micro);
+  line-height: var(--kc-line-height-micro);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* The hairline rail is the cue that these are destinations rather than content.
+   It is the same device the aside uses to separate itself from the article, at
+   one pixel instead of a full box. */
+.kc-prose .kc-prose__toc ul {
+  margin-block: 0;
+  padding-inline-start: var(--kc-space-3);
+  border-inline-start: 1px solid var(--kc-color-divider);
+  list-style: none;
+}
+
+/* Rows are evenly spaced regardless of nesting. The list rules above open a gap
+   between an item that has a sub-list and the next sibling, which is right in an
+   argument — proximity says which bullet the children belong to — and wrong in a
+   list of destinations, where the indentation already says it and the extra gap
+   just breaks the rhythm of the rail. */
+.kc-prose .kc-prose__toc li,
+.kc-prose .kc-prose__toc li + li {
+  margin-block: 0;
+}
+
+/* Block links, so the whole row is the target rather than the width of the
+   label. */
+.kc-prose .kc-prose__toc a {
+  display: block;
+  padding-block: var(--kc-space-1);
+}
+
+.kc-prose .kc-prose__toc ul ul {
+  margin-block-start: 0;
+  border-inline-start: 0;
+}
+
+/* ---- Footnotes ----------------------------------------------------------- */
+
+/* Both the reference and the backlink keep their underline. They sit inside a
+   text block, where color is not enough on its own to identify a link unless it
+   also clears 3:1 against the surrounding ink — and the system's link blue,
+   chosen to sit calmly beside body text, does not. */
+.kc-prose sup > a[role="doc-noteref"] {
+  font-weight: var(--kc-font-weight-emphasis);
+}
+
+.kc-prose__footnotes {
+  margin-block-start: var(--kc-space-10);
+  padding-block-start: var(--kc-space-4);
+  border-block-start: 1px solid var(--kc-color-divider);
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-sm);
+}
+
+/* The notes label takes the Micro role at whatever heading level the document
+   needs. Level is an outline decision and weight is a visual one — the same
+   split `CardTitle` makes — and hard-coding an `h6` here to get the look would
+   skip levels in every article that is not six deep already. */
+.kc-prose .kc-prose__footnotes > :is(h1, h2, h3, h4, h5, h6) {
+  margin-block: 0 var(--kc-space-3);
+  padding-block-end: 0;
+  border-block-end: 0;
+  color: var(--kc-color-text-muted);
+  font-family: var(--kc-font-body);
+  font-size: var(--kc-font-size-caps);
+  font-weight: var(--kc-font-weight-micro);
+  line-height: var(--kc-line-height-micro);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.kc-prose .kc-prose__footnotes ol {
+  padding-inline-start: 1.5rem;
+}
+
+.kc-prose .kc-prose__footnotes li {
+  margin-block-end: var(--kc-space-3);
+}
+
+.kc-prose__footnotes a[role="doc-backlink"] {
+  margin-inline-start: var(--kc-space-1);
+}
+
+/* ---- Back to top --------------------------------------------------------- */
+
+.kc-prose .kc-prose__back-to-top {
+  margin-block-end: 0;
+  text-align: end;
+}
+
+.kc-prose .kc-prose__back-to-top a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--kc-space-1);
+  min-block-size: var(--kc-control-min-size);
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-sm);
+  text-decoration: none;
+}
+
+.kc-prose .kc-prose__back-to-top a:hover {
+  color: var(--kc-color-link);
+  text-decoration: underline;
+}
+
+.kc-prose .kc-prose__back-to-top a::before {
+  content: "";
+  inline-size: 1rem;
+  block-size: 1rem;
+  background-color: currentcolor;
+  mask-image: var(--kc-prose-icon-arrow-up);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  transition: transform var(--kc-duration-press) var(--kc-ease-press);
+}
+
+.kc-prose .kc-prose__back-to-top a:hover::before,
+.kc-prose .kc-prose__back-to-top a:focus-visible::before {
+  transform: translateY(-2px);
+}
+
+/* ---- Selection ----------------------------------------------------------- */
+
+/* Mint, because selecting text affirms a choice. Coral is reserved for actions
+   that commit, and highlighting a sentence commits to nothing. */
+.kc-prose ::selection {
+  background: var(--kc-color-accent-surface);
+  color: var(--kc-color-accent-text);
+}
+
+/* ---- Reflow --------------------------------------------------------------- */
+
+/* The system's single breakpoint, used here for the one thing intrinsic sizing
+   cannot solve: a floated aside has no intrinsic minimum, so at 320px it would
+   leave the article two words wide beside it. */
+@media (max-width: 30rem) {
+  .kc-prose aside {
+    float: none;
+    inline-size: 100%;
+    margin-inline: 0;
+  }
+
+  .kc-prose blockquote {
+    padding-inline: var(--kc-space-4);
+  }
+
+  .kc-prose pre {
+    padding-inline: var(--kc-space-4);
+  }
+}
+
+/* ---- Print ---------------------------------------------------------------- */
+
+@media print {
+  /* Paper has no measure constraint from a viewport and no dark mode. */
+  .kc-prose {
+    max-inline-size: none;
+    color: #000;
+  }
+
+  .kc-prose :is(h1, h2, h3, h4, h5, h6) {
+    color: #000;
+    break-after: avoid;
+  }
+
+  .kc-prose :is(figure, img, tr, li, .kc-prose__callout) {
+    break-inside: avoid;
+  }
+
+  .kc-prose a {
+    color: #000;
+  }
+
+  /* A link is a destination, and on paper the destination has to be printed or
+     it is lost. */
+  .kc-prose a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: var(--kc-font-size-code);
+    overflow-wrap: anywhere;
+  }
+
+  .kc-prose :is(pre, code, kbd, samp, output, mark, del, ins, thead th, tfoot th, tfoot td, aside, .kc-prose__callout) {
+    background: none;
+    color: #000;
+  }
+
+  .kc-prose :is(pre, kbd, output, aside, .kc-prose__callout, thead th, tfoot th, tfoot td) {
+    border-color: #999;
+  }
+
+  .kc-prose table[data-zebra] tbody tr:nth-child(even) {
+    background: none;
+  }
+
+  /* Interactive-only furniture, and a disclosure that has to be open because a
+     reader cannot expand paper. */
+  .kc-prose__toc,
+  .kc-prose__back-to-top,
+  .kc-prose__copy,
+  .kc-prose summary::after {
+    display: none;
+  }
+
+  .kc-prose details > *:not(summary) {
+    display: block;
+  }
+
+  @supports selector(details::details-content) {
+    .kc-prose details::details-content {
+      block-size: auto;
+      opacity: 1;
+      overflow: visible;
+    }
+  }
+}
+
+/* ---- Forced colors --------------------------------------------------------- */
+
+/* The token layer already remaps every semantic color to a system color, so most
+   of this file needs nothing here. What remains is the set of things carried by
+   a background rather than by a border — masks, and fills the OS will flatten. */
+@media (forced-colors: active) {
+  .kc-prose :is(kbd, output, samp, aside, pre, thead th, tfoot th, tfoot td) {
+    border: 1px solid ButtonText;
+  }
+
+  .kc-prose samp {
+    border-inline-start-width: 3px;
+  }
+
+  .kc-prose__callout {
+    border: 1px solid CanvasText;
+    border-inline-start-width: 4px;
+  }
+
+  /* Masked glyphs are painted with `background-color`, which forced colors would
+     otherwise flatten to the surface and erase. These are the tone's second
+     carrier, so losing them is exactly the failure this mode exists to prevent. */
+  .kc-prose__callout::before,
+  .kc-prose summary::after,
+  .kc-prose a[target="_blank"]::after,
+  .kc-prose__back-to-top a::before {
+    forced-color-adjust: none;
+    background-color: CanvasText;
+  }
+
+  .kc-prose :is(mark, del, ins) {
+    forced-color-adjust: none;
+  }
+
+  /* An insertion loses its green, so the underline has to carry it alone. */
+  .kc-prose ins {
+    text-decoration-thickness: 2px;
+  }
+
+  .kc-prose :is(progress, meter) {
+    forced-color-adjust: none;
+    border: 1px solid ButtonText;
+  }
+
+  .kc-prose summary {
+    border-color: ButtonText;
+  }
+}

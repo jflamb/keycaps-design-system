@@ -17,6 +17,9 @@ body {
   color: var(--kc-color-text);
   font-family: var(--kc-font-body);
   font-size: var(--kc-font-size-md);
+  /* Declared rather than left to the UA's 400 so running text participates in
+     the dark-mode optical compensation. See --kc-font-weight-shift. */
+  font-weight: var(--kc-font-weight-body);
   line-height: var(--kc-line-height-body);
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
@@ -26,10 +29,25 @@ body {
   font: inherit;
 }
 
+/* Rhythm and leading reach every heading level; the display face stays on h1
+   and h2 only, per the Two Voice Rule. Without these two declarations a
+   consuming app inherits the UA's symmetric heading margins (h1 is 0.67em top
+   and bottom) and `line-height: normal`, rather than the 1.2 this package
+   documents. The leading was a contract the tokens layer stated and never
+   delivered. */
+:where(h1, h2, h3, h4, h5, h6) {
+  margin-block: var(--kc-space-heading-above) var(--kc-space-heading-below);
+  line-height: var(--kc-line-height-heading);
+}
+
+/* A heading that opens its container has nothing to separate itself from. */
+:where(h1, h2, h3, h4, h5, h6):first-child {
+  margin-block-start: 0;
+}
+
 :where(h1, h2) {
   font-family: var(--kc-font-display);
-  font-variation-settings: var(--kc-font-variation-display);
-  font-weight: var(--kc-font-weight-semibold);
+  font-weight: var(--kc-font-weight-display);
 }
 
 :where(a) {
@@ -52,6 +70,41 @@ body {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* A skip link is a `.kc-sr-only` element that stops hiding once it is focused,
+   which is why it lives here rather than with any one surface. It has to be the
+   first focusable thing in the document to be worth anything, and every page
+   with repeated navigation above its content needs one. */
+.kc-skip-link:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.kc-skip-link:focus {
+  position: fixed;
+  z-index: 1000;
+  inset-block-start: var(--kc-space-4);
+  inset-inline-start: var(--kc-space-4);
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--kc-control-min-size);
+  padding-inline: var(--kc-space-4);
+  border: 1px solid var(--kc-color-border);
+  border-radius: var(--kc-radius-key);
+  background: var(--kc-color-surface-raised);
+  color: var(--kc-color-link);
+  font-family: var(--kc-font-body);
+  font-size: var(--kc-font-size-sm);
+  font-weight: var(--kc-font-weight-label);
+  text-decoration: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

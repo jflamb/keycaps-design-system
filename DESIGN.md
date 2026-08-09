@@ -34,30 +34,28 @@ colors:
   info-border: "#addcf3"
 typography:
   display:
-    fontFamily: "Fraunces Variable, Georgia, Times New Roman, serif"
-    fontWeight: 600
+    fontFamily: "Piazzolla, Georgia, Times New Roman, serif"
+    fontWeight: 580
     lineHeight: 1.2
-    fontVariation: "'opsz' 11, 'SOFT' 80"
   title:
-    fontFamily: "Fraunces Variable, Georgia, Times New Roman, serif"
+    fontFamily: "Piazzolla, Georgia, Times New Roman, serif"
     fontSize: "1.25rem"
-    fontWeight: 600
+    fontWeight: 640
     lineHeight: 1.2
-    fontVariation: "'opsz' 11, 'SOFT' 80"
   body:
-    fontFamily: "Nunito Sans, ui-sans-serif, system-ui, -apple-system, sans-serif"
+    fontFamily: "Sofia Sans, ui-sans-serif, system-ui, -apple-system, sans-serif"
     fontSize: "1rem"
     fontWeight: 400
     lineHeight: 1.55
   label:
-    fontFamily: "Nunito Sans, ui-sans-serif, system-ui, -apple-system, sans-serif"
+    fontFamily: "Sofia Sans, ui-sans-serif, system-ui, -apple-system, sans-serif"
     fontSize: "0.875rem"
-    fontWeight: 600
+    fontWeight: 580
     lineHeight: 1.45
   micro:
-    fontFamily: "Nunito Sans, ui-sans-serif, system-ui, -apple-system, sans-serif"
+    fontFamily: "Sofia Sans, ui-sans-serif, system-ui, -apple-system, sans-serif"
     fontSize: "0.75rem"
-    fontWeight: 700
+    fontWeight: 760
     lineHeight: 1
 rounded:
   sm: "6px"
@@ -145,7 +143,7 @@ Keycaps is a plate, and a small number of solid objects seated on it. The plate 
 
 The system is tactile but restrained. It contains real physical feedback, and it spends it almost nowhere. A primary key travels 3px on press while its 4px bottom edge compresses to 1px — the cap descends and the wall it stands on absorbs the travel, which is the motion of a key hitting the plate beneath it. That press is the single most expressive thing the system does, it lasts 120ms, and it is the reason the rest of the interface holds still. If everything moved, the press would mean nothing.
 
-Warmth comes from material, not from saturation. The neutrals are warm-shifted rather than gray (`plate` #fdfdfb, `divider` #e7e7e3), the display face is Fraunces held at a constant optical size with softened terminals, and the accent is coral rather than blue. Coral appears at full strength on exactly one kind of thing — an action that commits — which is why the plate reads as calm. The scarcity is semantic, not budgeted: commitments are rare, so the color that marks them is rare.
+Warmth comes from material, not from saturation. The neutrals are warm-shifted rather than gray (`plate` #fdfdfb, `divider` #e7e7e3), the display face is Piazzolla drawing itself for the size it is set at, and the accent is coral rather than blue. Coral appears at full strength on exactly one kind of thing — an action that commits — which is why the plate reads as calm. The scarcity is semantic, not budgeted: commitments are rare, so the color that marks them is rare.
 
 **Key Characteristics:**
 - Warm near-white ground; nothing is pure gray and nothing is pure white
@@ -206,25 +204,53 @@ Dark mode is not an inversion. The plate becomes #15181d, raised surfaces #1e222
 
 ## Typography
 
-**Display Font:** Fraunces Variable (with Georgia, Times New Roman, serif)
-**Body Font:** Nunito Sans (with ui-sans-serif, system-ui, -apple-system, sans-serif)
-**Label/Mono Font:** ui-monospace, Cascadia Mono, SF Mono, Menlo, Consolas (system stack; no bundled mono)
+**Display Font:** Piazzolla (with Georgia, Times New Roman, serif)
+**Body Font:** Sofia Sans (with ui-sans-serif, system-ui, -apple-system, sans-serif)
+**Mono Font:** Lilex (with ui-monospace, Cascadia Mono, SF Mono, Menlo, Consolas)
 
-**Character:** A softened transitional serif over a humanist sans. Fraunces ships at `opsz 11` and `SOFT 80` — a low optical size with softened terminals, which keeps it warm and slightly bookish rather than sharp and editorial. Nunito Sans has rounded terminals and open apertures, so the pairing reads friendly at small sizes without becoming informal. Both are local WOFF2; nothing is fetched at runtime.
+**Character:** A warm, slightly eccentric serif over a neutral grotesque. Piazzolla carries an optical size axis from 8 to 30, left to run automatically, so the face redraws itself between a card title and a page heading rather than being scaled up and down. That is what keeps it warm and a little idiosyncratic at display sizes without becoming fussy at 1.25rem. Sofia Sans is the quiet half by design — it carries every label, value, button and error, and its job is to recede so the serif is the voice. All three are local WOFF2; nothing is fetched at runtime.
+
+The pairing was chosen on measurement as well as voice: at a common size the two x-heights sit within 1.2 percent of each other (0.482em against 0.488em), which is why they hold together where they actually meet — a card title above its description.
+
+All three faces are continuously variable — Piazzolla 100–900, Sofia Sans 1–1000, Lilex 100–900 — and the system uses that rather than snapping to hundreds. See the Optical Weight Rule.
 
 ### Hierarchy
 
-- **Display** (600, size set by context, 1.2): `h1` and `h2`. Fraunces with its optical settings applied. Sizes are not tokenized — the surface decides, the face does not.
-- **Title** (600, 1.25rem, 1.2): card titles. The only place Fraunces appears inside a component rather than in page-level headings.
+- **Display** (580, size set by context, 1.2): `h1` and `h2`. Piazzolla with optical sizing left automatic. Sizes are not tokenized — the surface decides, the face does not.
+- **Title** (640, 1.25rem, 1.2): card titles. The only place Piazzolla appears inside a component rather than in page-level headings.
 - **Body** (400, 1rem, 1.55): default running text and input values. The generous 1.55 leading is what makes dense forms breathable.
-- **Label** (600, 0.875rem, 1.45): field labels, button text, descriptions. Semibold rather than bold, because a label should be findable, not loud.
-- **Micro** (700, 0.75rem, 1): badges and small keys. Bold and tight-leaded — at this size, weight is the only hierarchy signal that survives.
+- **Label** (580, 0.875rem, 1.45): field labels, button text, descriptions. Just under semibold, because a label should be findable, not loud. Button text takes the role's weight and size but a tighter 1.2 leading — at 1.45 the content box exceeds `--kc-control-min-size` and the button sizes to its content instead of to the 44px floor, which the press depends on.
+- **Micro** (760, 0.75rem, 1): badges and small keys. Heavier than bold and tight-leaded — at this size, with no ascenders or descenders in all-caps, weight is the only hierarchy signal that survives.
 
 ### Named Rules
 
-**The Two Voice Rule.** Fraunces speaks in page headings and card titles. Nunito Sans does everything else — every label, every value, every button, every error. A third face, or Fraunces creeping into body copy, breaks the system.
+**The Two Voice Rule.** Piazzolla speaks in page headings and card titles. Sofia Sans does everything else — every label, every value, every button, every error. Piazzolla creeping into body copy breaks the system. Lilex is the third voice and it is not an exception to this rule — it speaks only in code, where the distinction it draws is semantic rather than decorative.
 
-**The Optical Constant Rule.** Fraunces is always set at `font-variation-settings: var(--kc-font-variation-display)`, which is `"opsz" 11, "SOFT" 80`. The variable axes are a brand constant, not a per-surface control, and they are declared in exactly one place. Changing them changes the voice.
+**The No Faux Type Rule.** `font-synthesis: none` is on, so the browser never fakes a weight or a slant. That makes shipped coverage the real contract. Sofia Sans is variable across its whole range in both upright and italic, so every weight and every emphasis combination in the body voice is real — including emphasis inside bold copy, which under the previous static body face fell back to upright. Piazzolla ships upright only, so italic inside a heading still renders upright rather than being synthesized; a faked slant on the display face reads worse than no slant at all. Reach for something the system does not ship and it fails silently, which is the intended cost.
+
+**The Inline Code Rule.** Code is set in Lilex at `--kc-font-size-code` (0.8em), relative to its parent rather than on the size ramp, because it appears inside body, label and table text alike.
+
+The size is doing work a face cannot. Monospace convention is a ~0.6em advance; Sofia Sans averages ~0.41em. Code therefore always sets wider than the prose around it, and no monospace face closes that gap — every candidate measured on this system landed at 0.6em, including the one that shipped before. What a face *can* fix is apparent size: the previous system stack set a 0.547em x-height against Sofia Sans' 0.488em, so code read a size larger than its surroundings. Lilex sets 0.516em.
+
+Bundling it also ends a quieter problem. A system stack is not one face — it was SF Mono on macOS, Consolas on Windows, Liberation Mono on Linux, three different x-heights, and the pairing had only ever been judged against one of them.
+
+**The Optical Weight Rule.** Roles carry the weight they need, not the nearest hundred. Apparent stroke weight falls as size falls, so a single number spanning a 40px heading and a 12px badge does not read as one system. Display sits at 580 and Title at 640 — the same intent at twice the size apart, bracketing 600 rather than sharing it. Label sits at 580, findable without being loud. Micro carries 760 because 12px uppercase has no ascenders or descenders left to help it. Body is deliberately untuned at 400: running text belongs at the face's own text weight.
+
+The generic ladder — regular 400, medium 500, semibold 600, bold 700 — remains for consumers reaching for a step. Both faces are variable, so every rung is a real weight in both voices rather than a nearest match.
+
+**Dark mode shaves weight, and only a variable face can.** Light glyphs on a dark ground irradiate: the bright stroke bleeds into its surround and reads heavier than the same weight on white. Every role weight is therefore `calc(base + var(--kc-font-weight-shift))`, where the shift is `0` in light and `-20` in dark. It is one value, and setting it to `0` disables the behavior entirely. The direction is a judgment about these two faces — both are low-contrast enough that irradiation, rather than thin strokes breaking up, is the dominant effect. A high-contrast face would want the opposite sign.
+
+**The Optical Sizing Rule.** Piazzolla's `opsz` axis is never pinned. It runs on `font-optical-sizing: auto` — the browser default — so the face draws itself for the size it is actually set at, and there is no `font-variation-settings` anywhere in the system.
+
+This replaces the Optical Constant Rule, which pinned the previous display face's axes to fixed values. The reasoning inverted with the face. Fraunces was pinned because its `SOFT` and `WONK` axes were brand choices that had to stay put; Piazzolla's only non-weight axis is optical size, which exists precisely to vary. Its range of 8–30 spans the whole system, from a 1.25rem card title to a 2.5rem page heading, and pinning it would trade away the small-size drawing that makes the Title role work. That capability is why this face was chosen over candidates with more character and no optical axis.
+
+A practical consequence: `--kc-font-variation-display` no longer exists. It was a token whose value could only have been `normal`, and while it existed it leaked the old face's axes onto elements that had no such axes.
+
+**The Heading Rhythm Rule.** A heading gets more space above it than below — `--kc-space-heading-above` (1.6em) against `--kc-space-heading-below` (0.6em), a ratio near 2.67:1. The heading belongs to the section it opens, not the one it closes, and the gap above is what says so.
+
+Both values are `em`, so they scale with whatever size the surface chose. This is the same reasoning that keeps heading sizes untokenized: the surface decides the size, and the space has to follow it rather than a fixed step. It also means the rule survives a display heading at 2.5rem and an `h4` at body size without either looking wrong.
+
+Spatial contrast is doing real work here, not decoration. The size ramp steps by a constant 0.125rem, so its largest ratio is 1.167:1 — below the ~1.2 threshold at which a size change reads as a role change on its own. Where a heading and its body text are close in size, the space around the heading is the hierarchy.
 
 ## Layout
 
@@ -277,6 +303,12 @@ Interactive targets never fall below 44×44 CSS pixels (`--kc-control-min-size`)
 
 **The Motion Contract.** The system's `prefers-reduced-motion` preference is authoritative. An app that offers its own in-product motion preference declares it on the root element — `data-kc-motion="reduce"` or `"full"` — exactly as it declares `data-theme`. Every value the substitution touches is a token (`--kc-press-travel`, `--kc-press-edge-width`, `--kc-chevron-open-turn`, `--kc-duration-press`, `--kc-duration-overlay`, `--kc-color-key-face-pressed`), so the tokens package owns the whole switch and component CSS carries no reduced-motion branch at all.
 
+**The Leading Edge Rule.** A heavier `border-inline-start` marks a block that is *quoted from or attributed to* something outside the flow — a Banner's tone, a callout, a `blockquote`, a `samp` showing real program output. It is the one place the system uses a weighted side border, it is always on the inline-start edge so it flips for RTL, and it is never decoration.
+
+It is deliberately not the keycap's bottom edge. The bottom edge promises travel and belongs to things that depress; a leading edge promises provenance and belongs to things that do not move. Two different weighted borders, two different meanings, and neither is available to the other.
+
+This is a considered exception to the general advice against colored side borders. The blocks that carry it are the ones where the convention predates the system — a quotation rule is centuries old — and where the alternative is spending a second color to say the same thing.
+
 **The Concentric Radius Rule.** A nested corner is the parent's radius minus the gap between them, computed with `calc()`. Never restate a nested radius as a literal.
 
 ## Components
@@ -304,7 +336,7 @@ Interactive targets never fall below 44×44 CSS pixels (`--kc-control-min-size`)
 - **Shadow Strategy:** `--kc-shadow-plate` in light, none in dark (see Elevation).
 - **Border:** 1px `divider` — lighter than the interactive `fog`, because a card encloses without demanding.
 - **Internal Padding:** step 6 (1.5rem), tightening to step 5 below 30rem. Header and body stack at step 2; the footer separates with a `divider` rule and step 4 of top padding.
-- **Title:** the one place Fraunces appears inside a component.
+- **Title:** the one place Piazzolla appears inside a component.
 
 ### Inputs / Fields
 
@@ -348,6 +380,26 @@ Interactive targets never fall below 44×44 CSS pixels (`--kc-control-min-size`)
 - **Style:** keycap radius, `plate` fill, 1px `fog` border, overlay shadow in both themes, capped at `min(24rem, calc(100vw - 2rem))` so it never overruns a small viewport.
 - **Motion:** 140ms ease-out fade with a 4px rise; removed entirely under reduced motion.
 
+## Long-form content
+
+Articles are the one surface the system cannot reach with components. Content arrives as bare `h2`, `blockquote`, `table`, `kbd` — emitted by a CMS, rendered from markdown, or typed by an author — and none of it can be passed a prop. `@jflamb/keycaps-tokens/prose.css` therefore styles those elements by tag inside a `.kc-prose` container, and is opt-in rather than part of the default import, because a product surface that renders no articles should not pay for it.
+
+Nothing in it is new vocabulary. A callout is the Banner's shape built from bare markup and a `data-tone`; a code block is the inline code treatment one step larger; the measure is the Intrinsic Maximum Rule applied to text, at `--kc-prose-measure` (58ch, about 80 rendered characters in Sofia Sans). Coral appears nowhere, because nothing in an article commits to anything.
+
+Heading sizes live here and only here. The token package ships none — the surface decides how large a heading is and the face does not — and a prose stylesheet is a surface, so `--kc-prose-h1` through `--kc-prose-h6` are declared on `.kc-prose` as the override point.
+
+### The two elements the Pressable Edge Rule decides
+
+**`kbd` does not get the bottom edge.** A keycap design system rendering a keyboard key as an actual keycap is the obvious move, and the rule forbids it: the edge promises travel, and a `kbd` never travels because it is a picture of a key on a different device. This is the same reasoning that denies the Badge an edge. It costs the system its most obvious joke.
+
+**`summary` does.** A disclosure is a real control, so it wears the edge and keeps the promise — 3px down, 4px compressing to 1px, from the same tokens a Button reads. The implementation differs because a Button pins its border box with `min-block-size` and a `summary` wraps to as many lines as its label needs; the padding does that job instead, giving up exactly what the edge takes over the same duration, so the border box is the same height on every frame and nothing below reflows while the key is down.
+
+### Named Rules
+
+**The Prose Markup Rule.** CSS cannot add a role, a name, or an `id`, so four patterns are incomplete without markup doing its half: table scroll containers and `pre` blocks need `tabindex="0"` (a scrollable region a keyboard cannot reach is a 2.1.1 failure), callouts need `role="note"` and a label, external links are marked by `target="_blank"` and need a visually hidden "opens in a new tab", and icon-only links need a `.kc-sr-only` name.
+
+**The Tone Trio Rule reaches prose too.** Every callout tone sets a surface, a border, ink, and a distinct icon *shape* — not the same shape in a different color — so the distinction survives forced colors, monochrome print, and color vision deficiency.
+
 ## Do's and Don'ts
 
 ### Do:
@@ -363,11 +415,12 @@ Interactive targets never fall below 44×44 CSS pixels (`--kc-control-min-size`)
 ### Don't:
 
 - **Don't** drift toward borderless flat minimalism — shadowless cards, seamless surfaces, objects that dissolve into the page. Keycaps is built on things being seated and visibly distinct from their ground. This is the system's confirmed anti-reference.
-- **Don't** put a weighted bottom edge on something that doesn't depress. The edge promises travel; a static element wearing one is a false affordance.
+- **Don't** put a weighted bottom edge on something that doesn't depress. The edge promises travel; a static element wearing one is a false affordance. This is why `kbd` is not a keycap, however much it wants to be.
 - **Don't** add a plate shadow in dark mode. Depth there is the surface ladder, not a cast.
 - **Don't** use coral for anything but a committing action. Not for emphasis, not for decoration, not for a hover state on something that isn't a key.
-- **Don't** introduce a third typeface, or let Fraunces into body copy.
-- **Don't** override Fraunces' `opsz 11` / `SOFT 80` per surface. The axes are brand constants.
+- **Don't** introduce a fourth typeface, or let Piazzolla into body copy. Three faces is the ceiling: display, body, code.
+- **Don't** pin Piazzolla's `opsz` axis, per surface or globally. Optical sizing runs automatically; fixing it to one value breaks the Title role.
+- **Don't** set symmetric margins on a heading, or leave it on the UA default, which is symmetric. More space above than below is what makes the heading read as opening its section.
 - **Don't** write raw color values in component CSS. If a needed color has no token, add the token.
 - **Don't** fetch anything at runtime — fonts, styles, or icons. Everything ships with the package.
 - **Don't** remove or restyle the focus ring below 3px at 3px offset.
