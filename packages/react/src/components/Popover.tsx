@@ -10,8 +10,14 @@ import { cx } from "../utils";
 
 export interface PopoverProps
   extends Omit<AriaPopoverProps, "children" | "className"> {
+  /** Extra class names appended to `kc-popover`. */
   className?: string;
+  /** The popover body. Keep it brief — this is context, not a place for a task. */
   children: ReactNode;
+  /**
+   * Accessible name for the dialog. Supply one whenever the trigger's own label
+   * does not describe the content, since the popover is announced separately.
+   */
   "aria-label"?: string;
 }
 

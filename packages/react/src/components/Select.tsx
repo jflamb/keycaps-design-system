@@ -14,20 +14,38 @@ import {
 import { ChevronDownIcon } from "../icons";
 import { cx } from "../utils";
 
+/** One entry in a Select. Options are data, not children — Keycaps owns the markup. */
 export interface SelectOption {
+  /** Secondary line under the label. Add one only when the label alone is ambiguous. */
   description?: string;
+  /** Stable identity. This is the value reported by `onSelectionChange` and matched by `selectedKey`. */
   id: string | number;
+  /** Renders the option unselectable while keeping it visible and announced. */
   isDisabled?: boolean;
+  /** The visible option text, and the string used for typeahead. */
   label: string;
 }
 
 export interface SelectProps
   extends Omit<AriaSelectProps<SelectOption>, "children" | "className"> {
+  /** Extra class names appended to `kc-select`. */
   className?: string;
+  /** Guidance rendered between the label and the trigger. */
   description?: ReactNode;
+  /**
+   * The validation message, rendered below the trigger. Pair it with
+   * `isInvalid` — unlike Field, Select does not infer invalidity from this prop.
+   */
   errorMessage?: ReactNode;
+  /** The visible label. Required. */
   label: ReactNode;
+  /** The choices, in the order they should be read. */
   options: SelectOption[];
+  /**
+   * Trigger text before a choice is made. Keep it an instruction, not a value.
+   *
+   * @default "Select an option"
+   */
   placeholder?: string;
 }
 
