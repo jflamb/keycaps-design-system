@@ -335,7 +335,7 @@ This is a considered exception to the general advice against colored side border
 - **Background:** `plate` on a `cloud` page.
 - **Shadow Strategy:** `--kc-shadow-plate` in light, none in dark (see Elevation).
 - **Border:** 1px `divider` — lighter than the interactive `fog`, because a card encloses without demanding.
-- **Internal Padding:** step 6 (1.5rem), tightening to step 5 below 30rem. Header and body stack at step 2; the footer separates with a `divider` rule and step 4 of top padding.
+- **Internal Padding:** step 6 (1.5rem), tightening to step 5 below 30rem. Header, body and footer stack at step 5, and the body stacks its own children at step 5 too — what sits in a card body is whole components, and composition between components is what steps 5 and 6 are for. The footer separates with a `divider` rule and step 4 of top padding.
 - **Title:** the one place Piazzolla appears inside a component.
 
 ### Inputs / Fields
@@ -346,7 +346,9 @@ This is a considered exception to the general advice against colored side border
 - **Hover:** border darkens to `slate`.
 - **Focus:** the standard 3px coral ring at 3px offset.
 - **Invalid:** border shifts to `danger-border`, with error text in `danger` at semibold. The error element collapses when empty rather than reserving space.
-- **Structure:** label, description, control, and error stack in a grid at step 2, capped at 32rem.
+- **Structure:** three groups, not four evenly spaced rows, capped at 32rem. Label and description sit at step 1 — the description finishes the sentence the label starts, so they are one unit. The control takes step 3, because moving from reading to doing is a change of activity and deserves a real interval. The error returns at step 2, closer to the control than the control is to the text above it, so it reads as belonging to the input rather than floating between fields.
+
+  Spacing carries the grouping here because nothing else can: every part is the same face at the same size, and only the error changes colour. Set uniformly, the parts of one field sat exactly as far apart as two different fields, and proximity conveyed nothing.
 
 ### Select
 

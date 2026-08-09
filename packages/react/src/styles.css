@@ -95,13 +95,31 @@
   cursor: not-allowed;
 }
 
+/* A field is three groups, not five evenly spaced lines. The label and its
+   description are one unit — the description finishes the sentence the label
+   starts — so they sit at step 1. The control is a change of activity, from
+   reading to doing, and takes a real step away. The error binds back to the
+   control it describes, closer than the control is to the text above it.
+   Uniform spacing here read as five unrelated rows, and at the same step the
+   card body used between whole fields, so nothing grouped and nothing separated.
+   Base gap is the tightest value; the two exceptions add to it, which keeps a
+   field with no description correct without a special case. */
 .kc-field,
 .kc-select {
   display: grid;
   inline-size: min(100%, 32rem);
-  gap: var(--kc-space-2);
+  gap: var(--kc-space-1);
   color: var(--kc-color-text);
   font-family: var(--kc-font-body);
+}
+
+.kc-field__input,
+.kc-select__trigger {
+  margin-block-start: calc(var(--kc-space-3) - var(--kc-space-1));
+}
+
+.kc-field__error {
+  margin-block-start: calc(var(--kc-space-2) - var(--kc-space-1));
 }
 
 .kc-field__label {
@@ -387,9 +405,14 @@
 }
 
 .kc-card__header,
+/* Step 5, because what stacks in a card body is whole components — two fields,
+   a field and a banner — and the Layout section reserves steps 5 and 6 for
+   composition between components while internal rhythm stays in 1–4. At step 2
+   a field's own label sat exactly as far from its description as it did from
+   the next field entirely, so proximity carried no information at all. */
 .kc-card__body {
   display: grid;
-  gap: var(--kc-space-2);
+  gap: var(--kc-space-5);
 }
 
 /* The one place the display face appears inside a component. At 1.25rem the
