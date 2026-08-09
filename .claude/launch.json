@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd apps/storybook && STORYBOOK_DISABLE_TELEMETRY=1 exec ./node_modules/.bin/storybook dev -p 6006 --host 127.0.0.1 --no-open"
+      ],
+      "port": 6006
+    }
+  ]
+}

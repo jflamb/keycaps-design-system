@@ -1,0 +1,334 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-08T00:00:00.000Z",
+  "title": "Design System: Keycaps",
+  "extensions": {
+    "colorMeta": {
+      "cloud": {
+        "role": "neutral",
+        "displayName": "Cloud",
+        "canonical": "oklch(96.2% 0.003 100)",
+        "tonalRamp": ["oklch(15% 0.003 100)", "oklch(26% 0.003 100)", "oklch(37% 0.003 100)", "oklch(48% 0.003 100)", "oklch(59% 0.003 100)", "oklch(70% 0.003 100)", "oklch(85% 0.003 100)", "oklch(96.2% 0.003 100)"]
+      },
+      "plate": {
+        "role": "neutral",
+        "displayName": "Plate",
+        "canonical": "oklch(98.7% 0.004 100)",
+        "tonalRamp": ["oklch(15% 0.004 100)", "oklch(26% 0.004 100)", "oklch(37% 0.004 100)", "oklch(48% 0.004 100)", "oklch(59% 0.004 100)", "oklch(72% 0.004 100)", "oklch(86% 0.004 100)", "oklch(98.7% 0.004 100)"]
+      },
+      "fog": {
+        "role": "neutral",
+        "displayName": "Fog",
+        "canonical": "oklch(82.1% 0.017 255)",
+        "tonalRamp": ["oklch(15% 0.017 255)", "oklch(26% 0.017 255)", "oklch(37% 0.017 255)", "oklch(48% 0.017 255)", "oklch(60% 0.017 255)", "oklch(71% 0.017 255)", "oklch(82.1% 0.017 255)", "oklch(93% 0.017 255)"]
+      },
+      "slate": {
+        "role": "neutral",
+        "displayName": "Slate",
+        "canonical": "oklch(48.9% 0.021 260)",
+        "tonalRamp": ["oklch(15% 0.021 260)", "oklch(26% 0.021 260)", "oklch(37% 0.021 260)", "oklch(48.9% 0.021 260)", "oklch(60% 0.021 260)", "oklch(71% 0.021 260)", "oklch(83% 0.021 260)", "oklch(94% 0.021 260)"]
+      },
+      "graphite": {
+        "role": "neutral",
+        "displayName": "Graphite",
+        "canonical": "oklch(34.2% 0.014 265)",
+        "tonalRamp": ["oklch(15% 0.014 265)", "oklch(24% 0.014 265)", "oklch(34.2% 0.014 265)", "oklch(45% 0.014 265)", "oklch(57% 0.014 265)", "oklch(69% 0.014 265)", "oklch(82% 0.014 265)", "oklch(94% 0.014 265)"]
+      },
+      "coral-key": {
+        "role": "primary",
+        "displayName": "Coral Key",
+        "canonical": "oklch(56.4% 0.163 33)",
+        "tonalRamp": ["oklch(20% 0.163 33)", "oklch(30% 0.163 33)", "oklch(40% 0.163 33)", "oklch(48% 0.163 33)", "oklch(56.4% 0.163 33)", "oklch(68% 0.150 33)", "oklch(80% 0.110 33)", "oklch(92% 0.055 33)"]
+      },
+      "coral": {
+        "role": "primary",
+        "displayName": "Coral",
+        "canonical": "oklch(64.4% 0.163 35)",
+        "tonalRamp": ["oklch(20% 0.163 35)", "oklch(31% 0.163 35)", "oklch(42% 0.163 35)", "oklch(53% 0.163 35)", "oklch(64.4% 0.163 35)", "oklch(75% 0.135 35)", "oklch(85% 0.095 35)", "oklch(94% 0.045 35)"]
+      },
+      "coral-edge": {
+        "role": "primary",
+        "displayName": "Coral Edge",
+        "canonical": "oklch(43.5% 0.150 33)",
+        "tonalRamp": ["oklch(18% 0.150 33)", "oklch(28% 0.150 33)", "oklch(43.5% 0.150 33)", "oklch(53% 0.150 33)", "oklch(63% 0.150 33)", "oklch(74% 0.130 33)", "oklch(84% 0.090 33)", "oklch(93% 0.045 33)"]
+      },
+      "mint": {
+        "role": "secondary",
+        "displayName": "Mint",
+        "canonical": "oklch(72.8% 0.101 168)",
+        "tonalRamp": ["oklch(20% 0.101 168)", "oklch(31% 0.101 168)", "oklch(42% 0.101 168)", "oklch(53% 0.101 168)", "oklch(63% 0.101 168)", "oklch(72.8% 0.101 168)", "oklch(84% 0.075 168)", "oklch(94% 0.038 168)"]
+      },
+      "mint-deep": {
+        "role": "secondary",
+        "displayName": "Mint Deep",
+        "canonical": "oklch(45.1% 0.081 168)",
+        "tonalRamp": ["oklch(18% 0.081 168)", "oklch(28% 0.081 168)", "oklch(38% 0.081 168)", "oklch(45.1% 0.081 168)", "oklch(58% 0.081 168)", "oklch(70% 0.081 168)", "oklch(82% 0.062 168)", "oklch(94% 0.032 168)"]
+      },
+      "mustard": {
+        "role": "tertiary",
+        "displayName": "Mustard",
+        "canonical": "oklch(80.8% 0.132 85)",
+        "tonalRamp": ["oklch(22% 0.132 85)", "oklch(33% 0.132 85)", "oklch(44% 0.132 85)", "oklch(55% 0.132 85)", "oklch(66% 0.132 85)", "oklch(74% 0.132 85)", "oklch(80.8% 0.132 85)", "oklch(93% 0.060 85)"]
+      },
+      "mustard-ink": {
+        "role": "tertiary",
+        "displayName": "Mustard Ink",
+        "canonical": "oklch(45.6% 0.086 82)",
+        "tonalRamp": ["oklch(18% 0.086 82)", "oklch(28% 0.086 82)", "oklch(38% 0.086 82)", "oklch(45.6% 0.086 82)", "oklch(58% 0.086 82)", "oklch(70% 0.086 82)", "oklch(82% 0.070 82)", "oklch(94% 0.035 82)"]
+      },
+      "signal-deep": {
+        "role": "tertiary",
+        "displayName": "Signal Deep",
+        "canonical": "oklch(48.2% 0.093 234)",
+        "tonalRamp": ["oklch(18% 0.093 234)", "oklch(28% 0.093 234)", "oklch(38% 0.093 234)", "oklch(48.2% 0.093 234)", "oklch(59% 0.093 234)", "oklch(71% 0.085 234)", "oklch(83% 0.060 234)", "oklch(94% 0.030 234)"]
+      },
+      "signal-bright": {
+        "role": "tertiary",
+        "displayName": "Signal Bright",
+        "canonical": "oklch(80.2% 0.096 226)",
+        "tonalRamp": ["oklch(20% 0.096 226)", "oklch(31% 0.096 226)", "oklch(42% 0.096 226)", "oklch(53% 0.096 226)", "oklch(64% 0.096 226)", "oklch(72% 0.096 226)", "oklch(80.2% 0.096 226)", "oklch(93% 0.045 226)"]
+      },
+      "danger": {
+        "role": "tertiary",
+        "displayName": "Danger",
+        "canonical": "oklch(52.4% 0.192 27)",
+        "tonalRamp": ["oklch(19% 0.192 27)", "oklch(29% 0.192 27)", "oklch(40% 0.192 27)", "oklch(52.4% 0.192 27)", "oklch(63% 0.175 27)", "oklch(74% 0.140 27)", "oklch(85% 0.095 27)", "oklch(94% 0.045 27)"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Page-level h1 and h2 only. Fraunces at opsz 11 / SOFT 80; size is set by the surface, not by a token."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card titles — the only place the display face appears inside a component."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running text and input values. The 1.55 leading is what keeps dense forms breathable."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Field labels, button text, and descriptions. Semibold so a label is findable without being loud."
+      },
+      "micro": {
+        "displayName": "Micro",
+        "purpose": "Badges and small keys. Bold and tight-leaded, because at 0.75rem weight is the only surviving hierarchy signal."
+      }
+    },
+    "shadows": [
+      {
+        "name": "plate",
+        "value": "0 1px 2px rgb(58 63 71 / 0.06), 0 10px 28px rgb(58 63 71 / 0.1)",
+        "purpose": "A card or panel resting on the plate. Light mode only — resolves to none in dark and under forced-colors. Tinted with graphite ink rather than black."
+      },
+      {
+        "name": "overlay",
+        "value": "0 14px 40px rgb(58 63 71 / 0.2)",
+        "purpose": "Popovers and select menus in light mode. The only shadow that survives into dark, where it deepens to 0 18px 44px rgb(0 0 0 / 0.45)."
+      },
+      {
+        "name": "overlay-dark",
+        "value": "0 18px 44px rgb(0 0 0 / 0.45)",
+        "purpose": "The dark-mode overlay cast. Detachment must stay legible in both physics."
+      },
+      {
+        "name": "selected-marker",
+        "value": "inset 3px 0 0 var(--kc-color-accent-border)",
+        "purpose": "The mint marker on a selected select option. A marker rather than a fill, so selection and focus can coexist without fighting."
+      }
+    ],
+    "motion": [
+      {
+        "name": "press",
+        "value": "120ms ease",
+        "purpose": "The key press: transform, border-block-end-width, and background-color transition together as one gesture. Also the select chevron rotation."
+      },
+      {
+        "name": "popover-in",
+        "value": "140ms ease-out",
+        "purpose": "Popover and select menu entrance — opacity from 0 with a 4px rise. Removed entirely under prefers-reduced-motion."
+      },
+      {
+        "name": "reduced-motion-floor",
+        "value": "0.01ms",
+        "purpose": "Under prefers-reduced-motion, all transition and animation durations collapse to 0.01ms and the key press re-expresses itself as a fill change to coral-edge rather than travel."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "reflow-floor",
+        "value": "320px"
+      },
+      {
+        "name": "compact",
+        "value": "30rem"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The committing action. A coral keycap with a 4px side wall that compresses as the cap travels.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Save changes</button>",
+      "css": ".ds-btn { display: inline-flex; min-block-size: var(--kc-control-min-size, 44px); inline-size: fit-content; align-items: center; justify-content: center; gap: var(--kc-space-2, 0.5rem); padding: calc(var(--kc-space-2, 0.5rem) + 2px) var(--kc-space-5, 1.25rem); border: 1px solid transparent; border-block-end: var(--kc-key-edge-width, 4px) solid transparent; border-radius: var(--kc-radius-key, 10px); font-family: var(--kc-font-body); font-size: var(--kc-font-size-sm, 0.875rem); font-weight: var(--kc-font-weight-bold, 700); line-height: 1.2; cursor: pointer; transition: transform var(--kc-duration-press, 120ms) var(--kc-ease-press, ease), border-block-end-width var(--kc-duration-press, 120ms) var(--kc-ease-press, ease), background-color var(--kc-duration-press, 120ms) var(--kc-ease-press, ease); } .ds-btn-primary { background: var(--kc-color-key-face); color: var(--kc-color-on-key); border-block-end-color: var(--kc-color-key-edge); } .ds-btn-primary:hover { background: var(--kc-color-key-face-hover); } .ds-btn-primary:active { transform: translateY(3px); border-block-end-width: 1px; } .ds-btn-primary:focus-visible { outline: var(--kc-focus-ring, 3px solid var(--kc-color-focus)); outline-offset: var(--kc-focus-ring-offset, 3px); } @media (prefers-reduced-motion: reduce) { .ds-btn-primary:active { transform: none; border-block-end-width: var(--kc-key-edge-width, 4px); background: var(--kc-color-key-edge); } }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "A raised plate key for non-committing actions. Same physics, no coral.",
+      "html": "<button class=\"ds-btn ds-btn-secondary\">Cancel</button>",
+      "css": ".ds-btn-secondary { background: var(--kc-color-surface-raised); color: var(--kc-color-text); border-color: var(--kc-color-border); border-block-end-color: var(--kc-color-border); } .ds-btn-secondary:hover { background: var(--kc-color-surface-hover); } .ds-btn-secondary:active { transform: translateY(3px); border-block-end-width: 1px; } .ds-btn-secondary:focus-visible { outline: var(--kc-focus-ring, 3px solid var(--kc-color-focus)); outline-offset: var(--kc-focus-ring-offset, 3px); } @media (prefers-reduced-motion: reduce) { .ds-btn-secondary:active { transform: none; border-block-end-width: var(--kc-key-edge-width, 4px); } }"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Text-only action in signal blue. No surface, no borders, but it still travels on press.",
+      "html": "<button class=\"ds-btn ds-btn-quiet\">Learn more</button>",
+      "css": ".ds-btn-quiet { background: transparent; color: var(--kc-color-link); border-color: transparent; border-block-end-color: transparent; } .ds-btn-quiet:hover { background: var(--kc-color-surface-hover); } .ds-btn-quiet:active { transform: translateY(3px); border-block-end-width: 1px; } .ds-btn-quiet:focus-visible { outline: var(--kc-focus-ring, 3px solid var(--kc-color-focus)); outline-offset: var(--kc-focus-ring-offset, 3px); }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "field-input",
+      "description": "Label, description, control, and error stacked in a grid, capped at a 32rem measure.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-field-label\" for=\"ds-field-1\">Workspace name</label><span class=\"ds-field-description\">Shown to everyone you invite.</span><input class=\"ds-field-input\" id=\"ds-field-1\" type=\"text\" placeholder=\"Acme Research\" /></div>",
+      "css": ".ds-field { display: grid; inline-size: min(100%, 32rem); gap: var(--kc-space-2, 0.5rem); color: var(--kc-color-text); font-family: var(--kc-font-body); } .ds-field-label { font-size: var(--kc-font-size-sm, 0.875rem); font-weight: var(--kc-font-weight-semibold, 600); } .ds-field-description { color: var(--kc-color-text-muted); font-size: var(--kc-font-size-sm, 0.875rem); line-height: 1.45; } .ds-field-input { inline-size: 100%; min-block-size: 50px; padding-inline: var(--kc-space-4, 1rem); border: 1.5px solid var(--kc-color-border); border-radius: var(--kc-radius-key, 10px); background: var(--kc-color-surface-raised); color: var(--kc-color-text); font-family: var(--kc-font-body); font-size: var(--kc-font-size-md, 1rem); } .ds-field-input::placeholder { color: var(--kc-color-text-muted); opacity: 1; } .ds-field-input:hover { border-color: var(--kc-color-text-muted); } .ds-field-input:focus-visible { outline: var(--kc-focus-ring, 3px solid var(--kc-color-focus)); outline-offset: var(--kc-focus-ring-offset, 3px); }"
+    },
+    {
+      "name": "Select Trigger",
+      "kind": "input",
+      "refersTo": "field-input",
+      "description": "A field that opens into a plate of its own. The chevron rotates 180 degrees over 120ms.",
+      "html": "<button class=\"ds-select-trigger\" aria-expanded=\"false\"><span>Choose a layout</span><svg class=\"ds-select-chevron\" viewBox=\"0 0 20 20\" fill=\"none\" aria-hidden=\"true\"><path d=\"M5 7.5 10 12.5 15 7.5\" /></svg></button>",
+      "css": ".ds-select-trigger { display: flex; inline-size: min(100%, 32rem); min-block-size: 50px; align-items: center; justify-content: space-between; gap: var(--kc-space-3, 0.75rem); padding-inline: var(--kc-space-4, 1rem); border: 1.5px solid var(--kc-color-border); border-radius: var(--kc-radius-key, 10px); background: var(--kc-color-surface-raised); color: var(--kc-color-text); font-family: var(--kc-font-body); font-size: var(--kc-font-size-md, 1rem); text-align: start; cursor: pointer; } .ds-select-trigger:hover { border-color: var(--kc-color-text-muted); } .ds-select-trigger:focus-visible { outline: var(--kc-focus-ring, 3px solid var(--kc-color-focus)); outline-offset: var(--kc-focus-ring-offset, 3px); } .ds-select-chevron { inline-size: 1.25rem; block-size: 1.25rem; flex: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform var(--kc-duration-press, 120ms) var(--kc-ease-press, ease); } .ds-select-trigger[aria-expanded=\"true\"] .ds-select-chevron { transform: rotate(180deg); } @media (prefers-reduced-motion: reduce) { .ds-select-trigger[aria-expanded=\"true\"] .ds-select-chevron { transform: none; } }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "The plate itself. Largest radius in the system, divider-weight border, and the only component that casts a plate shadow.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-header\"><h3 class=\"ds-card-title\">Release checklist</h3><p class=\"ds-card-description\">Every item is verified before a component reaches stable.</p></div><div class=\"ds-card-footer\"><button class=\"ds-btn ds-btn-primary\">Publish</button><button class=\"ds-btn ds-btn-quiet\">Review later</button></div></div>",
+      "css": ".ds-card { display: grid; inline-size: min(100%, 42rem); gap: var(--kc-space-5, 1.25rem); padding: var(--kc-space-6, 1.5rem); border: 1px solid var(--kc-color-divider); border-radius: var(--kc-radius-plate, 18px); background: var(--kc-color-surface-raised); color: var(--kc-color-text); box-shadow: var(--kc-shadow-plate); font-family: var(--kc-font-body); } .ds-card-header { display: grid; gap: var(--kc-space-2, 0.5rem); } .ds-card-title { margin: 0; font-family: var(--kc-font-display); font-size: var(--kc-font-size-xl, 1.25rem); font-variation-settings: \"opsz\" 11, \"SOFT\" 80; font-weight: var(--kc-font-weight-semibold, 600); line-height: var(--kc-line-height-heading, 1.2); } .ds-card-description { margin: 0; color: var(--kc-color-text-muted); } .ds-card-footer { display: flex; flex-wrap: wrap; gap: var(--kc-space-3, 0.75rem); align-items: center; padding-block-start: var(--kc-space-4, 1rem); border-block-start: 1px solid var(--kc-color-divider); } @media (max-width: 30rem) { .ds-card { padding: var(--kc-space-5, 1.25rem); } }"
+    },
+    {
+      "name": "Banner",
+      "kind": "custom",
+      "refersTo": "banner-info",
+      "description": "A strip of tone laid across the plate. Surface, border, and text move together; the 4px leading edge carries the tone.",
+      "html": "<div class=\"ds-banner\" role=\"status\"><div class=\"ds-banner-content\"><span class=\"ds-banner-title\">Storybook deployed</span><span>The documentation site updated after CI passed on main.</span></div><button class=\"ds-banner-dismiss\" aria-label=\"Dismiss\"><svg viewBox=\"0 0 18 18\" fill=\"none\" aria-hidden=\"true\"><path d=\"M4.5 4.5 13.5 13.5M13.5 4.5 4.5 13.5\" /></svg></button></div>",
+      "css": ".ds-banner { display: flex; inline-size: min(100%, 48rem); align-items: flex-start; justify-content: space-between; gap: var(--kc-space-3, 0.75rem); padding: var(--kc-space-3, 0.75rem) var(--kc-space-4, 1rem); border: 1px solid var(--kc-color-info-border); border-inline-start-width: 4px; border-radius: var(--kc-radius-sm, 6px); background: var(--kc-color-info-surface); color: var(--kc-color-info-text); font-family: var(--kc-font-body); } .ds-banner-content { display: grid; gap: var(--kc-space-1, 0.25rem); } .ds-banner-title { font-weight: var(--kc-font-weight-bold, 700); } .ds-banner-dismiss { min-inline-size: var(--kc-control-min-size, 44px); min-block-size: var(--kc-control-min-size, 44px); flex: none; margin: calc(var(--kc-space-1, 0.25rem) * -1); display: inline-flex; align-items: center; justify-content: center; border: none; background: transparent; color: inherit; cursor: pointer; } .ds-banner-dismiss svg { inline-size: 1.125rem; block-size: 1.125rem; stroke: currentColor; stroke-width: 2; stroke-linecap: round; } .ds-banner-dismiss:focus-visible { outline: var(--kc-focus-ring, 3px solid var(--kc-color-focus)); outline-offset: 2px; } @media (max-width: 30rem) { .ds-banner { padding-inline: var(--kc-space-3, 0.75rem); } }"
+    },
+    {
+      "name": "Badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "A label, not a control. Micro type, concentric radius, uniform 1px border — no weighted bottom edge, because a badge never travels.",
+      "html": "<span class=\"ds-badge\">Neutral</span> <span class=\"ds-badge ds-badge-success\">Stable</span> <span class=\"ds-badge ds-badge-warning\">Beta</span>",
+      "css": ".ds-badge { display: inline-flex; inline-size: fit-content; min-block-size: 1.5rem; align-items: center; padding: var(--kc-space-1, 0.25rem) calc(var(--kc-space-2, 0.5rem) + 2px); border: 1px solid var(--kc-color-border); border-radius: var(--kc-radius-sm, 6px); background: var(--kc-color-surface-raised); color: var(--kc-color-text); font-family: var(--kc-font-body); font-size: var(--kc-font-size-xs, 0.75rem); font-weight: var(--kc-font-weight-bold, 700); line-height: 1; } .ds-badge-success { border-color: var(--kc-color-success-border); background: var(--kc-color-success-surface); color: var(--kc-color-success-text); } .ds-badge-warning { border-color: var(--kc-color-warning-border); background: var(--kc-color-warning-surface); color: var(--kc-color-warning-text); }"
+    },
+    {
+      "name": "Popover",
+      "kind": "custom",
+      "refersTo": "popover",
+      "description": "The one genuinely detached surface. Casts in both themes because detachment must be legible in both physics.",
+      "html": "<div class=\"ds-popover\"><p style=\"margin:0\">Components reach stable only after manual screen-reader verification is documented in the release record.</p></div>",
+      "css": ".ds-popover { max-inline-size: min(24rem, calc(100vw - 2rem)); padding: var(--kc-space-4, 1rem); border: 1px solid var(--kc-color-border); border-radius: var(--kc-radius-key, 10px); background: var(--kc-color-surface-raised); color: var(--kc-color-text); box-shadow: var(--kc-shadow-overlay); font-family: var(--kc-font-body); animation: ds-popover-in 140ms ease-out; } @keyframes ds-popover-in { from { opacity: 0; transform: translateY(-4px); } } @media (prefers-reduced-motion: reduce) { .ds-popover { animation: none; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Quiet Plate",
+    "overview": "Keycaps is a plate, and a small number of solid objects seated on it. The plate is the protagonist: a warm near-white ground (cloud #f5f5f3) that asks for nothing, holds everything, and stays quiet under whatever is placed on it. Objects that sit on the plate are unmistakably objects — they have a border, a radius, a bottom edge, and a shadow that says they occupy space rather than float above it. Nothing dissolves into the page.\n\nThe system is tactile but restrained. It contains real physical feedback, and it spends it almost nowhere. A primary key travels 3px on press while its 4px bottom edge compresses to 1px, so the cap descends and bottoms out while its lower boundary stays exactly where it was — the motion of a key hitting the plate beneath it. That press is the single most expressive thing the system does, it lasts 120ms, and it is the reason the rest of the interface holds still. If everything moved, the press would mean nothing.\n\nWarmth comes from material, not from saturation. The neutrals are warm-shifted rather than gray (plate #fdfdfb, divider #e7e7e3), the display face is Fraunces held at a constant optical size with softened terminals, and the accent is coral rather than blue. Coral appears at full strength on exactly one kind of thing — an action that commits — which is why the plate reads as calm. The scarcity is semantic, not budgeted: commitments are rare, so the color that marks them is rare.",
+    "keyCharacteristics": [
+      "Warm near-white ground; nothing is pure gray and nothing is pure white",
+      "Objects are seated, not floating — border, radius, and edge are the default vocabulary",
+      "One expressive gesture (the 120ms key press) surrounded by stillness",
+      "Coral marks commitment; every other status speaks in mint, mustard, or signal blue",
+      "Depth is cast in light and tonal in dark — the same object, two different physics",
+      "Every state has a non-color carrier, because forced-colors and screen readers are release gates"
+    ],
+    "rules": [
+      {
+        "name": "The Commitment Rule",
+        "body": "The coral key face is worn only by actions that commit or confirm. Multiple commitments on one screen may all wear it — coral marks a kind of action, not a rank. The plate stays quiet because genuine commitments are rare, not because a budget caps them.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tone Trio Rule",
+        "body": "Every status tone sets surface, border, and text together. A tone expressed by only one of the three is incomplete, and a status expressed by color alone is a defect — there is always a label, an icon, or a role carrying the same meaning.",
+        "section": "colors"
+      },
+      {
+        "name": "The Warm Neutral Rule",
+        "body": "No pure grays, no #000, no #fff. Every neutral in the system carries a warm or cool bias; a value with equal RGB channels has escaped the palette.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Voice Rule",
+        "body": "Fraunces speaks in page headings and card titles. Nunito Sans does everything else — every label, every value, every button, every error. A third face, or Fraunces creeping into body copy, breaks the system.",
+        "section": "typography"
+      },
+      {
+        "name": "The Optical Constant Rule",
+        "body": "Fraunces is always set at font-variation-settings: \"opsz\" 11, \"SOFT\" 80. The variable axes are a brand constant, not a per-surface control. Changing them changes the voice.",
+        "section": "typography"
+      },
+      {
+        "name": "The 320 Rule",
+        "body": "Every surface reflows at 320 CSS pixels with no horizontal page scroll. html and body carry min-width: 320px as the floor, and it is verified in the browser matrix — not a guideline, a release gate.",
+        "section": "layout"
+      },
+      {
+        "name": "The Intrinsic Maximum Rule",
+        "body": "Components declare their own measure ceiling with min(100%, Xrem). Never constrain a Keycaps component from the outside when it already knows its comfortable width.",
+        "section": "layout"
+      },
+      {
+        "name": "The Light Lifts, Dark Layers Rule",
+        "body": "Cast shadow belongs to light mode. In dark mode, depth comes from surface tone alone. Adding a plate shadow to a dark surface is a defect, not an enhancement.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Overlay Exception Rule",
+        "body": "Only genuinely detached surfaces — popovers, select menus, dialogs — cast in both themes. If it rests on the plate, it does not cast in dark.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Pressable Edge Rule",
+        "body": "A bottom edge promises travel. Anything wearing a border-block-end heavier than its other borders must depress when activated. A static element with a weighted bottom edge is a false affordance.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Concentric Radius Rule",
+        "body": "A nested corner is the parent's radius minus the gap between them, computed with calc(). Never restate a nested radius as a literal.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do couple the press values. translateY(3px) and the 4px → 1px edge compression are one gesture; changing either alone breaks the key's physics.",
+      "Do give every status a second carrier. Surface, border, and text move together, and a label, icon, or ARIA role carries the meaning when color is unavailable.",
+      "Do compute nested radii with calc() from the parent (calc(var(--kc-radius-key) - 3px)), so curves stay concentric.",
+      "Do let components set their own measure with min(100%, Xrem) rather than constraining them from outside.",
+      "Do reach for semantic tokens (--kc-color-key-face, --kc-color-danger-text) in component CSS. Brand primitives are the palette's source, not its interface.",
+      "Do express every state change in a way that survives forced-colors: active — the system already maps every semantic token to a system color, and new components must too.",
+      "Do use logical properties (inline-size, border-block-end, padding-inline) so the system flips for RTL for free."
+    ],
+    "donts": [
+      "Don't drift toward borderless flat minimalism — shadowless cards, seamless surfaces, objects that dissolve into the page. Keycaps is built on things being seated and visibly distinct from their ground. This is the system's confirmed anti-reference.",
+      "Don't put a weighted bottom edge on something that doesn't depress. The edge promises travel; a static element wearing one is a false affordance.",
+      "Don't add a plate shadow in dark mode. Depth there is the surface ladder, not a cast.",
+      "Don't use coral for anything but a committing action. Not for emphasis, not for decoration, not for a hover state on something that isn't a key.",
+      "Don't introduce a third typeface, or let Fraunces into body copy.",
+      "Don't override Fraunces' opsz 11 / SOFT 80 per surface. The axes are brand constants.",
+      "Don't write raw color values in component CSS. If a needed color has no token, add the token.",
+      "Don't fetch anything at runtime — fonts, styles, or icons. Everything ships with the package.",
+      "Don't remove or restyle the focus ring below 3px at 3px offset.",
+      "Don't use pure gray, pure black, or pure white. Every neutral carries a bias."
+    ]
+  }
+}
