@@ -4,6 +4,11 @@ All notable changes to the fixed-version Keycaps package train are documented he
 
 ## Unreleased
 
+## 0.1.0 — 2026-08-09
+
+The first published release. Both packages enter the fixed version train at
+0.1.0, and every component is `beta` — see [component status](docs/component-status.md).
+
 ### Changed
 
 - **Monospace is now bundled: Lilex, replacing the system stack.** `--kc-font-mono` resolves to `"Lilex", ui-monospace, …`, adding one variable file (`wght` 100–900, ~40KB). The stack cost nothing but was never one face — SF Mono, Consolas and Liberation Mono have different x-heights, so inline code paired with the body face differently on every platform. Lilex sets a 0.516em x-height against Sofia Sans' 0.488em, where SF Mono set 0.547em and read a size larger than its surroundings.
