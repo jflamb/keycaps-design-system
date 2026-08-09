@@ -70,6 +70,87 @@
   color: var(--kc-color-link);
 }
 
+/* The destructive key. Outlined rather than filled, and the reasoning lives with
+   the tokens it reads — see `--kc-color-key-face-danger`. It keeps the wall and
+   the travel, so the Pressable Edge Rule's promise holds. */
+.kc-button[data-variant="danger"] {
+  border-color: var(--kc-color-danger-border);
+  border-block-end-color: var(--kc-color-key-edge-danger);
+  background: var(--kc-color-key-face-danger);
+  color: var(--kc-color-on-key-danger);
+}
+
+.kc-button[data-variant="danger"][data-hovered] {
+  background: var(--kc-color-key-face-danger-hover);
+}
+
+.kc-button[data-variant="danger"][data-pressed]:not([data-disabled]) {
+  background: var(--kc-color-key-face-danger-pressed);
+  color: var(--kc-color-on-key-danger-pressed);
+}
+
+/* A square key. The glyph is the whole label, so the accessible name has to come
+   from `aria-label` — which the component's types require rather than suggest.
+   `:not([stroke])` leaves the status icons alone: they carry their own paint so
+   they survive in markup this stylesheet never reaches. */
+.kc-button[data-icon-only] {
+  min-inline-size: var(--kc-button-min-size);
+  padding-inline: var(--kc-space-2);
+}
+
+.kc-button[data-icon-only] > svg {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  flex: none;
+}
+
+.kc-button[data-icon-only] > svg:not([stroke]) {
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* An action that reads as a word inside a sentence.
+   It is the one Button that is not a key: no surface, no wall, no control
+   height, and no travel. That last part is the Pressable Edge Rule read
+   correctly rather than ignored — the rule says a weighted bottom edge promises
+   travel, and this variant wears none, so it owes none. A 3px hop on a run of
+   text inside a paragraph would be a false note either way.
+
+   The 44×44 target is deliberately not met, and this is the system's second
+   documented exception after the `small` size. WCAG 2.5.8 exempts a target
+   inside a sentence or block of text, because meeting it would mean opening the
+   line height of the paragraph around it. The underline is not optional for the
+   same reason the prose footnote links keep theirs: the link blue was chosen to
+   sit calmly beside body text and does not clear 3:1 against it, so color alone
+   cannot identify it. */
+.kc-button[data-variant="link"] {
+  --kc-button-min-size: 0;
+  display: inline;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: none;
+  color: var(--kc-color-link);
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.kc-button[data-variant="link"][data-hovered] {
+  background: none;
+  text-decoration-thickness: 2px;
+}
+
+.kc-button[data-variant="link"][data-pressed]:not([data-disabled]) {
+  transform: none;
+  border-block-end-width: 0;
+}
+
 /* The press moves the key and nothing else. `min-block-size` pins the border box
    at its resting height, so compressing the wall redistributes space inside the
    box without resizing it — the only animated geometry is a transform.
@@ -148,6 +229,20 @@
 
 .kc-field__input {
   padding-inline: var(--kc-space-4);
+}
+
+/* A composer, not a taller input. The 50px floor is a control height; a textarea
+   is a reading surface, so it takes the Body role's leading and a four-line
+   floor. Resizing is block-only: a composer that can be dragged wider than the
+   32rem measure its field declares breaks the Intrinsic Maximum Rule from the
+   inside. `resize: block` is the logical form; `vertical` precedes it for
+   engines that do not know it yet. */
+.kc-field__input[data-multiline] {
+  min-block-size: 6.5rem;
+  padding-block: var(--kc-space-3);
+  line-height: var(--kc-line-height-body);
+  resize: vertical;
+  resize: block;
 }
 
 .kc-field__input::placeholder {
@@ -356,6 +451,7 @@
   inline-size: fit-content;
   min-block-size: 1.5rem;
   align-items: center;
+  gap: var(--kc-space-1);
   padding: var(--kc-space-1) calc(var(--kc-space-2) + 2px);
   border: 1px solid var(--kc-color-border);
   border-radius: var(--kc-radius-sm);
@@ -389,6 +485,25 @@
   border-color: var(--kc-color-danger-border);
   background: var(--kc-color-danger-surface);
   color: var(--kc-color-danger-text);
+}
+
+/* The 999px radius `DESIGN.md` calls available and unused. It stays unused by
+   default and is reached for only when the thing being labelled is genuinely in
+   motion, where "floating token" is the correct connotation rather than an
+   accident of taste. The extra inline padding is not decoration: at a full pill
+   radius the horizontal padding a 6px corner needs leaves the first glyph
+   sitting inside the curve. */
+.kc-badge[data-shape="pill"] {
+  padding-inline: var(--kc-space-3);
+  border-radius: var(--kc-radius-pill);
+}
+
+/* The Tone Trio Rule's second carrier. Sized off the cap height rather than the
+   box: at 0.75rem Micro type a 1rem glyph towers over its own label. */
+.kc-badge__icon {
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+  flex: none;
 }
 
 .kc-card {
@@ -449,6 +564,535 @@
   border-block-start: 1px solid var(--kc-color-divider);
 }
 
+/* A card that navigates. It warms one step on hover rather than lifting: the
+   plate shadow is `none` in dark, so a hover expressed as elevation would exist
+   in one theme only. Surface tone works in both, which is the same reasoning
+   the dark ladder is built on.
+   No bottom edge and no travel — a card is the plate, and the plate does not
+   depress. */
+.kc-card[data-linked] {
+  position: relative;
+  color: var(--kc-color-text);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--kc-duration-press) var(--kc-ease-press);
+}
+
+.kc-card[data-linked][data-hovered],
+.kc-card[data-linked]:has(.kc-card__link[data-hovered]) {
+  background: var(--kc-color-surface-hover);
+}
+
+.kc-card[data-linked][data-focus-visible],
+.kc-card[data-linked]:has(.kc-card__link[data-focus-visible]) {
+  outline: var(--kc-focus-ring);
+  outline-offset: var(--kc-focus-ring-offset);
+}
+
+/* The accessible name is the title this wraps, not the whole card. The overlay
+   is what makes the rest of the card clickable, and it is also why body text
+   inside a linked card cannot be selected — stated in the component's docs
+   rather than discovered. */
+.kc-card__link {
+  color: inherit;
+  outline: none;
+  text-decoration: none;
+}
+
+.kc-card__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* ---- Search field ------------------------------------------------------- */
+
+/* The glyph and the clear key sit over the input rather than beside it in a
+   wrapper, and that is a structural decision rather than a visual one. Keeping
+   the border, fill, and focus ring on the input itself means this field reuses
+   `.kc-field__input`'s existing `[data-hovered]` and `[data-focus-visible]`
+   rules exactly. A wrapper carrying the box would have needed its own states,
+   and the only way to write those without React Aria is `:focus-within` — a live
+   interactive selector in the stylesheet that is supposed to have none. */
+.kc-search-field__control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-block-start: calc(var(--kc-space-3) - var(--kc-space-1));
+}
+
+.kc-search-field__control .kc-field__input {
+  margin-block-start: 0;
+  padding-inline-start: calc(var(--kc-space-4) + 1.25rem + var(--kc-space-2));
+  padding-inline-end: var(--kc-control-min-size);
+}
+
+.kc-search-field__icon {
+  position: absolute;
+  inset-inline-start: var(--kc-space-4);
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  color: var(--kc-color-text-muted);
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+/* `translate` rather than a transform, so the press transform the key inherits
+   from `.kc-button` still composes with the centering instead of replacing it. */
+.kc-search-field .kc-search-field__clear {
+  position: absolute;
+  inset-inline-end: 3px;
+  inset-block-start: 50%;
+  translate: 0 -50%;
+  min-inline-size: var(--kc-control-min-size);
+  min-block-size: var(--kc-control-min-size);
+}
+
+.kc-search-field__clear-glyph {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* ---- Description list --------------------------------------------------- */
+
+/* Fifteen `<dl>` elements across the five consumer repos and five different
+   implementations of them. Each pair is wrapped in a `div`, which HTML permits
+   inside a `dl`, and that wrapper is what makes all three layouts one stylesheet
+   rather than three: the pair becomes a box to lay out instead of two siblings
+   to place by index.
+
+   The doubled class on the inner selectors is the same guard `prose.css`
+   documents: `.kc-prose dt` is (0,1,1) and a single `.kc-dl__term` is (0,1,0),
+   so a description list dropped inside an article would silently revert to the
+   article's rhythm. */
+.kc-dl {
+  display: grid;
+  gap: var(--kc-space-3);
+  margin: 0;
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-body);
+}
+
+.kc-dl[data-layout="grid"] {
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: var(--kc-space-5) var(--kc-space-6);
+}
+
+.kc-dl .kc-dl__item {
+  display: grid;
+  gap: var(--kc-space-1);
+  min-inline-size: 0;
+}
+
+.kc-dl[data-layout="rows"] .kc-dl__item {
+  grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+  gap: var(--kc-space-1) var(--kc-space-4);
+  align-items: baseline;
+}
+
+.kc-dl[data-divided] .kc-dl__item {
+  padding-block-end: var(--kc-space-3);
+  border-block-end: 1px solid var(--kc-color-divider);
+}
+
+.kc-dl[data-divided] .kc-dl__item:last-child {
+  padding-block-end: 0;
+  border-block-end: 0;
+}
+
+.kc-dl .kc-dl__term {
+  margin: 0;
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-sm);
+  font-weight: var(--kc-font-weight-label);
+  line-height: var(--kc-line-height-label);
+}
+
+.kc-dl .kc-dl__details {
+  margin: 0;
+  min-inline-size: 0;
+  color: var(--kc-color-text);
+  overflow-wrap: break-word;
+}
+
+.kc-dl .kc-dl__details[data-numeric] {
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+/* ---- Empty state -------------------------------------------------------- */
+
+/* A recess, not a raised object. It takes the page ground rather than the plate,
+   because a card is a thing on the plate and reads as content, while an empty
+   state is the shape content would fill. The border and the plate radius keep it
+   an object rather than letting it dissolve into the page — which is the
+   system's confirmed anti-reference. */
+.kc-empty-state {
+  display: grid;
+  inline-size: min(100%, 42rem);
+  justify-items: center;
+  gap: var(--kc-space-3);
+  padding: var(--kc-space-8) var(--kc-space-6);
+  border: 1px solid var(--kc-color-divider);
+  border-radius: var(--kc-radius-plate);
+  background: var(--kc-color-surface);
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-body);
+  text-align: center;
+}
+
+.kc-empty-state__icon {
+  display: inline-flex;
+  inline-size: 2rem;
+  block-size: 2rem;
+  color: var(--kc-color-text-muted);
+}
+
+.kc-empty-state__icon > svg {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+/* The body face, not the display one. The Two Voice Rule puts Piazzolla in page
+   headings and card titles; an empty state's heading is neither. */
+.kc-empty-state__title {
+  margin: 0;
+  font-family: var(--kc-font-body);
+  font-size: var(--kc-font-size-lg);
+  font-weight: var(--kc-font-weight-title);
+  line-height: var(--kc-line-height-heading);
+}
+
+.kc-empty-state__description {
+  margin: 0;
+  max-inline-size: 46ch;
+  color: var(--kc-color-text-muted);
+}
+
+.kc-empty-state__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--kc-space-3);
+  margin-block-start: var(--kc-space-2);
+}
+
+/* ---- Page header -------------------------------------------------------- */
+
+/* The heading's own margins are zeroed and the header owns the rhythm instead.
+   That follows the Heading Rhythm Rule rather than breaking it: a heading that
+   opens its container has nothing above it to separate from, and the space that
+   matters here belongs to the header as a block, not to the heading as a line.
+
+   Sizes are declared here and nowhere else, for the reason the token package
+   ships none — the surface decides how large a heading is, and a page header is
+   a surface. */
+.kc-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--kc-space-4) var(--kc-space-5);
+  margin-block-end: var(--kc-space-6);
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-body);
+}
+
+.kc-page-header[data-divided] {
+  padding-block-end: var(--kc-space-4);
+  border-block-end: 1px solid var(--kc-color-divider);
+}
+
+.kc-page-header__lead {
+  display: grid;
+  flex: 1 1 22rem;
+  min-inline-size: 0;
+  gap: var(--kc-space-2);
+}
+
+.kc-page-header__eyebrow {
+  margin: 0;
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-caps);
+  font-weight: var(--kc-font-weight-micro);
+  line-height: var(--kc-line-height-micro);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.kc-page-header__title {
+  margin: 0;
+  max-inline-size: 24ch;
+  font-family: var(--kc-font-display);
+  font-weight: var(--kc-font-weight-display);
+  line-height: var(--kc-line-height-heading);
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+
+h1.kc-page-header__title {
+  font-size: clamp(1.7rem, 1.2rem + 1.7vw, 2.25rem);
+}
+
+h2.kc-page-header__title {
+  font-size: clamp(1.4rem, 1.1rem + 1vw, 1.65rem);
+}
+
+h3.kc-page-header__title {
+  font-size: var(--kc-font-size-xl);
+}
+
+.kc-page-header__description {
+  margin: 0;
+  max-inline-size: 58ch;
+  color: var(--kc-color-text-muted);
+}
+
+.kc-page-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--kc-space-3);
+}
+
+.kc-page-header__meta {
+  display: flex;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--kc-space-2);
+}
+
+/* ---- Code block --------------------------------------------------------- */
+
+/* Deliberately the same treatment `prose.css` gives a `pre`, because a code
+   sample in a product surface and one in an article are the same thing and the
+   reader should not have to notice which page they are on.
+
+   No focus rule appears here. The `pre` carries `tabindex="0"` because a
+   scrollable region a keyboard cannot reach is a 2.1.1 failure, and `base.css`
+   already rings every `:focus-visible` at zero specificity — so the focus
+   indicator arrives from the tokens layer in every delivery mode, including
+   markup this stylesheet never sees. */
+.kc-code {
+  display: grid;
+  gap: var(--kc-space-2);
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-body);
+}
+
+.kc-code__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--kc-space-2);
+}
+
+.kc-code__label {
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-caps);
+  font-weight: var(--kc-font-weight-micro);
+  line-height: var(--kc-line-height-micro);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* In the row above the block rather than floating over its corner: an overlaid
+   control is always covering the first line, and one revealed on hover is
+   invisible to touch and to the keyboard. Same decision `prose.css` records. */
+.kc-code .kc-code__copy {
+  margin-inline-start: auto;
+}
+
+.kc-code .kc-code__copy[data-copied] {
+  border-color: var(--kc-color-success-border);
+  background: var(--kc-color-success-surface);
+  color: var(--kc-color-success-text);
+}
+
+.kc-code .kc-code__pre {
+  margin: 0;
+  padding: var(--kc-space-4) var(--kc-space-5);
+  border: 1px solid var(--kc-color-divider);
+  border-radius: var(--kc-radius-key);
+  background: var(--kc-color-surface-raised);
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-mono);
+  font-size: var(--kc-font-size-code-block);
+  line-height: var(--kc-line-height-body);
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.kc-code .kc-code__pre[data-wrap] {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.kc-code .kc-code__pre code {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+}
+
+.kc-code__token[data-token="comment"] {
+  color: var(--kc-color-code-comment);
+  font-style: italic;
+}
+
+.kc-code__token[data-token="punctuation"] {
+  color: var(--kc-color-code-punctuation);
+}
+
+.kc-code__token[data-token="string"] {
+  color: var(--kc-color-code-string);
+}
+
+/* Weight rather than a fifth hue. See the syntax tokens for why the palette
+   stops at two colors here. */
+.kc-code__token[data-token="keyword"] {
+  color: var(--kc-color-code-keyword);
+  font-weight: var(--kc-font-weight-emphasis);
+}
+
+/* ---- App shell ---------------------------------------------------------- */
+
+/* All five consumer repos carry a bespoke shell and no two agree. This one is
+   deliberately structural: apart from the nav link it contributes no interactive
+   element of its own, so it needs almost nothing in `static.css` and composes
+   with whatever router an app already has.
+
+   The sidebar split uses flex wrapping rather than a second media query — the
+   system is single-breakpoint, and a sidebar that reflows on its own content's
+   terms is what the Intrinsic Maximum Rule asks for anyway. The sidebar
+   separates itself by surface tone as well as by a rule, so it still reads as a
+   distinct region once it has wrapped above the content. */
+.kc-app-shell {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-block-size: 100vh;
+  min-block-size: 100dvh;
+  background: var(--kc-color-surface);
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-body);
+}
+
+.kc-app-shell__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--kc-space-3) var(--kc-space-5);
+  min-block-size: 60px;
+  padding: var(--kc-space-2) var(--kc-space-5);
+  border-block-end: 1px solid var(--kc-color-divider);
+  background: var(--kc-color-surface-raised);
+}
+
+.kc-app-shell__header[data-sticky] {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 20;
+}
+
+.kc-app-shell__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--kc-space-2);
+  font-family: var(--kc-font-display);
+  font-size: var(--kc-font-size-xl);
+  font-weight: var(--kc-font-weight-title);
+  line-height: var(--kc-line-height-heading);
+}
+
+.kc-app-shell__nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--kc-space-1);
+}
+
+.kc-app-shell__nav-link {
+  display: inline-flex;
+  min-block-size: var(--kc-control-min-size);
+  align-items: center;
+  gap: var(--kc-space-2);
+  padding-inline: var(--kc-space-3);
+  border-radius: var(--kc-radius-key);
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-sm);
+  font-weight: var(--kc-font-weight-label);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.kc-app-shell__nav-link[data-hovered] {
+  background: var(--kc-color-surface-hover);
+  color: var(--kc-color-text);
+}
+
+.kc-app-shell__nav-link[data-focus-visible] {
+  outline: var(--kc-focus-ring);
+  outline-offset: var(--kc-focus-ring-offset);
+}
+
+/* The Select option's selection treatment, not the coral key. A sidebar is a
+   list of options and navigating somewhere commits to nothing — the same call
+   the documentation site's own chrome makes. */
+.kc-app-shell__nav-link[aria-current="page"] {
+  background: var(--kc-color-accent-surface);
+  color: var(--kc-color-accent-text);
+  box-shadow: inset 3px 0 0 var(--kc-color-accent-border);
+}
+
+.kc-app-shell__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--kc-space-2);
+  margin-inline-start: auto;
+}
+
+.kc-app-shell__body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  min-inline-size: 0;
+}
+
+.kc-app-shell__sidebar {
+  flex: 1 1 14rem;
+  min-inline-size: 0;
+  padding: var(--kc-space-5);
+  border-inline-end: 1px solid var(--kc-color-divider);
+  background: var(--kc-color-surface-raised);
+}
+
+/* The grow factor is what makes the split behave without a query: the content
+   takes essentially all the free space while both are on one row, and drops the
+   sidebar to its own row the moment 30rem of content no longer fits beside it. */
+.kc-app-shell__main {
+  --kc-app-shell-measure: 72rem;
+
+  flex: 999 1 30rem;
+  min-inline-size: 0;
+  max-inline-size: var(--kc-app-shell-measure);
+  margin-inline: auto;
+  padding: var(--kc-space-6) var(--kc-space-5) var(--kc-space-10);
+}
+
+.kc-app-shell__footer {
+  padding: var(--kc-space-5);
+  border-block-start: 1px solid var(--kc-color-divider);
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-sm);
+}
+
 @keyframes kc-popover-in {
   from {
     opacity: 0;
@@ -464,6 +1108,27 @@
   .kc-banner {
     padding-inline: var(--kc-space-3);
   }
+
+  .kc-empty-state {
+    padding: var(--kc-space-6) var(--kc-space-5);
+  }
+
+  .kc-code .kc-code__pre {
+    padding-inline: var(--kc-space-4);
+  }
+
+  /* Below the measure a term and its value have no room to sit side by side, so
+     the pair stacks and proximity carries the grouping instead. */
+  .kc-dl[data-layout="rows"] .kc-dl__item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kc-app-shell__header,
+  .kc-app-shell__main,
+  .kc-app-shell__sidebar,
+  .kc-app-shell__footer {
+    padding-inline: var(--kc-space-4);
+  }
 }
 
 /* Reduced motion is not handled here. Travel, edge compression, chevron turn,
@@ -478,13 +1143,47 @@
   .kc-select__popover,
   .kc-banner,
   .kc-badge,
-  .kc-card {
+  .kc-card,
+  .kc-empty-state,
+  .kc-code .kc-code__pre {
     border-color: ButtonText;
+  }
+
+  /* An inline link has no box to outline, so its underline is the whole
+     affordance and it must survive the color being taken away. */
+  .kc-button[data-variant="link"] {
+    border-color: transparent;
+    text-decoration-thickness: 2px;
+  }
+
+  /* The status shape is the tone's second carrier, so it has to keep its paint
+     when the OS flattens everything else. Losing it is exactly the failure this
+     mode exists to prevent. */
+  .kc-badge__icon {
+    forced-color-adjust: none;
+    color: CanvasText;
+  }
+
+  .kc-app-shell__header,
+  .kc-app-shell__sidebar,
+  .kc-app-shell__footer,
+  .kc-page-header[data-divided],
+  .kc-dl[data-divided] .kc-dl__item {
+    border-color: ButtonText;
+  }
+
+  .kc-app-shell__nav-link[aria-current="page"] {
+    color: HighlightText;
+    background: Highlight;
+    box-shadow: none;
   }
 
   .kc-button[data-focus-visible],
   .kc-field__input[data-focus-visible],
   .kc-select__trigger[data-focus-visible],
+  .kc-app-shell__nav-link[data-focus-visible],
+  .kc-card[data-linked][data-focus-visible],
+  .kc-card[data-linked]:has(.kc-card__link[data-focus-visible]),
   .kc-select__option[data-focused] {
     outline: 3px solid Highlight;
     outline-offset: 2px;
@@ -501,4 +1200,11 @@
     color: GrayText;
     opacity: 1;
   }
+}
+
+/* The skip link's landmark contributes no box of its own. Its child is clipped
+   at rest and fixed-position when focused, so a wrapper with any layout would
+   reserve space for something that is never in the flow. */
+.kc-app-shell__skip {
+  display: contents;
 }

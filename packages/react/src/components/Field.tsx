@@ -4,8 +4,10 @@ import {
   Input,
   Label,
   Text,
+  TextArea,
   TextField,
   type InputProps,
+  type TextAreaProps,
   type TextFieldProps,
 } from "react-aria-components";
 import { cx } from "../utils";
@@ -28,11 +30,24 @@ export interface FieldProps extends Omit<TextFieldProps, "children" | "className
   /**
    * Props forwarded to the underlying `input`, including `type`, `placeholder`,
    * `autoComplete`, and `inputMode`. `value` and `onChange` belong on the Field
-   * itself, not here.
+   * itself, not here. Ignored when the field is multiline.
    */
   inputProps?: Omit<InputProps, "className"> & { className?: string };
   /** The visible label. Required — Keycaps has no placeholder-only field. */
   label: ReactNode;
+  /**
+   * Renders a `textarea` instead of an `input`. Defaults to true when
+   * `textareaProps` is supplied, which mirrors how `isInvalid` is derived from
+   * `errorMessage` below: the caller states the thing they mean and the flag
+   * follows.
+   *
+   * The control grows from a four-line floor and stays resizable in the block
+   * direction only — a composer that can be dragged wider than the field it
+   * lives in breaks the Intrinsic Maximum Rule from the inside.
+   */
+  multiline?: boolean;
+  /** Props forwarded to the underlying `textarea`, including `rows`. */
+  textareaProps?: Omit<TextAreaProps, "className"> & { className?: string };
 }
 
 export function Field({
@@ -41,9 +56,13 @@ export function Field({
   errorMessage,
   inputProps,
   label,
+  multiline,
+  textareaProps,
   ...props
 }: FieldProps) {
   const { className: inputClassName, ...restInputProps } = inputProps ?? {};
+  const { className: textareaClassName, ...restTextareaProps } = textareaProps ?? {};
+  const isMultiline = multiline ?? textareaProps != null;
 
   // Deriving `true` from `errorMessage` keeps a supplied message from being
   // silently dropped. Staying `undefined` otherwise is deliberate: an explicit
@@ -63,10 +82,18 @@ export function Field({
           {description}
         </Text>
       ) : null}
-      <Input
-        {...restInputProps}
-        className={cx("kc-field__input", inputClassName)}
-      />
+      {isMultiline ? (
+        <TextArea
+          {...restTextareaProps}
+          className={cx("kc-field__input", textareaClassName)}
+          data-multiline={true}
+        />
+      ) : (
+        <Input
+          {...restInputProps}
+          className={cx("kc-field__input", inputClassName)}
+        />
+      )}
       <FieldError className="kc-field__error">{errorMessage}</FieldError>
     </TextField>
   );

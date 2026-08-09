@@ -8,6 +8,12 @@
     "rootDir": "src",
     "types": []
   },
-  "include": ["src/index.ts", "src/components/**/*.tsx", "src/icons.tsx", "src/utils.ts"],
+  "include": [
+    "src/index.ts",
+    "src/static.tsx",
+    "src/components/**/*.tsx",
+    "src/icons.tsx",
+    "src/utils.ts"
+  ],
   "exclude": ["src/**/*.stories.tsx", "src/**/*.test.tsx", "src/test"]
 }

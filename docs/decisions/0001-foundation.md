@@ -23,7 +23,7 @@ This note records that shift rather than rewriting the decision.
 
 - Keycaps APIs remain owned and can outlive a behavior dependency.
 - React Aria supplies keyboard, focus, touch, and internationalized interaction patterns without imposing a visual system.
-- CSS custom properties support React and non-React projects.
+- CSS custom properties support React and non-React projects. [ADR 0002](0002-consumer-delivery.md) narrows what this means for components: tokens and `prose.css` are consumable by anything, but component markup is authored in one place and reaches non-React projects as rendered output.
 - Local WOFF2 assets prevent third-party font requests at runtime.
 - Explicit `data-theme` selectors preserve the existing jflamb theme-preference contract.
 - Astryx is a future evaluation candidate, not a dependency.

@@ -16,7 +16,8 @@
     "vite": "8.2.1"
   },
   "scripts": {
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && node prerender.mjs",
+    "build:static": "node prerender.mjs",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit"
   }

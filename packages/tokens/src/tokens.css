@@ -151,6 +151,32 @@
   --kc-color-key-face-pressed: var(--kc-color-key-face-hover);
   --kc-color-key-edge: var(--kc-color-coral-edge);
   --kc-color-on-key: var(--kc-color-plate);
+
+  /* The destructive key. Deliberately *not* a filled key in the danger hue:
+     `danger` (#c7302b) and `coral-key` (#c7452c) differ only in their green
+     channel, so two filled keys side by side — "Approve" and "Reject" on the
+     same approvals row — would be indistinguishable. The Commitment Rule also
+     reserves the coral fill for actions that commit, and the Tone Trio Rule
+     forbids a status carried by color alone.
+
+     So the difference is carried by form: the destructive key is a raised plate
+     surface with the danger tone on its border, its wall, and its ink, against a
+     filled coral face. Filled versus outlined survives forced colors,
+     monochrome printing, and every color vision deficiency; a 21-point shift in
+     one channel does not. It still wears the 4px wall and still depresses, so
+     the Pressable Edge Rule is kept.
+
+     The pressed pair inverts rather than tinting. Under reduced motion the press
+     has to be legible in material, and every light tint of `danger-surface` dark
+     enough to read as pressed drops the ink below 4.5:1 — the danger red is too
+     dark to leave headroom. Filling with the wall color and flipping the ink to
+     the raised surface lands at 5.3:1 in light and 6.6:1 in dark. */
+  --kc-color-key-face-danger: var(--kc-color-surface-raised);
+  --kc-color-key-face-danger-hover: var(--kc-color-danger-surface);
+  --kc-color-key-face-danger-pressed: var(--kc-color-key-face-danger-hover);
+  --kc-color-key-edge-danger: var(--kc-color-danger-text);
+  --kc-color-on-key-danger: var(--kc-color-danger-text);
+  --kc-color-on-key-danger-pressed: var(--kc-color-on-key-danger);
   --kc-color-accent-surface: var(--kc-color-mint-tint);
   --kc-color-accent-text: var(--kc-color-mint-deep);
   --kc-color-accent-border: var(--kc-color-mint);
@@ -166,6 +192,19 @@
   --kc-color-info-surface: #eaf6fc;
   --kc-color-info-text: var(--kc-color-signal-deep);
   --kc-color-info-border: #addcf3;
+  /* Syntax roles for a code block. Four, not the dozen a highlighter offers,
+     and two of them are not colors at all — the Two Voice Rule already spends
+     Lilex on the semantic distinction code draws, and a plate that stays quiet
+     cannot also carry five hues in a `pre`. Comments and punctuation recede to
+     the muted ink; a string literal — the value a reader is usually scanning
+     for — takes the accent, which is the system's "yes"; a keyword is carried by
+     weight rather than hue. Coral appears nowhere: nothing in a code sample
+     commits to anything. */
+  --kc-color-code-comment: var(--kc-color-text-muted);
+  --kc-color-code-punctuation: var(--kc-color-text-muted);
+  --kc-color-code-string: var(--kc-color-accent-text);
+  --kc-color-code-keyword: var(--kc-color-text);
+
   --kc-shadow-plate: 0 1px 2px rgb(58 63 71 / 0.06),
     0 10px 28px rgb(58 63 71 / 0.1);
   --kc-shadow-overlay: 0 14px 40px rgb(58 63 71 / 0.2);
@@ -267,6 +306,10 @@
     --kc-press-edge-width: var(--kc-key-edge-width);
     --kc-chevron-open-turn: 0deg;
     --kc-color-key-face-pressed: var(--kc-color-key-edge);
+    /* The destructive key inverts instead of tinting. See the note where these
+       two are declared. */
+    --kc-color-key-face-danger-pressed: var(--kc-color-key-edge-danger);
+    --kc-color-on-key-danger-pressed: var(--kc-color-surface-raised);
   }
 }
 
@@ -277,6 +320,8 @@
   --kc-press-edge-width: var(--kc-key-edge-width);
   --kc-chevron-open-turn: 0deg;
   --kc-color-key-face-pressed: var(--kc-color-key-edge);
+  --kc-color-key-face-danger-pressed: var(--kc-color-key-edge-danger);
+  --kc-color-on-key-danger-pressed: var(--kc-color-surface-raised);
 }
 
 @media (forced-colors: active) {
@@ -298,6 +343,16 @@
     --kc-color-key-face-pressed: ButtonFace;
     --kc-color-key-edge: ButtonText;
     --kc-color-on-key: ButtonText;
+    --kc-color-key-face-danger: ButtonFace;
+    --kc-color-key-face-danger-hover: ButtonFace;
+    --kc-color-key-face-danger-pressed: ButtonFace;
+    --kc-color-key-edge-danger: ButtonText;
+    --kc-color-on-key-danger: ButtonText;
+    --kc-color-on-key-danger-pressed: ButtonText;
+    --kc-color-code-comment: CanvasText;
+    --kc-color-code-punctuation: CanvasText;
+    --kc-color-code-string: CanvasText;
+    --kc-color-code-keyword: CanvasText;
     --kc-color-accent-surface: Canvas;
     --kc-color-accent-text: CanvasText;
     --kc-color-accent-border: ButtonText;
