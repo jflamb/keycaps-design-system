@@ -166,11 +166,21 @@
      one channel does not. It still wears the 4px wall and still depresses, so
      the Pressable Edge Rule is kept.
 
-     The pressed pair inverts rather than tinting. Under reduced motion the press
-     has to be legible in material, and every light tint of `danger-surface` dark
-     enough to read as pressed drops the ink below 4.5:1 — the danger red is too
-     dark to leave headroom. Filling with the wall color and flipping the ink to
-     the raised surface lands at 5.3:1 in light and 6.6:1 in dark. */
+     Under reduced motion the pressed face becomes the wall color and the ink
+     flips to the raised surface — which is the same substitution a primary key
+     makes, not a special case for this variant. A primary key fills with
+     `coral-edge`, its wall; this one fills with `key-edge-danger`, its wall. The
+     one thing worth recording is why tinting was not an option here: every light
+     tint of `danger-surface` dark enough to read as pressed drops the ink below
+     4.5:1, because the danger red is too dark to leave headroom. Filling with the
+     wall lands at 5.3:1 in light and 6.6:1 in dark.
+
+     Form alone does not finish the job. Outlining ends the collision with the
+     coral key and starts a nearer one with `secondary`, which is also a raised
+     plate key — and in `forced-colors: active` every token below resolves to a
+     system color, so nothing here distinguishes destroying from cancelling. The
+     component renders the danger shape by construction for that reason; these
+     tokens carry the tone, and the octagon carries the meaning. */
   --kc-color-key-face-danger: var(--kc-color-surface-raised);
   --kc-color-key-face-danger-hover: var(--kc-color-danger-surface);
   --kc-color-key-face-danger-pressed: var(--kc-color-key-face-danger-hover);

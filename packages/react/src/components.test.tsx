@@ -238,6 +238,76 @@ describe("Button variants", () => {
   });
 });
 
+/**
+ * The danger key's shape carrier.
+ *
+ * Outlining the destructive key stops it colliding with the coral one and puts
+ * it beside `secondary` instead, where the only remaining differences are a pink
+ * border and red ink — and both vanish into system colors under
+ * `forced-colors: active`. Shape is what survives, so the component supplies it
+ * rather than trusting a call site to remember. These tests exist because the
+ * failure they guard against is invisible in the default theme: the key looks
+ * fine, and it is only the high-contrast reader who loses the distinction.
+ */
+describe("the destructive key's second carrier", () => {
+  const toneMark = (element: HTMLElement) =>
+    element.querySelector(".kc-button__tone-icon");
+
+  it("marks a danger button with the danger shape without being asked", () => {
+    render(<Button variant="danger">Delete zone</Button>);
+    const button = screen.getByRole("button", { name: "Delete zone" });
+    expect(toneMark(button)).not.toBeNull();
+    // The shape is decoration for the accessibility tree — the label already
+    // names the destruction, and a second announcement would be noise.
+    expect(toneMark(button)).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("marks a danger LinkButton the same way, so the two cannot drift", () => {
+    render(
+      <LinkButton href="/zones/1/delete" variant="danger">
+        Delete zone
+      </LinkButton>,
+    );
+    expect(toneMark(screen.getByRole("link", { name: "Delete zone" }))).not.toBeNull();
+  });
+
+  it("marks a danger key whose children are a render function", () => {
+    render(<Button variant="danger">{() => "Delete zone"}</Button>);
+    expect(
+      toneMark(screen.getByRole("button", { name: "Delete zone" })),
+    ).not.toBeNull();
+  });
+
+  it("leaves every other variant unmarked", () => {
+    for (const variant of ["primary", "secondary", "quiet", "link"] as const) {
+      const { unmount } = render(<Button variant={variant}>Save</Button>);
+      expect(toneMark(screen.getByRole("button", { name: "Save" }))).toBeNull();
+      unmount();
+    }
+  });
+
+  it("exempts an icon-only danger key, whose glyph is already the shape", () => {
+    render(
+      <Button aria-label="Delete zone" iconOnly variant="danger">
+        <svg data-testid="caller-glyph" viewBox="0 0 20 20" aria-hidden="true" />
+      </Button>,
+    );
+    const button = screen.getByRole("button", { name: "Delete zone" });
+    expect(toneMark(button)).toBeNull();
+    expect(button.querySelectorAll("svg")).toHaveLength(1);
+  });
+
+  it("paints the shape itself, so it survives markup the stylesheet never reaches", () => {
+    render(<Button variant="danger">Delete zone</Button>);
+    // A carrier that needs a second file to become visible is not a carrier:
+    // Mode 1 pages render this markup with only the token layer in scope.
+    expect(toneMark(screen.getByRole("button", { name: "Delete zone" }))).toHaveAttribute(
+      "stroke",
+      "currentColor",
+    );
+  });
+});
+
 describe("Badge", () => {
   it("gives each tone a distinct icon shape rather than a recolored one", () => {
     const { container } = render(

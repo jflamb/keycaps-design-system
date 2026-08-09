@@ -109,8 +109,14 @@ export const Small: Story = {
  * variant worth reading twice. `danger` (#c7302b) and `coral-key` (#c7452c)
  * differ only in their green channel — put a filled key of each side by side on
  * an approvals row and nobody can tell "Approve" from "Reject" at a glance. Form
- * carries the difference instead of hue, which is also what makes it survive
- * forced colors, monochrome print, and every color vision deficiency.
+ * carries the difference instead of hue.
+ *
+ * Outlining solves that collision and creates a nearer one. A `secondary` key is
+ * also a raised plate key, so what separates destroying from cancelling comes
+ * down to a pink border and red ink — and under `forced-colors: active` both
+ * resolve to the same system colors, leaving nothing. The octagon is why this
+ * variant still reads as destructive there, and the component renders it rather
+ * than offering it, because a second carrier a call site can forget is not one.
  *
  * The label still has to name the destruction. "Delete draft", not "Confirm".
  */
@@ -124,6 +130,11 @@ export const Danger: Story = {
     await expect(Number.parseFloat(computed.borderBlockEndWidth)).toBeGreaterThan(
       Number.parseFloat(computed.borderInlineStartWidth),
     );
+    // The shape is supplied by the component, and it is decoration for the
+    // accessibility tree — the label already names what will be destroyed.
+    const mark = button.querySelector(".kc-button__tone-icon");
+    await expect(mark).not.toBeNull();
+    await expect(mark).toHaveAttribute("aria-hidden", "true");
   },
 };
 
@@ -221,7 +232,7 @@ export const Variants: Story = {
     docs: {
       description: {
         story:
-          "The four keys on one row, which is the arrangement that decided the danger variant's shape. A filled danger key here would be a second coral key — the two hexes differ by 21 points in one channel — and the reader would be choosing between two identical-looking commitments.",
+          "The four keys on one row, which is the arrangement that decided the danger variant's shape. A filled danger key here would be a second coral key — the two hexes differ by 21 points in one channel — and the reader would be choosing between two identical-looking commitments. Read this row again in forced colors: \"Reject request\" and \"Review details\" resolve to the same border, wall, and ink, and the octagon is the only thing left saying which one destroys.",
       },
     },
   },

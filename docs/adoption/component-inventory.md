@@ -58,6 +58,11 @@ Styling is `ledger.css` (a hand-rolled token layer, ~120 custom properties)
 plus `workbench-view.css` (1,914 lines), with markup rendered by
 `workbench-view.js`.
 
+There is a fourth styling surface outside `public/` entirely:
+`apps/web/functions/approvals/[approvalRequestId].ts` emits a complete document
+with its own inline `<style>` block, carrying a third copy of the press CSS. Any
+migration scoped to `public/` will miss it.
+
 **Closest to Keycaps of the five, and already diverged.** `ledger.css` calls
 itself "the shared Keycaps layer" and reimplements the vocabulary — `--radius-plate: 18px`,
 `--radius-key: 10px`, `--edge-w: 4px`, `--dur-press: 120ms`, `--shadow-plate`,
@@ -68,7 +73,9 @@ it is on the retired Fraunces/Nunito Sans pairing.
 
 ### retirement-dashboard
 
-The largest and most distant surface: 4,912 lines of CSS, ~700 class selectors,
+The largest and most distant surface: 6,783 lines of CSS across four files —
+`styles.css` (4,912), `print.css` (1,253), `ledger-preview.css` (499), and
+`auth.css` (119) — with ~700 class selectors in the main sheet alone,
 no framework. Its own visual system end to end — Aptos, a green `#2a7360`
 accent, a 4px spacing grid, and a bespoke type ramp (`--text-2xs` … `--text-3xl`).
 It has real dark-theme support and the only genuinely dense data UI in the set:
@@ -81,7 +88,9 @@ Nothing here is Keycaps-shaped. This is a re-skin, not an adoption.
 
 React 19, Tailwind v4, 14 components, 3,712 lines of CSS. Inter on a
 `#075ce5` blue. Has a local `Button.tsx` with `primary | secondary | danger |
-ghost` variants — one variant away from Keycaps' `primary | secondary | quiet`.
+ghost` variants — but only `--primary` has any CSS behind it, the undefined
+`secondary` is the default, and there is one call site. It is a stub, not a
+component to reconcile.
 Light-mode only: no `data-theme` or `prefers-color-scheme` rules anywhere, so
 adopting the Keycaps theme contract is net-new work.
 
@@ -94,6 +103,12 @@ A single 190-line marketing page with 816 lines of CSS. Ships Fraunces and
 Nunito Sans WOFF2 locally — the retired pairing. Sections: hero, diagnostic
 rows, local-runtime path, prompt transcript, supported list, legal. Light-mode
 only.
+
+It also carries `.impeccable/design.json`, titled "Design System: mcp-unifi
+Keycaps" — a second design system document describing this repo's own tokens and
+components. Whatever its original purpose, a per-repo artifact claiming the
+Keycaps name is precisely the divergence ADR 0002 exists to end, and it should be
+retired with the migration rather than left to be read as authority.
 
 ### mcp-dnsimple
 
@@ -150,7 +165,7 @@ Ranked by how many repos need them.
 
 | Component | Repos | Evidence |
 | --- | --- | --- |
-| Data table | 3/5 | RD 17 tables + `.table-scroll`/`.quiet-table`/`.sensitivity-table`, KN 2, AW `.data-table`. RD's scroll container already implements the Prose Markup Rule's `tabindex="0"`. |
+| Data table | 3/5 | RD 17 tables + `.table-scroll`/`.sensitivity-table`, KN 2, AW `.data-table`/`.quiet-table`. RD's scroll container already implements the Prose Markup Rule's `tabindex="0"`. |
 | Modal dialog | 2/5 | RD 3 native `<dialog>` (`.plan-history-dialog`, `.tiller-picker-dialog`), AW `.dialog`/`.dialog-backdrop`/`.dialog-panel`/`.dialog-actions`. |
 | Drawer / side panel | 2/5 | KN `.details-drawer` (430px, `--open` state, mobile close), RD `.assumptions-drawer`. |
 | Segmented control | 2/5 | RD `.segmented`/`.segment`/`.segment-label`/`.segment-sub` (28 hits — its primary assumption control), KN `.browse-filter`. |
@@ -172,11 +187,17 @@ components.
 ## Cross-cutting migration issues
 
 **The type system just moved and no consumer followed.** Keycaps is on
-Piazzolla / Sofia Sans / Lilex as of `f86c6f6`. AW, UF, and DN are all on
-Fraunces + Nunito Sans; RD is on Aptos; KN is on Inter. All five need a font
-swap, and three of them ship the old WOFF2 files locally. Optical sizing is a
-live concern: AW pins `"opsz" 11` on panel titles, which the Piazzolla Title
-role forbids.
+Piazzolla / Sofia Sans / Lilex as of `f86c6f6`. AW and UF are on Fraunces +
+Nunito Sans and ship those WOFF2 files locally; DN is on Fraunces + Figtree +
+JetBrains Mono; RD is on Aptos; KN is on Inter. All five need a font swap.
+Optical sizing is a live concern: AW pins `"opsz" 11` on panel titles, which the
+Piazzolla Title role forbids.
+
+**One consumer fetches fonts at runtime.** `mcp-dnsimple` loads all three of its
+faces from the Google Fonts CDN (`src/branding.ts:103`), with `preconnect` hints
+to `fonts.googleapis.com` and `fonts.gstatic.com`. That is a standing violation
+of the no-runtime-fetch rule in `DESIGN.md` and in the component contract, and
+adopting the Keycaps token layer resolves it as a side effect.
 
 **Two repos have no dark mode.** `knowledge` and `mcp-unifi` declare
 `color-scheme: light` and have no `data-theme` or `prefers-color-scheme` rules.

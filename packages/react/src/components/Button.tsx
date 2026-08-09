@@ -1,9 +1,11 @@
+import type { ReactNode } from "react";
 import {
   Button as AriaButton,
   Link as AriaLink,
   type ButtonProps as AriaButtonProps,
   type LinkProps as AriaLinkProps,
 } from "react-aria-components";
+import { DangerIcon } from "../icons";
 import { cx } from "../utils";
 
 /**
@@ -15,7 +17,8 @@ import { cx } from "../utils";
  * - `danger` destroys something. It is an outlined key in the danger tone
  *   rather than a filled one, because a filled danger key and a filled coral
  *   key differ only in one color channel and would be indistinguishable side by
- *   side. See `--kc-color-key-face-danger` in the tokens package.
+ *   side. See `--kc-color-key-face-danger` in the tokens package. It carries the
+ *   danger shape by construction — see `toneMarked`.
  * - `link` is not a key at all — an inline run of text inside a sentence. It has
  *   no control height, no wall, and does not travel.
  */
@@ -87,15 +90,61 @@ function keyAttributes({
   };
 }
 
+/**
+ * The destructive key's second carrier, supplied by the component rather than
+ * asked for at the call site.
+ *
+ * Outlining the danger key stops it colliding with the coral one, but it moves
+ * the key next to `secondary` instead — and against a secondary key the only
+ * differences left are a pink border and red ink. Both are color. Under
+ * `forced-colors: active` every one of those tokens resolves to a system color
+ * (`ButtonFace`, `ButtonText`), so a "Delete" key and a "Cancel" key carry no
+ * distinguishing destructive signal at all. Shape is the only carrier that
+ * survives, which is the Tone Trio Rule's whole argument, and a carrier a caller
+ * can forget to pass is not a carrier.
+ *
+ * `iconOnly` is exempt: its glyph already is the shape, and a second one would
+ * put two marks in a key whose entire label is one.
+ *
+ * Children may be a render function — React Aria passes state to it — so the
+ * wrap has to survive that shape as well as a plain node.
+ */
+function toneMarked<Children>(
+  variant: ButtonVariant,
+  iconOnly: boolean | undefined,
+  children: Children,
+): Children {
+  if (variant !== "danger" || iconOnly) return children;
+  const mark = <DangerIcon className="kc-button__tone-icon" key="kc-tone" />;
+  if (typeof children === "function") {
+    return ((...values: unknown[]) => (
+      <>
+        {mark}
+        {(children as (...args: unknown[]) => ReactNode)(...values)}
+      </>
+    )) as Children;
+  }
+  return (
+    <>
+      {mark}
+      {children as ReactNode}
+    </>
+  ) as Children;
+}
+
 export function Button({
   className,
   variant = "primary",
   size = "medium",
   ...props
 }: ButtonProps) {
-  const { iconOnly, ...rest } = props as { iconOnly?: boolean } & AriaButtonProps;
+  const { iconOnly, children, ...rest } = props as {
+    iconOnly?: boolean;
+  } & AriaButtonProps;
   return (
-    <AriaButton {...rest} {...keyAttributes({ className, variant, size, iconOnly })} />
+    <AriaButton {...rest} {...keyAttributes({ className, variant, size, iconOnly })}>
+      {toneMarked(variant, iconOnly, children)}
+    </AriaButton>
   );
 }
 
@@ -127,8 +176,12 @@ export function LinkButton({
   size = "medium",
   ...props
 }: LinkButtonProps) {
-  const { iconOnly, ...rest } = props as { iconOnly?: boolean } & AriaLinkProps;
+  const { iconOnly, children, ...rest } = props as {
+    iconOnly?: boolean;
+  } & AriaLinkProps;
   return (
-    <AriaLink {...rest} {...keyAttributes({ className, variant, size, iconOnly })} />
+    <AriaLink {...rest} {...keyAttributes({ className, variant, size, iconOnly })}>
+      {toneMarked(variant, iconOnly, children)}
+    </AriaLink>
   );
 }

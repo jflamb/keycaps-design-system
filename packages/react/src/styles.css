@@ -93,6 +93,22 @@
    from `aria-label` — which the component's types require rather than suggest.
    `:not([stroke])` leaves the status icons alone: they carry their own paint so
    they survive in markup this stylesheet never reaches. */
+/* The destructive key's shape carrier. Sized a step under the icon-only glyph so
+   it reads as a mark on the label rather than as a second label, and `flex: none`
+   so a long label cannot squeeze it toward nothing. It paints itself — the icon
+   bakes in its own stroke — so it survives statically rendered markup and forced
+   colors alike, which is the only reason it is worth putting here. */
+.kc-button__tone-icon {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  flex: none;
+}
+
+.kc-button[data-size="small"] .kc-button__tone-icon {
+  inline-size: 1rem;
+  block-size: 1rem;
+}
+
 .kc-button[data-icon-only] {
   min-inline-size: var(--kc-button-min-size);
   padding-inline: var(--kc-space-2);

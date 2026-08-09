@@ -22,9 +22,12 @@ Hand-written markup carrying `class="kc-button"` renders correctly at rest and i
 inert on interaction.
 
 `assistant-workbench` already answered the question for itself by forking the
-vocabulary into `ledger.css`, which drifted — its press travels 2px against the
-3px `DESIGN.md` specifies. That fork is the failure this decision exists to
-prevent recurring.
+vocabulary into `ledger.css`, which drifted — and drifted partially, which is the
+more instructive failure. `.button` and `.action-button` implement the canonical
+press exactly (3px travel, a 4px wall compressing to 1px). `.icon-button` and
+`.operator-menu` travel 2px from a 3px wall. One repo, one stylesheet, two
+different physics, and nothing to say which is correct. That fork is the failure
+this decision exists to prevent recurring.
 
 ## Decision
 
@@ -99,8 +102,9 @@ nothing for this; the config has to live in each consumer.
 **Enforcement where the divergence happens.** This repo's coverage is strong —
 `tests/e2e/foundation.spec.ts` asserts the press coupling invariant, transform-only
 geometry, and the reduced-motion substitution. None of it was ever in scope for
-`assistant-workbench`, which is why its press could reach 2px with every check
-green. Each consumer therefore runs two CI rules: app CSS may not contain a raw
+`assistant-workbench`, which is why one half of its stylesheet could reach a 2px
+press while the other half stayed canonical, with every check green. Each
+consumer therefore runs two CI rules: app CSS may not contain a raw
 color literal or a design token outside the `--kc-` namespace, and app CSS may not
 define or override any `.kc-` selector. The second is what makes re-forking the
 vocabulary a build failure rather than a code review someone loses.

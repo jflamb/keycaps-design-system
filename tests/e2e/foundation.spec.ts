@@ -232,6 +232,49 @@ test("the select menu matches its trigger width", async ({ page }) => {
   expect(widths.popover).toBe(widths.trigger);
 });
 
+test("forced colors leave the destructive key distinguishable from the neutral one", async ({
+  page,
+}) => {
+  // The claim under test is narrow and easy to get wrong by looking: in the
+  // default theme a danger key is obviously red. Under forced colors its border,
+  // wall, and ink all resolve to system colors — the same ones a secondary key
+  // resolves to — so every difference the design relies on is gone except shape.
+  await page.emulateMedia({ forcedColors: "active" });
+  await page.goto(
+    "/iframe.html?id=components-button--variants&viewMode=story&globals=theme:light",
+  );
+  expect(
+    await page.evaluate(() => matchMedia("(forced-colors: active)").matches),
+  ).toBe(true);
+
+  const danger = page.getByRole("button", { name: "Reject request" });
+  const neutral = page.getByRole("button", { name: "Review details" });
+
+  const paint = (locator: typeof danger) =>
+    locator.evaluate((element) => {
+      const computed = getComputedStyle(element);
+      return {
+        color: computed.color,
+        borderBlockEndColor: computed.borderBlockEndColor,
+      };
+    });
+
+  // Not an incidental observation — this is the defect the shape exists to cover.
+  // If a future palette change makes these differ, the assertion should be
+  // revisited rather than deleted: the shape is still the carrier that survives
+  // monochrome print and color vision deficiency.
+  expect(await paint(danger)).toEqual(await paint(neutral));
+
+  const markBox = async (locator: typeof danger) =>
+    locator.locator(".kc-button__tone-icon").boundingBox();
+
+  const dangerMark = await markBox(danger);
+  expect(dangerMark).not.toBeNull();
+  expect(dangerMark?.width).toBeGreaterThan(8);
+  expect(dangerMark?.height).toBeGreaterThan(8);
+  await expect(neutral.locator(".kc-button__tone-icon")).toHaveCount(0);
+});
+
 test("forced colors preserve borders and a visible keyboard focus indicator", async ({
   page,
 }) => {
