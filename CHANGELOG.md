@@ -4,6 +4,15 @@ All notable changes to the fixed-version Keycaps package train are documented he
 
 ## Unreleased
 
+## 0.1.2 — 2026-08-09
+
+### Fixed
+
+- **`keycaps-css-lint` no longer lets a green check hide an unenforced rule.**
+  Files allowlisted for pre-migration token and color debt are still checked for
+  `.kc-` selector overrides, and a non-empty `include` configuration whose globs
+  match no files now exits 2 instead of reporting zero clean files.
+
 ## 0.1.1 — 2026-08-09
 
 ### Added
