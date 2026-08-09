@@ -15,7 +15,7 @@
  * into the package fails here rather than in a consumer.
  */
 
-import { access, cp, mkdir, writeFile } from "node:fs/promises";
+import { access, cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { createElement as h } from "react";
@@ -121,6 +121,29 @@ function assert(condition, message) {
     process.stderr.write(`Mode 1 consumption proof failed: ${message}\n`);
     process.exit(1);
   }
+}
+
+// ADR 0002 asks this fixture to track `main` rather than a release, so a
+// breaking change surfaces here before five consumer repos find it separately.
+// It does — via `workspace:*` — but nothing said so out loud, and a fixture
+// quietly pinned to the last published version is the one failure mode that
+// looks green while proving the opposite of what it claims. Both halves are
+// asserted: the specifier, which catches a deliberate pin, and the resolved
+// path, which catches everything else.
+const fixtureManifest = JSON.parse(
+  await readFile(fileURLToPath(new URL("./package.json", import.meta.url)), "utf8"),
+);
+const packagesDir = fileURLToPath(new URL("../../packages/", import.meta.url));
+for (const name of ["@jflamb/keycaps-tokens", "@jflamb/keycaps-react"]) {
+  const specifier = fixtureManifest.dependencies?.[name];
+  assert(
+    specifier?.startsWith("workspace:"),
+    `${name} is pinned to ${specifier} rather than this repo's source`,
+  );
+  assert(
+    fileURLToPath(import.meta.resolve(name)).startsWith(packagesDir),
+    `${name} resolved outside packages/, so this fixture is proving a published copy`,
+  );
 }
 
 // Every stylesheet the document links, and everything those stylesheets import,
