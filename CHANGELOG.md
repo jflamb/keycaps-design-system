@@ -4,6 +4,16 @@ All notable changes to the fixed-version Keycaps package train are documented he
 
 ## Unreleased
 
+## 0.1.1 — 2026-08-09
+
+### Added
+
+- **`keycaps-css-lint`, a bin on `@jflamb/keycaps-tokens`.** The two drift rules from [ADR 0002](docs/decisions/0002-consumer-delivery.md) — no raw color literals or design tokens outside the `--kc-` namespace, and no `.kc-` selector defined or overridden — run in consuming repos from a `.keycaps-lint.json` naming their files and allowlists. It ships rather than being copied into each consumer, because five copies of an anti-drift script is a drift problem wearing a disguise. Color detection covers every notation CSS currently offers, including `oklch()` and `color-mix()` before anyone reaches for them; token detection matches on the noun, so `--nav-width` stays a product's business while `--panel-radius` does not.
+
+### Fixed
+
+- **The a11y addon no longer races the browser suite's axe run.** `@storybook/addon-a11y` ran axe inside the preview as each story rendered while `@axe-core/playwright` ran axe against the same stories, and two engines in one frame produce "Axe is already running". As a race it passed locally and failed on slower CI runners, reading as a flaky test rather than a misconfiguration. Automatic checks are now `manual`; the panel still runs on demand, and the Playwright suite remains the authority.
+
 ## 0.1.0 — 2026-08-09
 
 The first published release. Both packages enter the fixed version train at
