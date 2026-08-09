@@ -28,7 +28,7 @@ body {
 
 :where(h1, h2) {
   font-family: var(--kc-font-display);
-  font-variation-settings: "opsz" 11, "SOFT" 80;
+  font-variation-settings: var(--kc-font-variation-display);
   font-weight: var(--kc-font-weight-semibold);
 }
 
@@ -55,12 +55,21 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  :root:not([data-kc-motion="full"]) *,
+  :root:not([data-kc-motion="full"]) *::before,
+  :root:not([data-kc-motion="full"]) *::after {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+:root[data-kc-motion="reduce"] *,
+:root[data-kc-motion="reduce"] *::before,
+:root[data-kc-motion="reduce"] *::after {
+  scroll-behavior: auto !important;
+  transition-duration: 0.01ms !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
 }

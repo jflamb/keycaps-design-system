@@ -27,6 +27,8 @@
 
   /* Typography */
   --kc-font-display: "Fraunces Variable", Georgia, "Times New Roman", serif;
+  /* Brand constant, not a per-surface control. Changing it changes the voice. */
+  --kc-font-variation-display: "opsz" 11, "SOFT" 80;
   --kc-font-body: "Nunito Sans", ui-sans-serif, system-ui, -apple-system,
     sans-serif;
   --kc-font-mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas,
@@ -59,6 +61,15 @@
   --kc-control-min-size: 44px;
   --kc-duration-press: 120ms;
   --kc-ease-press: ease;
+  --kc-duration-overlay: 140ms;
+  --kc-ease-overlay: ease-out;
+
+  /* The press gesture. Travel and edge width are one coupled value pair: the
+     cap descends exactly as far as its wall shrinks, so the object's lower
+     boundary never moves. 3px down, 4px edge compressing to 1px. */
+  --kc-press-travel: 3px;
+  --kc-press-edge-width: 1px;
+  --kc-chevron-open-turn: 180deg;
 
   /* Light semantic theme */
   --kc-color-surface: var(--kc-color-cloud);
@@ -72,6 +83,7 @@
   --kc-color-focus: var(--kc-color-coral);
   --kc-color-key-face: var(--kc-color-coral-key);
   --kc-color-key-face-hover: var(--kc-color-coral-deep);
+  --kc-color-key-face-pressed: var(--kc-color-key-face-hover);
   --kc-color-key-edge: var(--kc-color-coral-edge);
   --kc-color-on-key: var(--kc-color-plate);
   --kc-color-accent-surface: var(--kc-color-mint-tint);
@@ -170,8 +182,35 @@
   color-scheme: light;
 }
 
+/* Motion contract. The system preference is authoritative; `data-kc-motion` on
+   the root element is the explicit override, mirroring `data-theme`. Reduced
+   motion removes the travel and keeps the wall at full height — the press is
+   still legible, expressed in material instead of movement. */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-kc-motion="full"]) {
+    --kc-duration-press: 0ms;
+    --kc-duration-overlay: 0ms;
+    --kc-press-travel: 0px;
+    --kc-press-edge-width: var(--kc-key-edge-width);
+    --kc-chevron-open-turn: 0deg;
+    --kc-color-key-face-pressed: var(--kc-color-key-edge);
+  }
+}
+
+:root[data-kc-motion="reduce"] {
+  --kc-duration-press: 0ms;
+  --kc-duration-overlay: 0ms;
+  --kc-press-travel: 0px;
+  --kc-press-edge-width: var(--kc-key-edge-width);
+  --kc-chevron-open-turn: 0deg;
+  --kc-color-key-face-pressed: var(--kc-color-key-edge);
+}
+
 @media (forced-colors: active) {
-  :root {
+  :root,
+  :root:not([data-theme="light"]),
+  :root[data-theme="dark"],
+  :root[data-kc-motion="reduce"] {
     --kc-color-surface: Canvas;
     --kc-color-surface-raised: Canvas;
     --kc-color-surface-hover: Canvas;
@@ -183,6 +222,7 @@
     --kc-color-focus: Highlight;
     --kc-color-key-face: ButtonFace;
     --kc-color-key-face-hover: ButtonFace;
+    --kc-color-key-face-pressed: ButtonFace;
     --kc-color-key-edge: ButtonText;
     --kc-color-on-key: ButtonText;
     --kc-color-accent-surface: Canvas;
