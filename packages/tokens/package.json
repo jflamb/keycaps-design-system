@@ -12,8 +12,15 @@
   "bugs": {
     "url": "https://github.com/jflamb/keycaps-design-system/issues"
   },
-  "sideEffects": ["**/*.css"],
-  "files": ["dist", "LICENSE", "README.md"],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist",
+    "bin",
+    "LICENSE",
+    "README.md"
+  ],
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -30,11 +37,15 @@
   "scripts": {
     "build": "node ../../scripts/build-tokens.mjs",
     "clean": "rm -rf dist",
-    "prepublishOnly": "pnpm build"
+    "prepublishOnly": "pnpm build",
+    "test": "node --test test/*.test.mjs"
   },
   "publishConfig": {
     "access": "public",
     "provenance": true,
     "registry": "https://registry.npmjs.org"
+  },
+  "bin": {
+    "keycaps-css-lint": "./bin/keycaps-css-lint.mjs"
   }
 }

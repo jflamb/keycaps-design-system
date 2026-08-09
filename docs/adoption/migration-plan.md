@@ -198,8 +198,19 @@ Keycaps' invariants were ever in scope for it.
 - Point `tests/consumer/` at this repo's `main` rather than a release, so a
   breaking change surfaces here before five repos find it separately.
 
-**2.2 — Enforcement in each consumer.** Two CI rules, added as a script in each
-repo and wired into its existing check workflow:
+**2.2 — Enforcement in each consumer.** Two CI rules, run by `keycaps-css-lint`
+— a bin shipped on `@jflamb/keycaps-tokens` — and wired into each repo's existing
+check workflow.
+
+The rules are **not** copied into each repo. Five copies of an anti-drift script
+is a drift problem wearing a disguise: when the color rule has to learn about a
+notation nobody has used yet, it would need fixing five times and the fifth would
+be missed. The invariants are Keycaps' invariants, so they ship from the package
+that defines the `--kc-` namespace and that every consumer installs anyway. Each
+repo carries only a `.keycaps-lint.json` naming the files to scan and its own
+allowlist — the part that genuinely differs.
+
+The rules themselves:
 
 1. **No raw color literals and no non-`--kc-` design tokens in app CSS.** Fail on
    `#rgb`/`#rrggbb`, `rgb(`, `hsl(`, and `oklch(` in any app stylesheet, and on
@@ -209,9 +220,18 @@ repo and wired into its existing check workflow:
    makes re-forking the vocabulary a build failure rather than a code review
    someone loses.
 
-Both rules need an explicit, small allowlist per repo for genuinely local
-concerns — `retirement-dashboard`'s nine `--chart-*` series colors are the real
-example, and they are Tier 3 by the inventory's own classification.
+Both rules need an allowlist per repo. Two kinds, and the difference matters:
+`allowTokens` is for genuinely local concerns that will never be Keycaps' job —
+`retirement-dashboard`'s `--chart-*` series colors are the real example, Tier 3
+by the inventory's own classification. `allowFiles` is for pre-migration debt,
+and every entry is deleted by the phase that migrates that file, so the list is
+a ratchet and its length is a progress bar. The linter prints the allowlisted
+count on every run, because an allowlist that stops being visible stops being
+temporary.
+
+For a repo the size of `retirement-dashboard` the debt allowlist is file-scoped
+rather than occurrence-scoped; enumerating individual findings across 6,783 lines
+of CSS would produce a list nobody reads.
 
 Wiring per repo:
 
