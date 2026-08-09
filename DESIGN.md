@@ -178,7 +178,7 @@ A warm-neutral plate carrying four semantic hues: coral for commitment, mint for
 - **Mustard Ink** (`mustard-ink` #7d5a12): warning text on light surfaces — a deep olive-brown, not a yellow, because yellow text is unreadable at body sizes.
 - **Signal Deep** (`signal-deep` #22688f): links and informational text. The only blue in the system, and it is reserved for "this is information or a destination," never for "this is the primary action."
 - **Signal Bright** (`signal-bright` #7ccbf2): links and informational text in dark mode.
-- **Danger** (`danger` #c7302b): error text and invalid-field borders. Deliberately close to coral in hue and clearly darker in tone — errors belong to the same warm family, so the interface never turns alien when something goes wrong.
+- **Danger** (`danger` #c7302b): error text, invalid-field borders, and the wall and ink of the destructive key. Deliberately close to coral in hue and clearly darker in tone — errors belong to the same warm family, so the interface never turns alien when something goes wrong. That closeness is affordable precisely because danger is never a *face*: it draws lines and letters, never fills a key. A filled danger key beside a filled coral one would differ in one color channel, which is why the destructive key is outlined instead — see Buttons.
 
 ### Neutral
 
@@ -326,6 +326,11 @@ This is a considered exception to the general advice against colored side border
 - **Reduced motion:** travel is removed and the edge stays at full 4px; a primary key instead fills with `--kc-color-key-face-pressed`, which resolves to `coral-edge`. The press is still legible, expressed in material instead of movement. The whole substitution lives in the tokens layer (see Motion), so no component implements it and none can forget it.
 - **Focus:** 3px `coral` outline at 3px offset, outside the object so the edge stays readable.
 - **Small size:** 36px height, micro type, tighter padding.
+- **Danger:** the destructive key, and deliberately *not* a filled key in the danger hue. `danger` (#c7302b) and `coral-key` (#c7452c) differ only in their green channel, so two filled keys on one approvals row — "Approve" beside "Reject" — would be indistinguishable at a glance. The difference is carried by form instead: a raised `plate` surface with `danger-border` sides, a `danger` wall, and `danger` ink, against a filled coral face. Filled versus outlined survives forced colors, monochrome print, and every color vision deficiency; 21 points in one channel does not. It keeps the wall and it travels, so the Pressable Edge Rule's promise holds. Under reduced motion the pressed state fills with the wall color and takes raised-surface ink — the same substitution a primary key makes, not an exception to it.
+- **The destructive key carries the danger shape, and the component supplies it.** Outlining solves the collision with coral and creates a nearer one: against a `secondary` key, a danger key differs only by a pink border and red ink, and under `forced-colors: active` both resolve to the same system colors, leaving no destructive signal at all. Shape is the only carrier that survives, so the danger variant renders the octagon by construction. This is the Tone Trio Rule read strictly — a second carrier a caller can forget to pass is not a second carrier. An icon-only danger key is exempt, because its glyph already *is* the shape and a second mark would crowd a key whose whole label is one.
+- **Icon-only:** a square key at the 44px floor. The glyph is the whole label, so the accessible name has to be supplied, and the type requires it rather than suggesting it.
+- **Link:** the one Button that is not a key. No surface, no wall, no control height, and no travel — the edge promises travel, this variant wears none, so it owes none. It is the system's second documented exception to the 44×44 minimum, after `small`: WCAG 2.5.8 exempts a target inside a block of text, because meeting it would mean opening the leading of the paragraph around it. The underline is not optional in exchange, because the link blue does not clear 3:1 against body ink.
+- **A key that navigates** is a `LinkButton`, an anchor wearing the same key. Choose by what happens, not by how it should look: navigating is a link, doing is a button.
 
 ### Cards / Containers
 
@@ -337,6 +342,7 @@ This is a considered exception to the general advice against colored side border
 - **Border:** 1px `divider` — lighter than the interactive `fog`, because a card encloses without demanding.
 - **Internal Padding:** step 6 (1.5rem), tightening to step 5 below 30rem. Header, body and footer stack at step 5, and the body stacks its own children at step 5 too — what sits in a card body is whole components, and composition between components is what steps 5 and 6 are for. The footer separates with a `divider` rule and step 4 of top padding.
 - **Title:** the one place Piazzolla appears inside a component.
+- **Navigating:** a card can be a link two ways, and they are not interchangeable. As one anchor, the accessible name is everything inside it — right for a short row, wrong the moment the card carries a title, a description, and a metadata line. With the link around the title and an overlay covering the rest, the name stays the title. The overlay's cost is real: body copy inside a linked card cannot be selected. Either way the card warms one step on hover rather than lifting, because the plate shadow is `none` in dark and a hover expressed as elevation would exist in one theme only. It does not depress — a card is the plate, and the plate has no wall.
 
 ### Inputs / Fields
 
@@ -349,6 +355,9 @@ This is a considered exception to the general advice against colored side border
 - **Structure:** three groups, not four evenly spaced rows, capped at 32rem. Label and description sit at step 1 — the description finishes the sentence the label starts, so they are one unit. The control takes step 3, because moving from reading to doing is a change of activity and deserves a real interval. The error returns at step 2, closer to the control than the control is to the text above it, so it reads as belonging to the input rather than floating between fields.
 
   Spacing carries the grouping here because nothing else can: every part is the same face at the same size, and only the error changes colour. Set uniformly, the parts of one field sat exactly as far apart as two different fields, and proximity conveyed nothing.
+
+- **Multiline:** a composer, not a taller input. It takes the Body role's 1.55 leading rather than a control's and starts at a four-line floor instead of the 50px control height, because the reader is writing sentences rather than a value. Resizing is block-only — a composer draggable past the 32rem measure its field declares breaks the Intrinsic Maximum Rule from the inside.
+- **Search:** the field plus the three things a field does not have — the `searchbox` role, Escape-to-clear, and a clear control. The magnifier and the clear key sit *over* the input rather than beside it in a wrapper, which is structural rather than visual: the border, fill, and focus ring stay on the input, so no second set of state rules is needed. The clear control is absent from the markup while the field is empty rather than hidden by CSS; an announced control with no effect is worse than no control.
 
 ### Select
 
@@ -374,6 +383,8 @@ This is a considered exception to the general advice against colored side border
 - **Style:** 1.5rem tall, micro type, `plate` fill, `sm` radius (6px), and a uniform 1px border on all four sides.
 - **No bottom edge.** A badge never receives input, so under the Pressable Edge Rule it must not wear the weighted edge that promises travel. Its height floor is set just above its natural 22px so the box stays close to what the padding declares rather than opening a gap the padding never asked for.
 - **Tones:** info, success, warning, danger, following the Tone Trio Rule.
+- **Icon:** the tone's own shape — a circled i, a circled check, a triangle, an octagon — drawn from the same paths `prose.css` masks for its callouts. This is the Tone Trio Rule's second carrier, and the shape is selected by tone rather than chosen by the caller, so a warning cannot wear a check. `neutral` has no shape and renders none.
+- **Pill:** the `pill` radius, reached for only when the thing being labelled is genuinely in motion — a live connection state rather than a version number. "Floating token" is the right connotation for the first and the wrong one for the second, which is what makes the shape carry a distinction rather than a preference. The seated badge stays the default.
 
 ### Popover
 
@@ -381,6 +392,71 @@ This is a considered exception to the general advice against colored side border
 
 - **Style:** keycap radius, `plate` fill, 1px `fog` border, overlay shadow in both themes, capped at `min(24rem, calc(100vw - 2rem))` so it never overruns a small viewport.
 - **Motion:** 140ms ease-out fade with a 4px rise; removed entirely under reduced motion.
+
+### App shell
+
+**Character:** the frame, not a thing in it.
+
+- **Structure:** a bar, a body, a footer, and a skip link before all of them. The shell contributes no interactive element of its own except a navigation link, so it composes with whatever router an app already has and needs almost nothing on the static path.
+- **The skip link is rendered by construction**, inside its own navigation landmark. Page content outside every landmark is a real gap for anyone moving through a page by landmark, and the one control that exists to help them skip should not be the thing they cannot reach that way.
+- **The sidebar split uses flex wrapping, not a second breakpoint.** The system is single-breakpoint, and a sidebar that reflows on its own content's terms is what the Intrinsic Maximum Rule asks for anyway. The sidebar separates itself by surface tone as well as by a rule, so it still reads as a distinct region once it has wrapped.
+- **The current destination takes the Select option's treatment** — accent wash with a mint marker on the leading edge — not the coral key. A sidebar is a list of options, and navigating somewhere commits to nothing.
+- **Measure:** the content region carries `min(100%, 72rem)`, centered. A page needs no layout wrapper.
+
+### Page header
+
+**Character:** what this is, what it is for, and what you can do to it.
+
+- **The heading's own margins are zeroed and the header owns the rhythm.** That follows the Heading Rhythm Rule rather than breaking it: a heading opening its container has nothing above it to separate from, and the space that matters belongs to the header as a block rather than to the heading as a line.
+- **Heading sizes live here**, and only here among the components — the surface decides how large a heading is, and a page header is a surface. They clamp with the viewport rather than stepping at a breakpoint.
+- **Level and size are set independently.** The outline is a document decision; the size is a visual one. The eyebrow is a paragraph in the Micro role, never a heading, so it stays out of the outline.
+
+### Empty state
+
+**Character:** the shape content would fill.
+
+- **A recess, not a raised object.** It takes the page ground rather than the plate, inside a `divider` border at the plate radius. A card is a thing on the plate and reads as content; the absence of content reads as a well. It is still an object — the border and the radius keep it from dissolving into the page.
+- **The heading is the body face** at the Title weight. Under the Two Voice Rule Piazzolla speaks in page headings and card titles, and this is neither.
+- **Name what is absent, not the emptiness.** "No approvals waiting" tells the reader something; "Nothing here" tells them the screen loaded.
+
+### Description list
+
+**Character:** a label and its value, fifteen times a page.
+
+- **Each pair is wrapped**, which HTML permits inside a `dl`, and that wrapper is what makes three layouts one stylesheet: the pair becomes a box to lay out rather than two siblings to place by index.
+- **Layouts:** `rows` for a detail panel the reader scans down, stacking below the measure on its own; `stacked` for a narrow column; `grid` for a strip of independent facts.
+- **The term is muted Label type and the value is body ink**, because the value is the content and the label is the way in.
+- **Numeric values take tabular figures and align to the end edge**, the same reasoning `prose.css` applies to a numeric table column.
+
+### Code block
+
+**Character:** the inline code treatment, one step larger, in a box you can reach.
+
+- Deliberately the same treatment `prose.css` gives a `pre`. A code sample in a product surface and one in an article are the same thing, and the reader should not have to notice which page they are on.
+- **It is focusable**, per the Prose Markup Rule: long code lines scroll by default, and a scrollable region a keyboard cannot reach is a 2.1.1 failure. No focus rule ships with it — `base.css` rings every `:focus-visible` at zero specificity, so the indicator arrives from the token layer in every delivery mode.
+- **Four syntax roles, and only two of them are colors.** A `pre` carrying five hues is the loudest thing on any page it appears on. Comments and punctuation recede to the muted ink; a string — usually the value the reader is scanning for — takes the accent; a keyword is carried by weight. Coral appears nowhere, because nothing in a code sample commits to anything.
+- **The copy control sits above the block, not over its corner.** An overlaid control is always covering the first line, and one revealed on hover is invisible to touch and to the keyboard.
+
+## Delivery
+
+The visual system reaches non-React projects two ways, and the split is
+structural rather than documentary.
+
+`styles.css` expresses every interactive state through React Aria's data
+attributes and contains no `:hover`, `:active`, or `:focus-visible` rule. A
+hand-written `.kc-button` therefore renders correctly at rest and does nothing on
+interaction — which is what makes hand-authoring an unsupported path in practice
+and not only in an ADR.
+
+Statically rendered pages get those states from a separate opt-in stylesheet,
+imported only by a prerender path. Moving a rule from it into `styles.css` would
+make hand-authored markup work and is the one change this system cannot absorb.
+`Select` and `Popover` appear in neither: a listbox that cannot open is not a
+degraded Select.
+
+Two things need no static counterpart because they already work everywhere: the
+skip link and the focus ring both live in the token layer, since an accessibility
+floor that depends on which stylesheet a page happened to import is not a floor.
 
 ## Long-form content
 
@@ -418,6 +494,8 @@ Heading sizes live here and only here. The token package ships none — the surf
 
 - **Don't** drift toward borderless flat minimalism — shadowless cards, seamless surfaces, objects that dissolve into the page. Keycaps is built on things being seated and visibly distinct from their ground. This is the system's confirmed anti-reference.
 - **Don't** put a weighted bottom edge on something that doesn't depress. The edge promises travel; a static element wearing one is a false affordance. This is why `kbd` is not a keycap, however much it wants to be.
+- **Don't** distinguish two committing actions by hue alone. Coral and danger differ by one channel, so a filled destructive key beside a filled primary key is a coin flip. Form carries the difference; color confirms it.
+- **Don't** add a `:hover`, `:active`, or `:focus-visible` rule to the component stylesheet. Those states ship separately so hand-authored markup stays visibly inert — see Delivery.
 - **Don't** add a plate shadow in dark mode. Depth there is the surface ladder, not a cast.
 - **Don't** use coral for anything but a committing action. Not for emphasis, not for decoration, not for a hover state on something that isn't a key.
 - **Don't** introduce a fourth typeface, or let Piazzolla into body copy. Three faces is the ceiling: display, body, code.

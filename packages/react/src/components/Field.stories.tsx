@@ -113,3 +113,36 @@ export const Disabled: Story = {
     description: "Your administrator controls this value.",
   },
 };
+
+/**
+ * A composer, not a taller input.
+ *
+ * Two consumers need one — `retirement-dashboard`'s assistant chat composer and
+ * `knowledge`'s `.chat-composer` — and both are places where the reader writes
+ * sentences rather than a value. So it takes the Body role's 1.55 leading rather
+ * than a control's, and it starts at a four-line floor instead of the 50px
+ * control height.
+ *
+ * Resizing is block-only. A composer that can be dragged wider than the 32rem
+ * measure its field declares breaks the Intrinsic Maximum Rule from the inside.
+ *
+ * One known artifact on the static-render path: React Aria decides whether a
+ * text field is single- or multi-line after mount, so `renderToStaticMarkup`
+ * emits `type="text"` on the `textarea`. Browsers ignore it and it corrects on
+ * hydration; it is inert, not a behavior.
+ */
+export const Multiline: Story = {
+  args: {
+    label: "What changed?",
+    description: "One or two sentences. This is stored with the plan revision.",
+    multiline: true,
+    textareaProps: { placeholder: "Raised the survivor income floor to $75,000." },
+  },
+  play: async ({ canvasElement }) => {
+    const field = within(canvasElement).getByRole("textbox", {
+      name: "What changed?",
+    });
+    await expect(field.tagName).toBe("TEXTAREA");
+    await expect(field).toHaveAttribute("data-multiline");
+  },
+};

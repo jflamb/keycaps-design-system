@@ -70,6 +70,54 @@ none, can consume the visual system:
 That button honors both themes, forced colors, and reduced motion without any
 further work, because all four are token-level contracts.
 
+<Rule name="Do not hand-author component markup." tone="dont">
+  Tokens and <code>prose.css</code> are consumable by anything. A{" "}
+  <code>.kc-button</code> or <code>.kc-card</code> written by hand is not: it
+  renders correctly at rest and is completely inert on hover, press, and focus,
+  because every interactive state in <code>styles.css</code> is a React Aria data
+  attribute. That is deliberate. A project that needs components without
+  authoring React renders them, below.
+</Rule>
+
+## Components without React
+
+A page that cannot run React at runtime can still ship the real components —
+rendered to HTML at build time, with no client bundle.
+
+```js
+import { renderStaticDocument } from "@jflamb/keycaps-react/static";
+import { AppShell, AppShellMain, PageHeader } from "@jflamb/keycaps-react";
+
+const html = renderStaticDocument({
+  title: "mcp-dnsimple",
+  stylesheets: ["./kc/tokens/index.css", "./kc/styles.css", "./kc/static.css"],
+  children: (
+    <AppShell>
+      <AppShellMain>
+        <PageHeader title="Your DNS, answerable in a sentence" />
+      </AppShellMain>
+    </AppShell>
+  ),
+});
+```
+
+**`static.css` is the load-bearing part.** Statically rendered output carries no
+`[data-hovered]` or `[data-pressed]`, because nothing is running to put them
+there, so the pseudo-class rules ship as their own opt-in stylesheet. Import it
+from a prerender path and nowhere else — leaving it out of `styles.css` is what
+keeps hand-authored markup inert, and the guarantee is structural rather than
+documentary.
+
+`renderStaticDocument` also emits the no-flash theme bootstrap and both
+`theme-color` variants, so a statically rendered page gets the dark theme without
+each project reinventing the head.
+
+`Select` and `Popover` are not eligible. Their behavior cannot degrade to CSS —
+a listbox that cannot open is not a degraded Select, it is a broken one — and
+`renderStatic` throws rather than letting one onto a page with no JavaScript. Its
+one blind spot is a `PopoverTrigger`, which renders only its trigger until it
+opens; do not put one on a statically rendered page.
+
 ## Peer range
 
 <PeerRange />
@@ -93,6 +141,13 @@ Keycaps defines only the CSS contract. **It writes no cookies and no browser
 storage.** Persisting a preference is the app's job — existing jflamb
 applications may continue storing theirs under the `jflamb-theme` key, and
 Keycaps will not interfere with it.
+
+One narrow exception, and it only *reads*: `renderStaticDocument` emits a
+blocking bootstrap that looks for `jflamb-theme` in a cookie and then in
+`localStorage`, and sets `data-theme` if it finds `"light"` or `"dark"`. That is
+the no-flash guard a statically rendered page needs and cannot write for itself.
+Pass `themeStorageKey: false` to omit it entirely and leave
+`prefers-color-scheme` to decide.
 
 The attribute belongs on the root element and nowhere else. Nesting a
 `data-theme` inside the page does not scope the theme, because the token

@@ -18,7 +18,11 @@ const PURPOSE: Record<string, string> = {
     "The WOFF2 files themselves, for preloading or for a build that copies assets by path.",
   "@jflamb/keycaps-react": "The components.",
   "@jflamb/keycaps-react/styles.css":
-    "Component styling. Required — the components ship no inline styles.",
+    "Component styling. Required — the components ship no inline styles. Every interactive state is a React Aria data attribute, so this file alone is inert on hover, press, and focus.",
+  "@jflamb/keycaps-react/static":
+    "renderStatic and renderStaticDocument, for rendering components to HTML at build time. A separate bundle, because it pulls in react-dom/server.",
+  "@jflamb/keycaps-react/static.css":
+    "The :hover, :active, and :focus-visible rules that mirror those data attributes, for a page that ships no client React. Import it only from a prerender path — loading it in a React app is harmless but pointless, and loading it nowhere is what makes hand-authored markup visibly inert.",
 };
 
 function exportRows(name: string, exportsField: Record<string, unknown>) {

@@ -57,7 +57,7 @@ Storybook is the documentation site and deploys to GitHub Pages after the main C
 
 VitePress is deliberately not part of the foundation. Storybook already keeps narrative guidance, live component examples, accessibility checks, and API documentation in one place. A separate standards site is worth reconsidering only when non-component guidance becomes substantial enough that Storybook navigation is the constraint.
 
-See [Foundation decision](docs/decisions/0001-foundation.md), [component status](docs/component-status.md), [publishing](docs/publishing.md), and [contributing guidance](docs/contributing/components.md).
+See [Foundation decision](docs/decisions/0001-foundation.md), [consumer delivery](docs/decisions/0002-consumer-delivery.md), [component status](docs/component-status.md), [publishing](docs/publishing.md), and [contributing guidance](docs/contributing/components.md).
 
 ## License
 

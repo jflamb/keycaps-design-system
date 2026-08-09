@@ -232,6 +232,49 @@ test("the select menu matches its trigger width", async ({ page }) => {
   expect(widths.popover).toBe(widths.trigger);
 });
 
+test("forced colors leave the destructive key distinguishable from the neutral one", async ({
+  page,
+}) => {
+  // The claim under test is narrow and easy to get wrong by looking: in the
+  // default theme a danger key is obviously red. Under forced colors its border,
+  // wall, and ink all resolve to system colors — the same ones a secondary key
+  // resolves to — so every difference the design relies on is gone except shape.
+  await page.emulateMedia({ forcedColors: "active" });
+  await page.goto(
+    "/iframe.html?id=components-button--variants&viewMode=story&globals=theme:light",
+  );
+  expect(
+    await page.evaluate(() => matchMedia("(forced-colors: active)").matches),
+  ).toBe(true);
+
+  const danger = page.getByRole("button", { name: "Reject request" });
+  const neutral = page.getByRole("button", { name: "Review details" });
+
+  const paint = (locator: typeof danger) =>
+    locator.evaluate((element) => {
+      const computed = getComputedStyle(element);
+      return {
+        color: computed.color,
+        borderBlockEndColor: computed.borderBlockEndColor,
+      };
+    });
+
+  // Not an incidental observation — this is the defect the shape exists to cover.
+  // If a future palette change makes these differ, the assertion should be
+  // revisited rather than deleted: the shape is still the carrier that survives
+  // monochrome print and color vision deficiency.
+  expect(await paint(danger)).toEqual(await paint(neutral));
+
+  const markBox = async (locator: typeof danger) =>
+    locator.locator(".kc-button__tone-icon").boundingBox();
+
+  const dangerMark = await markBox(danger);
+  expect(dangerMark).not.toBeNull();
+  expect(dangerMark?.width).toBeGreaterThan(8);
+  expect(dangerMark?.height).toBeGreaterThan(8);
+  await expect(neutral.locator(".kc-button__tone-icon")).toHaveCount(0);
+});
+
 test("forced colors preserve borders and a visible keyboard focus indicator", async ({
   page,
 }) => {
@@ -319,4 +362,162 @@ test("showcase reflows at 320 CSS pixels without horizontal page scrolling", asy
   }));
   expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
   await expect(page.getByRole("button", { name: "Save settings" })).toBeVisible();
+});
+
+/**
+ * The two halves of ADR 0002's structural guarantee.
+ *
+ * `styles.css` is data-attribute-only, so hand-authored `.kc-` markup renders
+ * correctly at rest and does nothing on hover or press. `static.css` — imported
+ * only by a prerender path — restores those states with real pseudo-classes.
+ *
+ * Both stories carry byte-identical markup. If someone ever moves a `:hover`
+ * rule into `styles.css`, the first test fails here rather than a consumer
+ * discovering that hand-authoring suddenly looks supported.
+ */
+const staticStory = (story: string) =>
+  `/iframe.html?id=foundations-static-render--${story}&viewMode=story&globals=theme:light`;
+
+async function keyState(page: import("@playwright/test").Page) {
+  // Settled states only. The press transitions over 120ms and the point here is
+  // the resting geometry on each side of the interaction, not the animation.
+  await page.addStyleTag({
+    content: ".kc-button, .kc-field__input { transition: none !important; }",
+  });
+
+  const key = page.getByRole("button", { name: "Get started" });
+  const read = () =>
+    key.evaluate((element) => {
+      const computed = getComputedStyle(element);
+      return {
+        background: computed.backgroundColor,
+        transform: computed.transform,
+        edge: computed.borderBlockEndWidth,
+      };
+    });
+
+  const rest = await read();
+  await key.hover();
+  const hovered = await read();
+
+  const box = (await key.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  const pressed = await read();
+  await page.mouse.up();
+
+  return { rest, hovered, pressed };
+}
+
+test("hand-authored markup is inert under styles.css alone", async ({ page }) => {
+  await page.goto(staticStory("hand-authored-markup-is-inert"));
+
+  const { rest, hovered, pressed } = await keyState(page);
+
+  // Rendered correctly at rest — this is not a broken page, it is an inert one.
+  expect(rest.background).not.toBe("rgba(0, 0, 0, 0)");
+  expect(Number.parseFloat(rest.edge)).toBe(4);
+
+  // And nothing moves.
+  expect(hovered.background).toBe(rest.background);
+  expect(pressed.transform).toBe(rest.transform);
+  expect(pressed.edge).toBe(rest.edge);
+});
+
+test("static.css restores the states on the same markup", async ({ page }) => {
+  await page.goto(staticStory("static-css-restores-the-states"));
+
+  const { rest, hovered, pressed } = await keyState(page);
+
+  expect(hovered.background).not.toBe(rest.background);
+
+  // The press physics, on a path with no React attached: the cap descends
+  // exactly as far as its wall shrinks. `matrix(a, b, c, d, tx, ty)` — the last
+  // component is the vertical translation. Parsed rather than read through
+  // DOMMatrix, which the browser has and the test runner does not.
+  const travel = Number.parseFloat(pressed.transform.split(",").at(-1)!);
+  const restEdge = Number.parseFloat(rest.edge);
+  const pressedEdge = Number.parseFloat(pressed.edge);
+  expect(travel).toBe(3);
+  expect(pressedEdge).toBe(1);
+  expect(travel + pressedEdge).toBe(restEdge);
+});
+
+test("a statically rendered key keeps a visible focus indicator", async ({ page }) => {
+  // The ring comes from the token layer's zero-specificity `:where(:focus-visible)`
+  // rule, so it is present in *both* delivery modes — including the inert one.
+  // A page that cannot show focus is not a degraded page, it is an inaccessible
+  // one, and that is why this rule does not live with the other state selectors.
+  for (const story of [
+    "hand-authored-markup-is-inert",
+    "static-css-restores-the-states",
+  ]) {
+    await page.goto(staticStory(story));
+    await page.getByRole("button", { name: "Get started" }).focus();
+    const outline = await page
+      .getByRole("button", { name: "Get started" })
+      .evaluate((element) => {
+        const computed = getComputedStyle(element);
+        return {
+          style: computed.outlineStyle,
+          width: Number.parseFloat(computed.outlineWidth),
+          offset: Number.parseFloat(computed.outlineOffset),
+        };
+      });
+    expect(outline.style, story).not.toBe("none");
+    expect(outline.width, story).toBeGreaterThanOrEqual(3);
+    expect(outline.offset, story).toBeGreaterThanOrEqual(3);
+  }
+});
+
+test("the app shell puts a working skip link before everything else", async ({ page }) => {
+  await page.goto(
+    "/iframe.html?id=components-app-shell--default&viewMode=story&globals=theme:light",
+  );
+
+  const skip = page.getByRole("link", { name: "Skip to main content" });
+
+  // Hidden at rest by clipping, not by `display: none` — a display-none element
+  // is not focusable, which would defeat the whole point.
+  expect((await skip.boundingBox())!.height).toBeLessThanOrEqual(1);
+
+  await skip.focus();
+  const focused = (await skip.boundingBox())!;
+  expect(focused.height).toBeGreaterThanOrEqual(44);
+  await expect(skip).toBeFocused();
+
+  await skip.press("Enter");
+  await expect(page.getByRole("main")).toBeVisible();
+});
+
+test("the new surfaces reflow at 320 CSS pixels", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+
+  for (const id of [
+    "components-app-shell--default",
+    "components-app-shell--with-sidebar",
+    "components-page-header--complete",
+    "components-description-list--rows",
+    "components-empty-state--with-action",
+    "components-code-block--syntax-tokens",
+    "components-search-field--default",
+  ]) {
+    await page.goto(`/iframe.html?id=${id}&viewMode=story&globals=theme:light`);
+    const dimensions = await page.evaluate(() => ({
+      clientWidth: document.documentElement.clientWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+    }));
+    expect(dimensions.scrollWidth, id).toBeLessThanOrEqual(dimensions.clientWidth);
+  }
+});
+
+test("the Tier 1 surfaces are axe-clean in light and dark", async ({ page }) => {
+  for (const theme of ["light", "dark"]) {
+    await page.goto(
+      `/iframe.html?id=components-app-shell--default&viewMode=story&globals=theme:${theme}`,
+    );
+    await expect(page.getByRole("main")).toBeVisible();
+    const accessibility = await new AxeBuilder({ page }).analyze();
+    expect(accessibility.violations, theme).toEqual([]);
+  }
 });

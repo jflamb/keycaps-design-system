@@ -1,0 +1,166 @@
+/* Keycaps static state selectors — the Mode 1 half of ADR 0002.
+ *
+ * Opt-in, and imported only by a prerender path:
+ *
+ *   @import "@jflamb/keycaps-react/styles.css";
+ *   @import "@jflamb/keycaps-react/static.css";
+ *
+ * ## Why this file exists at all
+ *
+ * `styles.css` expresses every interactive state through React Aria's data
+ * attributes — `[data-hovered]`, `[data-pressed]`, `[data-focus-visible]` — and
+ * contains no `:hover`, `:active`, or `:focus-visible` rule. Statically rendered
+ * output carries none of those attributes, because nothing is running to put
+ * them there, so a Mode 1 page needs the real pseudo-classes.
+ *
+ * ## Why it is a separate file and not three more rules over there
+ *
+ * Adding these to `styles.css` would also make hand-authored `.kc-button` markup
+ * work — which is the delivery model ADR 0002 rejected, and the one that
+ * produced `ledger.css`. Keeping them here means `styles.css` stays
+ * data-attribute-only and hand-written markup against it is visibly inert on
+ * hover, press, and focus. The guarantee is structural rather than documentary:
+ * you cannot forget to enforce it, because there is nothing to enforce.
+ *
+ * So: **do not move a rule from this file into `styles.css`, and do not add a
+ * `:hover`, `:active`, or `:focus-visible` selector there.** The e2e suite
+ * asserts both halves — that hand-authored markup does not react under
+ * `styles.css` alone, and that it does under both.
+ *
+ * ## What is not here
+ *
+ * `Select` and `Popover`. Their behavior cannot degrade to CSS: a listbox that
+ * cannot open is not a degraded Select, it is a broken one. A page that needs
+ * either is a Mode 2 page, and `renderStatic` throws rather than letting one
+ * through.
+ *
+ * `SkipLink` and the code block's focus ring are also absent, and for the
+ * opposite reason — they already work everywhere. `.kc-skip-link` and the
+ * zero-specificity `:where(:focus-visible)` ring both live in the tokens
+ * package's `base.css`, which every delivery mode loads.
+ *
+ * A statically rendered Banner dismiss and a code block's copy control are
+ * present but inert; neither has a no-JS behavior to degrade to. Do not render
+ * them on a Mode 1 page.
+ *
+ * ## The mirror
+ *
+ * Every rule below states which data-attribute rule in `styles.css` it mirrors.
+ * The two files are a pair: a change to a state in one is a change in both.
+ * `:not([data-disabled])` appears throughout because React Aria emits
+ * `data-disabled` into static output — a disabled key renders disabled, it just
+ * does not react — so the guard is on the attribute rather than on `:disabled`,
+ * which an anchor cannot carry.
+ */
+
+/* Mirrors `.kc-button[data-variant="primary"][data-hovered]`. */
+.kc-button[data-variant="primary"]:not([data-disabled]):hover {
+  background: var(--kc-color-key-face-hover);
+}
+
+/* Mirrors `.kc-button[data-variant="secondary"][data-hovered]`
+   and `.kc-button[data-variant="quiet"][data-hovered]`. */
+.kc-button[data-variant="secondary"]:not([data-disabled]):hover,
+.kc-button[data-variant="quiet"]:not([data-disabled]):hover {
+  background: var(--kc-color-surface-hover);
+}
+
+/* Mirrors `.kc-button[data-variant="danger"][data-hovered]`. */
+.kc-button[data-variant="danger"]:not([data-disabled]):hover {
+  background: var(--kc-color-key-face-danger-hover);
+}
+
+/* Mirrors `.kc-button[data-variant="link"][data-hovered]`. */
+.kc-button[data-variant="link"]:not([data-disabled]):hover {
+  background: none;
+  text-decoration-thickness: 2px;
+}
+
+/* Mirrors `.kc-button[data-pressed]:not([data-disabled])`.
+   The coupling is the same one the React path asserts: the cap descends exactly
+   as far as its wall shrinks, both from tokens, so the reduced-motion
+   substitution reaches this path with no branch here. */
+.kc-button:not([data-disabled]):active {
+  transform: translateY(var(--kc-press-travel));
+  border-block-end-width: var(--kc-press-edge-width);
+}
+
+/* Mirrors `.kc-button[data-variant="primary"][data-pressed]:not([data-disabled])`. */
+.kc-button[data-variant="primary"]:not([data-disabled]):active {
+  background: var(--kc-color-key-face-pressed);
+}
+
+/* Mirrors `.kc-button[data-variant="danger"][data-pressed]:not([data-disabled])`. */
+.kc-button[data-variant="danger"]:not([data-disabled]):active {
+  background: var(--kc-color-key-face-danger-pressed);
+  color: var(--kc-color-on-key-danger-pressed);
+}
+
+/* Mirrors `.kc-button[data-variant="link"][data-pressed]:not([data-disabled])`.
+   An inline link wears no wall, so it owes no travel. */
+.kc-button[data-variant="link"]:not([data-disabled]):active {
+  transform: none;
+  border-block-end-width: 0;
+}
+
+/* Mirrors `.kc-button[data-focus-visible]`. */
+.kc-button:focus-visible {
+  outline: var(--kc-focus-ring);
+  outline-offset: var(--kc-focus-ring-offset);
+}
+
+/* Mirrors `.kc-field__input[data-hovered]`. The Select trigger shares that rule
+   in `styles.css` and is deliberately not mirrored here. */
+.kc-field__input:not([data-disabled]):hover {
+  border-color: var(--kc-color-text-muted);
+}
+
+/* Mirrors `.kc-field__input[data-focus-visible]`. */
+.kc-field__input:focus-visible {
+  outline: var(--kc-focus-ring);
+  outline-offset: var(--kc-focus-ring-offset);
+}
+
+/* Mirrors `.kc-card[data-linked][data-hovered]` and the `:has()` form beside it.
+   `:has()` is unnecessary here: without React the anchor's hover propagates to
+   the card through the ordinary `:hover` chain, which matches any ancestor of
+   the hovered element. */
+.kc-card[data-linked]:hover {
+  background: var(--kc-color-surface-hover);
+}
+
+/* Mirrors `.kc-card[data-linked][data-focus-visible]` and its `:has()` form.
+   `:focus-within` rather than `:focus-visible`, because the focus may land on
+   the `CardLink` inside rather than on the card itself, and the ring belongs to
+   the card either way — the whole card is the target. */
+.kc-card[data-linked]:focus-visible,
+.kc-card[data-linked]:has(.kc-card__link:focus-visible) {
+  outline: var(--kc-focus-ring);
+  outline-offset: var(--kc-focus-ring-offset);
+}
+
+/* Mirrors `.kc-app-shell__nav-link[data-hovered]`. */
+.kc-app-shell__nav-link:hover {
+  background: var(--kc-color-surface-hover);
+  color: var(--kc-color-text);
+}
+
+/* Mirrors `.kc-app-shell__nav-link[data-focus-visible]`. */
+.kc-app-shell__nav-link:focus-visible {
+  outline: var(--kc-focus-ring);
+  outline-offset: var(--kc-focus-ring-offset);
+}
+
+/* Mirrors the focus half of the forced-colors block in `styles.css`. The token
+   layer remaps every semantic color for this mode already, so what remains is
+   the indicator the OS would otherwise flatten. */
+@media (forced-colors: active) {
+  .kc-button:focus-visible,
+  .kc-field__input:focus-visible,
+  .kc-app-shell__nav-link:focus-visible,
+  .kc-card[data-linked]:focus-visible,
+  .kc-card[data-linked]:has(.kc-card__link:focus-visible) {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+}

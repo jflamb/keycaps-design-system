@@ -8,6 +8,7 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
+  CardLink,
   CardTitle,
 } from "./Card";
 
@@ -123,5 +124,87 @@ export const HeadingLevels: Story = {
     await expect(
       canvas.getByRole("heading", { level: 4, name: /as h4/ }),
     ).toBeVisible();
+  },
+};
+
+/**
+ * The whole card is one link.
+ *
+ * The accessible name is everything inside it, which is right for a short row —
+ * `retirement-dashboard`'s `.hub-card-link`, `knowledge`'s `.home-update` — and
+ * wrong the moment the card carries a title, a description, and a metadata line,
+ * because a screen reader then announces the entire paragraph as the link text.
+ * When that happens, reach for `CardLink` instead.
+ *
+ * It warms one step on hover rather than lifting. The plate shadow is `none` in
+ * dark, so a hover expressed as elevation would exist in one theme only; surface
+ * tone works in both, which is the same reasoning the dark ladder is built on.
+ * It does not depress: a card is the plate, and the plate has no wall to
+ * compress.
+ */
+export const WholeCardLink: Story = {
+  render: () => (
+    <div className="kc-story-column">
+      <Card as="a" href="#approvals">
+        <CardHeader>
+          <CardTitle level={3}>Approvals</CardTitle>
+          <CardDescription>Three requests waiting on you.</CardDescription>
+        </CardHeader>
+      </Card>
+      <Card as="a" href="#activity">
+        <CardHeader>
+          <CardTitle level={3}>Activity</CardTitle>
+          <CardDescription>What the assistant did overnight.</CardDescription>
+        </CardHeader>
+      </Card>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const link = within(canvasElement).getByRole("link", { name: /Approvals/ });
+    await expect(link).toHaveClass("kc-card");
+    await expect(link).toHaveAttribute("data-linked");
+  },
+};
+
+/**
+ * The title is the link; the rest of the card is clickable through an overlay.
+ *
+ * This is the shape to use whenever the card carries more than a line or two —
+ * the accessible name stays the title, so the link list a screen reader user
+ * navigates by is a list of destinations rather than a list of paragraphs.
+ *
+ * The cost is real and worth stating rather than discovering: the overlay sits
+ * above the card's text, so body copy inside a linked card cannot be selected. A
+ * card whose content the reader needs to copy should use an ordinary link and no
+ * overlay.
+ */
+export const LinkedTitle: Story = {
+  render: () => (
+    <Card isLinked>
+      <CardHeader>
+        <Badge tone="info">Updated</Badge>
+        <CardTitle level={3}>
+          <CardLink href="#filing-destination">
+            Confirm the filing destination
+          </CardLink>
+        </CardTitle>
+        <CardDescription>
+          This item looks like a durable resource, but it has not been moved.
+        </CardDescription>
+      </CardHeader>
+      <CardBody>
+        <p>
+          Suggested destination: <strong>Resources / Design systems</strong>
+        </p>
+      </CardBody>
+    </Card>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // The name is the title, not the whole card.
+    await expect(
+      canvas.getByRole("link", { name: "Confirm the filing destination" }),
+    ).toBeVisible();
+    await expect(canvas.queryByRole("link", { name: /durable resource/ })).toBeNull();
   },
 };
