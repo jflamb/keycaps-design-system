@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import axe from "axe-core";
+import { Form } from "react-aria-components";
 import { describe, expect, it, vi } from "vitest";
 import {
   Badge,
@@ -31,21 +32,51 @@ describe("Button", () => {
 });
 
 describe("Field", () => {
-  it("connects its label, description, and error message", () => {
+  it("connects its label, description, and error message without a redundant invalid prop", () => {
     render(
       <Field
         description="Use a durable address."
         errorMessage="Enter a complete email address."
         inputProps={{ type: "email" }}
-        isInvalid
         label="Email address"
       />,
     );
 
     const field = screen.getByRole("textbox", { name: "Email address" });
+    expect(field).toHaveAttribute("aria-invalid", "true");
     expect(field).toHaveAccessibleDescription(
       /durable address.*complete email address/i,
     );
+    expect(screen.getByText("Enter a complete email address.")).toBeVisible();
+  });
+
+  it("honors an explicit valid state over a supplied error message", () => {
+    render(
+      <Field
+        errorMessage="Enter a complete email address."
+        isInvalid={false}
+        label="Email address"
+      />,
+    );
+
+    const field = screen.getByRole("textbox", { name: "Email address" });
+    expect(field).not.toHaveAttribute("aria-invalid", "true");
+    expect(screen.queryByText("Enter a complete email address.")).toBeNull();
+  });
+
+  it("still reports native constraint violations when no error message is supplied", async () => {
+    const user = userEvent.setup();
+    render(
+      <Form>
+        <Field isRequired label="Email address" name="email" />
+        <Button type="submit">Save settings</Button>
+      </Form>,
+    );
+
+    const field = screen.getByRole("textbox", { name: "Email address" });
+    expect(field).not.toHaveAttribute("aria-invalid", "true");
+    await user.click(screen.getByRole("button", { name: "Save settings" }));
+    expect(field).toHaveAttribute("aria-invalid", "true");
   });
 });
 
