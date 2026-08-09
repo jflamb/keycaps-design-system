@@ -18,6 +18,24 @@ const contentTypes = new Map([
   [".woff2", "font/woff2"],
 ]);
 
+function sendFile(target, response) {
+  const stream = createReadStream(target);
+  stream.on("open", () => {
+    response.writeHead(200, {
+      "Cache-Control": "no-store",
+      "Content-Type": contentTypes.get(path.extname(target)) ?? "application/octet-stream",
+    });
+    stream.pipe(response);
+  });
+  stream.on("error", () => {
+    if (!response.headersSent) {
+      response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("Not found");
+    } else {
+      response.destroy();
+    }
+  });
+}
+
 const server = createServer(async (request, response) => {
   try {
     const pathname = decodeURIComponent(new URL(request.url ?? "/", "http://localhost").pathname);
@@ -31,11 +49,7 @@ const server = createServer(async (request, response) => {
     const metadata = await stat(target);
     if (metadata.isDirectory()) target = path.join(target, "index.html");
 
-    response.writeHead(200, {
-      "Cache-Control": "no-store",
-      "Content-Type": contentTypes.get(path.extname(target)) ?? "application/octet-stream",
-    });
-    createReadStream(target).pipe(response);
+    sendFile(target, response);
   } catch {
     response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("Not found");
   }

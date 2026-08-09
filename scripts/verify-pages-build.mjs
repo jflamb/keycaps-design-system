@@ -20,6 +20,24 @@ const contentTypes = new Map([
   [".woff2", "font/woff2"],
 ]);
 
+function sendFile(target, response) {
+  const stream = createReadStream(target);
+  stream.on("open", () => {
+    response.writeHead(200, {
+      "Cache-Control": "no-store",
+      "Content-Type": contentTypes.get(path.extname(target)) ?? "application/octet-stream",
+    });
+    stream.pipe(response);
+  });
+  stream.on("error", () => {
+    if (!response.headersSent) {
+      response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("Not found");
+    } else {
+      response.destroy();
+    }
+  });
+}
+
 const server = createServer(async (request, response) => {
   try {
     const pathname = decodeURIComponent(new URL(request.url ?? "/", "http://localhost").pathname);
@@ -37,11 +55,7 @@ const server = createServer(async (request, response) => {
 
     const metadata = await stat(target);
     if (metadata.isDirectory()) target = path.join(target, "index.html");
-    response.writeHead(200, {
-      "Cache-Control": "no-store",
-      "Content-Type": contentTypes.get(path.extname(target)) ?? "application/octet-stream",
-    });
-    createReadStream(target).pipe(response);
+    sendFile(target, response);
   } catch {
     response.writeHead(404).end("Not found");
   }
@@ -67,6 +81,40 @@ try {
   page.on("console", (message) => {
     if (message.type() === "error") consoleErrors.push(message.text());
   });
+
+  const missingIndex = await page.request.get(`${origin}${basePath}assets/`);
+  if (missingIndex.status() !== 404) {
+    throw new Error(`Missing directory index returned ${missingIndex.status()}; expected 404.`);
+  }
+
+  // The manager is the deployed landing page, so its branding is part of the
+  // artifact. The served <title> is what a link preview and a cold tab show
+  // before Storybook rewrites it per story; a regression here is what
+  // "storybook - Storybook" looked like.
+  const managerHtml = await (await page.request.get(`${origin}${basePath}`)).text();
+  const servedTitle = /<title>([^<]*)<\/title>/.exec(managerHtml)?.[1] ?? "";
+  if (!/Keycaps/.test(servedTitle)) {
+    throw new Error(`Served manager title does not name Keycaps: ${servedTitle}`);
+  }
+
+  await page.goto(`${origin}${basePath}`, { waitUntil: "networkidle" });
+
+  const managerTheme = await page.evaluate(() => ({
+    theme: document.documentElement.dataset.theme ?? null,
+    cloud: getComputedStyle(document.documentElement)
+      .getPropertyValue("--kc-color-cloud")
+      .trim(),
+  }));
+  if (managerTheme.theme !== "light") {
+    throw new Error(
+      `Manager did not receive the Keycaps theme contract: data-theme=${managerTheme.theme}`,
+    );
+  }
+  if (managerTheme.cloud !== "#f5f5f3") {
+    throw new Error(
+      `Manager is not carrying Keycaps tokens: --kc-color-cloud=${managerTheme.cloud || "(unset)"}`,
+    );
+  }
 
   await page.goto(
     `${origin}${basePath}iframe.html?id=introduction--guidance&viewMode=docs`,

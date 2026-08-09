@@ -32,7 +32,7 @@
     "react-dom": ">=18.2.0 <20.0.0"
   },
   "dependencies": {
-    "react-aria-components": "1.20.0"
+    "react-aria-components": "^1.20.0"
   },
   "devDependencies": {
     "@axe-core/react": "4.11.0",
@@ -47,12 +47,13 @@
     "jsdom": "28.1.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "storybook": "10.5.7",
     "tsup": "8.5.1",
     "typescript": "7.0.2",
     "vitest": "4.1.10"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --external react --external react-dom && tsc -p tsconfig.build.json && cp src/styles.css dist/styles.css",
+    "build": "tsup src/index.ts --format esm,cjs --external react --external react-dom --clean && tsc -p tsconfig.build.json && cp src/styles.css dist/styles.css",
     "clean": "rm -rf dist coverage",
     "prepublishOnly": "pnpm build && pnpm test",
     "test": "vitest run --coverage.enabled=false",

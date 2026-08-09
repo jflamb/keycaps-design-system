@@ -39,6 +39,6 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish tokens
-        run: npm publish ./packages/tokens --access public --provenance
+        run: pnpm --filter @jflamb/keycaps-tokens publish --access public --provenance --no-git-checks
       - name: Publish React components
-        run: npm publish ./packages/react --access public --provenance
+        run: pnpm --filter @jflamb/keycaps-react publish --access public --provenance --no-git-checks
