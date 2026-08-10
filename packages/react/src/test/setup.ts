@@ -64,3 +64,42 @@ if (!globalThis.PointerEvent) {
 if (!HTMLElement.prototype.scrollIntoView) {
   HTMLElement.prototype.scrollIntoView = () => {};
 }
+
+/*
+ * jsdom 28 ships `HTMLDialogElement` with its `open` property and none of its
+ * methods, so `showModal()` throws. This shim is the smallest thing that lets a
+ * unit test drive the element: `open` tracks the attribute, and `close` and
+ * `cancel` fire where the platform fires them, which is what `Dialog` listens
+ * for.
+ *
+ * What it deliberately does *not* fake is the reason the component exists — the
+ * top layer, the focus trap, inertness, and the `::backdrop`. None of those can
+ * be shimmed honestly, so none of them is asserted here. They are verified in
+ * the browser suite instead, against a real Chromium, and that split is the
+ * point: a passing unit test must not be able to claim a guarantee jsdom is
+ * incapable of providing.
+ */
+if (!HTMLDialogElement.prototype.showModal) {
+  const setOpen = (dialog: HTMLDialogElement, open: boolean) => {
+    if (open) dialog.setAttribute("open", "");
+    else dialog.removeAttribute("open");
+  };
+
+  HTMLDialogElement.prototype.show = function show(this: HTMLDialogElement) {
+    setOpen(this, true);
+  };
+
+  HTMLDialogElement.prototype.showModal = function showModal(this: HTMLDialogElement) {
+    setOpen(this, true);
+  };
+
+  HTMLDialogElement.prototype.close = function close(
+    this: HTMLDialogElement,
+    returnValue?: string,
+  ) {
+    if (!this.hasAttribute("open")) return;
+    if (returnValue !== undefined) this.returnValue = returnValue;
+    setOpen(this, false);
+    this.dispatchEvent(new Event("close"));
+  };
+}

@@ -40,6 +40,10 @@ const modeTwoOnly = [
     "Popover needs a client runtime to open, trap focus, and return it. A page that needs one is a Mode 2 page.",
   ],
   [
+    "kc-dialog",
+    "Dialog needs a client runtime to call `showModal()`. Nothing opens it on a page with no JavaScript, and a modal that cannot open is not a degraded dialog. A page that needs one is a Mode 2 page.",
+  ],
+  [
     "kc-theme-toggle",
     "ThemeToggle needs a client runtime to change the theme. A Mode 1 page carries the no-flash bootstrap and lets `prefers-color-scheme` decide, which is the whole of its theming.",
   ],

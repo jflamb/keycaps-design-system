@@ -393,6 +393,19 @@ This is a considered exception to the general advice against colored side border
 - **Style:** keycap radius, `plate` fill, 1px `fog` border, overlay shadow in both themes, capped at `min(24rem, calc(100vw - 2rem))` so it never overruns a small viewport.
 - **Motion:** 140ms ease-out fade with a 4px rise; removed entirely under reduced motion.
 
+### Dialog
+
+**Character:** a plate that has detached, and the drawer is the same plate pinned to an edge.
+
+- **It is a native `<dialog>` opened with `showModal()`, and that is the design decision.** Inertness, the focus trap, Escape, and top-layer stacking are the platform's, and a component that re-implements them ships a subset. This is the opposite conclusion to `Disclosure`'s only in appearance: both take the platform element, and the difference is that a `<details>` needs no runtime while a `<dialog>` cannot open without one. That is why `renderStatic` throws on this and renders that.
+- **Style:** plate radius (18px), `plate` fill, 1px `fog` border, overlay shadow in both themes under the Overlay Exception Rule, capped at `min(42rem, calc(100vw - 2rem))`. Both maxima are restated rather than left to the UA, which otherwise caps a `dialog` at `calc(100% - 6px - 2em)` in each axis — a measure the component did not choose.
+- **The scrim is `--kc-color-scrim`**, graphite-tinted in light and black in dark at the same 0.68 alpha, and opaque `Canvas` under forced colors, where the overlay shadow is `none` and the scrim is the only separator left.
+- **The head does not scroll.** The body is the scroll container and the head and footer are flex items that do not shrink, so the close control is reachable at every scroll offset without a sticky offset that has to be kept clear of the radius.
+- **The drawer is a `placement` prop.** `inline-end` and `inline-start` pin the same dialog to one edge at full height, 35rem wide, square-cornered and border-free on the edge it is flush with. A sibling `Drawer` would be two components for one object.
+- **The title is the Title role in the display face**, which follows from the same sentence as the radius: a plate's title is a card title.
+- **Nested overlays portal into it.** A `Select` or `Popover` inside a modal would otherwise be portalled to `document.body`, outside the top layer and inside the inert half of the document — painted under the scrim and impossible to open. The system solves this between its own components rather than through a prop a caller can forget.
+- **It locks the page behind it**, which the platform does not do, compensating exactly for the scrollbar it removes.
+
 ### App shell
 
 **Character:** the frame, not a thing in it.
@@ -465,6 +478,13 @@ imported only by a prerender path. Moving a rule from it into `styles.css` would
 make hand-authored markup work and is the one change this system cannot absorb.
 `Select` and `Popover` appear in neither: a listbox that cannot open is not a
 degraded Select.
+
+`Dialog` is in `styles.css` and not in `static.css`, which is the same answer
+arrived at from the other side. It is styled through `[open]` and `::backdrop` —
+an attribute and a pseudo-element, so the data-attribute-only rule is untouched —
+and it has no static counterpart because a `<dialog>` opens only when something
+calls `showModal()`. There is no state for a prerender path to restore, because
+there is no page without JavaScript on which it does anything at all.
 
 Three things need no static counterpart because they already work everywhere: the
 skip link, the focus ring, and the disclosure all live in the token layer, since

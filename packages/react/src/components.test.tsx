@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { useState } from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import axe from "axe-core";
@@ -36,6 +37,7 @@ import {
   DescriptionList,
   DescriptionListItem,
   DescriptionTerm,
+  Dialog,
   Disclosure,
   EmptyState,
   Field,
@@ -1230,6 +1232,239 @@ describe("the disclosure and the article disclosure are one rule", () => {
   });
 });
 
+/**
+ * What jsdom can and cannot be asked about this component.
+ *
+ * jsdom 28 ships `HTMLDialogElement` with its `open` property and none of its
+ * methods, so `test/setup.ts` shims `show`, `showModal`, and `close`. The shim
+ * fakes the element's *bookkeeping* and nothing else: there is no top layer, no
+ * focus trap, no inertness, and no `::backdrop` behind it. So none of those is
+ * asserted here — they are the browser suite's, against a real Chromium.
+ *
+ * That split is deliberate rather than a shortfall. The whole argument for this
+ * component is that the platform provides those four things; a unit test that
+ * appeared to confirm them against a shim would be asserting the shim.
+ */
+describe("Dialog", () => {
+  const options = [
+    { id: "household", label: "Household budget" },
+    { id: "retirement", label: "Retirement plan" },
+  ];
+
+  function ControlledDialog({ description }: { description?: string }) {
+    const [isOpen, setIsOpen] = useState(false);
+    return (
+      <>
+        <Button onPress={() => setIsOpen(true)}>Open it</Button>
+        <Dialog
+          description={description}
+          isOpen={isOpen}
+          onOpenChange={setIsOpen}
+          title="Connect a spreadsheet"
+        >
+          <p>Body copy.</p>
+        </Dialog>
+      </>
+    );
+  }
+
+  it("opens as a modal and takes its accessible name from its title", async () => {
+    const user = userEvent.setup();
+    render(<ControlledDialog description="Pick the spreadsheet to read from." />);
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Open it" }));
+
+    const dialog = await screen.findByRole("dialog");
+    expect(dialog).toHaveAccessibleName("Connect a spreadsheet");
+    expect(dialog).toHaveAccessibleDescription("Pick the spreadsheet to read from.");
+    // The heading is a real heading as well as the name, so the dialog has an
+    // outline of its own once a reader is inside it.
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Connect a spreadsheet" }),
+    ).toBeVisible();
+  });
+
+  it("renders a named close control by construction and reports the close", async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    render(
+      <Dialog isOpen onOpenChange={onOpenChange} title="Assumptions">
+        <p>Body copy.</p>
+      </Dialog>,
+    );
+
+    // Not a prop a caller supplies. Escape is the other way out and it is
+    // invisible, so a dialog whose close control can be forgotten looks
+    // inescapable — the same reasoning that makes the app shell render its own
+    // skip link.
+    await user.click(screen.getByRole("button", { name: "Close dialog" }));
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it("refuses Escape when it is not dismissable, and accepts it when it is", () => {
+    const onOpenChange = vi.fn();
+    const { rerender } = render(
+      <Dialog isDismissable={false} isOpen onOpenChange={onOpenChange} title="Save first">
+        <p>Body copy.</p>
+      </Dialog>,
+    );
+
+    // Escape reaches a `<dialog>` as a cancelable `cancel` event before `close`,
+    // so refusing it is a `preventDefault` on that event and nothing else.
+    const dialog = screen.getByRole("dialog");
+    const refused = new Event("cancel", { cancelable: true });
+    dialog.dispatchEvent(refused);
+    expect(refused.defaultPrevented).toBe(true);
+
+    rerender(
+      <Dialog isOpen onOpenChange={onOpenChange} title="Save first">
+        <p>Body copy.</p>
+      </Dialog>,
+    );
+    const allowed = new Event("cancel", { cancelable: true });
+    screen.getByRole("dialog").dispatchEvent(allowed);
+    expect(allowed.defaultPrevented).toBe(false);
+  });
+
+  it("carries the placement as an attribute, so the drawer is this component", () => {
+    render(
+      <Dialog isOpen onOpenChange={() => {}} placement="inline-end" title="Assumptions">
+        <p>Body copy.</p>
+      </Dialog>,
+    );
+    // The drawer is geometry rather than a sibling component. If a `Drawer`
+    // export ever appears, this is the test that should have stopped it.
+    expect(screen.getByRole("dialog")).toHaveAttribute("data-placement", "inline-end");
+  });
+
+  it("locks the page while it is open and restores exactly what it found", () => {
+    const root = document.documentElement;
+    root.style.overflow = "auto";
+
+    const { rerender } = render(
+      <Dialog isOpen onOpenChange={() => {}} title="Assumptions">
+        <p>Body copy.</p>
+      </Dialog>,
+    );
+    // A native `<dialog>` does not do this on its own — the page keeps
+    // scrolling under the pointer, which is the modal defect users report.
+    expect(root.style.overflow).toBe("hidden");
+
+    rerender(
+      <Dialog isOpen={false} onOpenChange={() => {}} title="Assumptions">
+        <p>Body copy.</p>
+      </Dialog>,
+    );
+    expect(root.style.overflow).toBe("auto");
+    root.style.overflow = "";
+  });
+
+  it("puts a nested Select inside the dialog rather than on document.body", async () => {
+    const user = userEvent.setup();
+    render(
+      <Dialog isOpen onOpenChange={() => {}} title="Connect a spreadsheet">
+        <Select label="Spreadsheet" options={options} />
+      </Dialog>,
+    );
+
+    await user.click(screen.getByRole("button", { name: /Spreadsheet/ }));
+    const listbox = await screen.findByRole("listbox");
+
+    /*
+     * The whole architecture in one assertion. `showModal()` puts the dialog in
+     * the top layer and makes everything outside it inert; React Aria portals to
+     * `document.body` by default, so a listbox landing there is both inert and
+     * painted under the scrim — it cannot be opened at all.
+     *
+     * jsdom has no top layer, so what this can prove is the *containment*, which
+     * is the part the system controls. That it is consequently clickable and
+     * above the scrim is asserted in the browser suite, where those things exist.
+     */
+    const dialog = screen.getByRole("dialog", { name: "Connect a spreadsheet" });
+    expect(dialog.tagName).toBe("DIALOG");
+    expect(dialog.contains(listbox)).toBe(true);
+  });
+
+  it("leaves a Popover outside a dialog exactly where React Aria puts it", async () => {
+    const user = userEvent.setup();
+    render(
+      <PopoverTrigger>
+        <Button variant="secondary">Account help</Button>
+        <Popover aria-label="Account help">Use your jflamb.com account.</Popover>
+      </PopoverTrigger>,
+    );
+
+    // The context defaults to `undefined` outside a Dialog, which is what leaves
+    // React Aria's own default in place rather than replacing it with ours.
+    await user.click(screen.getByRole("button", { name: "Account help" }));
+    const popover = await screen.findByRole("dialog", { name: "Account help" });
+    expect(document.body.contains(popover)).toBe(true);
+  });
+
+  it("is refused by renderStatic, because a modal that cannot open is not a degraded dialog", () => {
+    expect(() =>
+      renderStatic(
+        <Dialog isOpen onOpenChange={() => {}} title="Assumptions">
+          <p>Body copy.</p>
+        </Dialog>,
+      ),
+    ).toThrow(StaticRenderError);
+  });
+
+  it("reads a scrim token that is declared in both themes and under forced colors", () => {
+    // The design direction said "the token layer ships one scrim and neither
+    // number is it." It shipped none — see correction 30. This is the test that
+    // stops the dark theme or the forced-colors mapping being the one that gets
+    // forgotten, which is exactly how AW ended up with dialogs that have no
+    // depth in dark mode.
+    const tokens = readFileSync(resolve(process.cwd(), "../tokens/src/tokens.css"), "utf8");
+    const declarations = [...tokens.matchAll(/--kc-color-scrim:\s*([^;]+);/g)].map(
+      (match) => match[1]!.trim(),
+    );
+    expect(declarations).toHaveLength(4);
+
+    // Light is tinted with the graphite ink, the same tint both shadows carry.
+    expect(declarations[0]).toBe("rgb(58 63 71 / 0.68)");
+    // Both dark blocks — the `prefers-color-scheme` one and the explicit
+    // `data-theme` one — or a reader with an explicit choice gets the light
+    // scrim on a dark ground.
+    expect(declarations[1]).toBe("rgb(0 0 0 / 0.68)");
+    expect(declarations[2]).toBe("rgb(0 0 0 / 0.68)");
+    // `--kc-shadow-overlay` is `none` under forced colors, which leaves the
+    // scrim as the only thing between the dialog and the page.
+    expect(declarations[3]).toBe("Canvas");
+
+    // And the component spends it, rather than declaring a literal of its own —
+    // which is what both consumer repos did.
+    expect(readSource("./styles.css")).toContain("background: var(--kc-color-scrim);");
+  });
+
+  it("has no axe violations, open, with a footer and a nested chooser", async () => {
+    const { container } = render(
+      <Dialog
+        description="Pick the spreadsheet this dashboard reads from."
+        isOpen
+        onOpenChange={() => {}}
+        title="Connect a spreadsheet"
+        footer={
+          <>
+            <Button variant="secondary">Cancel</Button>
+            <Button>Connect</Button>
+          </>
+        }
+      >
+        <Select label="Spreadsheet" options={options} />
+      </Dialog>,
+    );
+
+    const result = await axe.run(container, {
+      runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"] },
+    });
+    expect(result.violations).toEqual([]);
+  });
+});
+
 describe("styles.css stays data-attribute-only", () => {
   const stripComments = (css: string) => css.replace(/\/\*[\s\S]*?\*\//g, "");
 
@@ -1240,10 +1475,26 @@ describe("styles.css stays data-attribute-only", () => {
     }
   });
 
-  it("keeps Select and Popover out of static.css, since neither degrades to CSS", () => {
+  it("keeps Select, Popover, and Dialog out of static.css, since none degrades to CSS", () => {
     const css = stripComments(readSource("./static.css"));
     expect(css).not.toContain("kc-select");
     expect(css).not.toContain("kc-popover");
+    // A `<dialog>` opens only when something calls `showModal()`. There is no
+    // state here for a prerender path to restore, because there is no page with
+    // no JavaScript on which this component does anything at all.
+    expect(css).not.toContain("kc-dialog");
+  });
+
+  it("styles the dialog through the attribute and the pseudo-element, not a pseudo-class", () => {
+    // The narrow reading of the rule above, made explicit because it is the one
+    // a future edit is most likely to get wrong. `[open]` is an attribute the
+    // browser writes and `::backdrop` is a pseudo-element, so a native
+    // `<dialog>` can be styled in this file without touching the guarantee —
+    // and the scoping to `[open]` is load-bearing, since an author `display`
+    // beats the UA's `display: none` at any specificity.
+    const css = stripComments(readSource("./styles.css"));
+    expect(css).toContain(".kc-dialog[open]");
+    expect(css).toContain(".kc-dialog::backdrop");
   });
 
   it("mirrors each data-attribute state it claims to mirror", () => {

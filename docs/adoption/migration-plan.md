@@ -447,7 +447,14 @@ result and replaces the ranking derived from the inventory; corrections
 | # | Component | Consumers | Mode | Evidence |
 | ---: | --- | ---: | --- | --- |
 | 1 | Disclosure — **shipped** | **3/5** | **1 and 2** | AW `[approvalRequestId].ts:425`, `index.html:1203`; KN `DetailsDrawer.tsx:242`, `SafeVegaLiteChart.tsx:248`; RD 9 sites, `planner.ts:573`/`:3821`/`:4397-4410`, `assistantChat.ts:140`, `tillerPicker.ts:91` |
-| 2 | Modal dialog | **2/5** | 2 only | AW `index.html:368-387` (live: `openDialog` `:1083`); RD `planHistory.ts:6`, `tillerPicker.ts:17` |
+| 2 | Modal dialog — **shipped** | **2/5** | 2 only | AW `index.html:368-387` (live: `openDialog` `:1083`); RD `planHistory.ts:6`, `tillerPicker.ts:17` |
+
+The modal dialog shipped as `Dialog`, a native `<dialog>` opened with
+`showModal()`, with the drawer as a `placement` prop rather than a sibling
+component. `renderStatic` throws on it, so its mode is 2 only. Corrections
+[30](#corrections-to-the-survey) and [31](#corrections-to-the-survey) record what
+the build turned up about the scrim token and the React Aria portal APIs. **That
+completes the Phase 2a queue.**
 
 The disclosure shipped as a native `<details>`, so its mode is 1 *and* 2 rather
 than "2, progressive": `renderStatic` renders it and it genuinely works there,
@@ -1914,3 +1921,58 @@ here rather than silently corrected there.
     placement rather than either repo's grid that ships. Recorded because "the
     same two-slot shape" is true of the markup and not of the treatment, and the
     difference is a decision the direction left open rather than one it made.
+
+30. **The token layer shipped no scrim at all, and under forced colors the scrim
+    is the only separator left.** The design direction says "the token layer
+    ships one scrim and neither number is it." It shipped none:
+    `grep -rn "scrim\|backdrop" packages/tokens/src packages/react/src` returned
+    nothing before this component. So the builder was adding the token rather
+    than pointing two repos at an existing one, which is a different piece of
+    work and one the direction did not budget.
+
+    What the survey handed over is the *alpha* rather than a colour.
+    `assistant-workbench` uses `rgb(21 24 29 / 0.68)`
+    (`apps/web/public/workbench-view.css:1537`) and `retirement-dashboard`
+    `rgba(8, 15, 24, 0.68)` (`src/styles.css:1453`) — two different colours and
+    the same 0.68, chosen without coordinating. Both colours fail the Phase 2
+    colour rule and neither survives; the agreement on alpha is the strongest
+    evidence available for a value nobody can reason to from first principles,
+    so `--kc-color-scrim` keeps it and takes the graphite ink both shadows are
+    already tinted with.
+
+    The second half is the part the direction could not have known, because it
+    only appears once a dialog exists. `--kc-shadow-overlay` resolves to `none`
+    under `forced-colors: active` (`packages/tokens/src/tokens.css:382`), so in
+    that mode a dialog has no shadow, and the scrim is the only thing between it
+    and the page. A translucent scrim would need `forced-color-adjust: none` to
+    survive there, which is fighting the mode rather than answering it — so the
+    token resolves to an opaque `Canvas` instead, the page behind is genuinely
+    hidden, and the dialog's `ButtonText` border draws the boundary. Recorded
+    because "add the scrim token" and "decide what `::backdrop` does when the
+    shadow is gone" are two decisions and the direction anticipated neither.
+
+31. **`UNSAFE_PortalProvider` is not reachable from `packages/react`, and it does
+    not live where the plan says it does.** The Phase 2a brief states that the
+    replacement for the deprecated `UNSTABLE_portalContainer` "lives in
+    `@react-aria/overlays`, which is a transitive dependency and not a direct
+    one." Verified against the installed tree, both halves are off.
+    `@react-aria/overlays` is **not installed at all** —
+    `react-aria-components@1.20.0` depends on the monolithic `react-aria@3.51.0`,
+    which is where `UNSAFE_PortalProvider` is actually exported from
+    (`dist/types/exports/index.d.ts:92`).
+
+    The consequence is stronger than "transitive rather than direct". Under
+    pnpm's strict linking, `packages/react/node_modules` contains only
+    `react-aria-components`, so `react-aria` is **unresolvable** from this
+    package: `require.resolve("react-aria")` throws `MODULE_NOT_FOUND`. Reaching
+    the provider would mean adding a second React Aria package as a direct
+    dependency whose version has to track RAC's exactly, in order to obtain an
+    API whose own stability marker is `UNSAFE_` rather than `UNSTABLE_`.
+
+    So `Dialog` uses `UNSTABLE_portalContainer`, which is present, typed, and
+    does the job, and the system supplies the context the provider would have
+    supplied — `Dialog` publishes its element and `Popover` and `Select` read it.
+    The deprecation redirects to a different spelling of the same capability
+    rather than away from the capability, so when it moves, one module and two
+    call sites change. Recorded because the brief presented the two escape
+    hatches as a live choice, and on this installation only one of them exists.

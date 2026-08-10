@@ -386,6 +386,200 @@
   opacity: 0.5;
 }
 
+/* ---- Dialog -------------------------------------------------------------- */
+
+/* A modal, and a drawer is the same object at a different placement.
+ *
+ * This treatment lives here rather than in `base.css` — which is where the
+ * disclosure's went one component ago — and the difference between the two cases
+ * is the whole of ADR 0002. A `<details>` works with no runtime, so its states
+ * belong in the file every delivery mode loads. A `<dialog>` opens only when
+ * something calls `showModal()`, so it is Mode 2 only, `renderStatic` throws on
+ * it, and `static.css` has nothing to restore. It sits beside Select and Popover
+ * because it is the same kind of thing they are.
+ *
+ * Nothing below is a pseudo-class, so the data-attribute-only rule this file
+ * lives under is untouched: `[open]` is an attribute the browser writes, and
+ * `::backdrop` is a pseudo-element. Neither is a state a hand-authored `.kc-`
+ * page could fake into working.
+ */
+
+/* The UA hides a closed dialog with `display: none`, and an author `display`
+   would beat it at any specificity — so the flex column is scoped to `[open]`
+   rather than declared on the class. A `.kc-dialog` that is always visible is
+   the failure this one selector prevents. */
+.kc-dialog[open] {
+  display: flex;
+}
+
+.kc-dialog {
+  /* The Intrinsic Maximum Rule, in the form Popover already uses. Both consumer
+     repos wrote a ceiling of their own — `min(100%, 600px)` and
+     `min(42rem, calc(100vw - 2rem))` — so no caller constrains this from
+     outside. The viewport term is what keeps the gutter at small sizes. */
+  inline-size: min(42rem, calc(100vw - 2rem));
+  /* Both maxima are restated rather than left to the UA, which caps a `dialog`
+     at `calc(100% - 6px - 2em)` in each axis. That is a measure this component
+     did not choose and cannot see: at 320 pixels it silently clamped the panel
+     to 282 and the drawer to the same, so the Intrinsic Maximum Rule was being
+     enforced by the browser rather than by the component. */
+  max-inline-size: min(42rem, calc(100vw - 2rem));
+  max-block-size: calc(100dvh - 2rem);
+  flex-direction: column;
+  /* Zero, because the head, body and footer own their own padding — that is what
+     lets the body scroll while the other two hold still. Both of RD's dialogs
+     reached the same conclusion. */
+  padding: 0;
+  border: 1px solid var(--kc-color-border);
+  /* A dialog is a plate that has detached, so it takes the largest radius in the
+     system rather than the keycap radius a popover wears. */
+  border-radius: var(--kc-radius-plate);
+  background: var(--kc-color-surface-raised);
+  color: var(--kc-color-text);
+  /* The Overlay Exception Rule: genuinely detached, so it casts in dark as well
+     as light. AW's panel takes the plate shadow, which is `none` in dark, so its
+     dialogs have no depth there at all. */
+  box-shadow: var(--kc-shadow-overlay);
+  /* Deliberately *not* `hidden`, which is what a rounded panel normally wants.
+     A Select or a Popover inside this dialog is portalled into this element —
+     see `overlay-portal.ts` — and clipping here would cut its menu off at the
+     dialog's edge, which is the same failure in a new place. The body clips its
+     own corner instead, below. */
+  overflow: visible;
+  font-family: var(--kc-font-body);
+  animation: kc-popover-in var(--kc-duration-overlay) var(--kc-ease-overlay);
+}
+
+/* The scrim, and the token behind it is new — the token layer shipped none. Both
+   consumer scrims are raw literals that fail the Phase 2 colour rule; what
+   survives from them is the alpha, which the two repos picked independently and
+   identically. See correction 30. */
+.kc-dialog::backdrop {
+  background: var(--kc-color-scrim);
+  animation: kc-scrim-in var(--kc-duration-overlay) var(--kc-ease-overlay);
+}
+
+/* The drawer. RD's `.assumptions-drawer` is this same `<dialog>` pinned to the
+   inline-end edge at full height, which is geometry rather than a component —
+   `margin: 0 0 0 auto`, `height: 100%`, `width: min(560px, 100%)`. 560px is
+   35rem. Stated logically so it flips for RTL, which RD's physical `margin-left`
+   does not. */
+.kc-dialog[data-placement="inline-end"],
+.kc-dialog[data-placement="inline-start"] {
+  inline-size: min(35rem, 100vw);
+  max-inline-size: 100vw;
+  block-size: 100dvh;
+  max-block-size: 100dvh;
+  margin-block: 0;
+}
+
+/* Flush against one viewport edge, so the corners on that edge are square and
+   the border there would be a line drawn along the screen's own edge. */
+.kc-dialog[data-placement="inline-end"] {
+  margin-inline: auto 0;
+  border-inline-end-width: 0;
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.kc-dialog[data-placement="inline-start"] {
+  margin-inline: 0 auto;
+  border-inline-start-width: 0;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+/* The head holds still. RD makes its head `position: sticky` because its whole
+   dialog scrolls; here the body is the scroll container, so the head and footer
+   are simply flex items that do not shrink. Same guarantee — the close control
+   is reachable at every scroll offset — carried by layout rather than by an
+   offset that has to be kept clear of the radius. AW scrolls the whole panel,
+   header included, so its close control leaves the viewport in a long dialog. */
+.kc-dialog__head {
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--kc-space-4);
+  padding: var(--kc-space-6);
+  border-block-end: 1px solid var(--kc-color-divider);
+}
+
+.kc-dialog__heading {
+  display: grid;
+  gap: var(--kc-space-1);
+}
+
+/* The Title role, and the second place the display face appears inside a
+   component. That follows from the same sentence that chose the radius: a dialog
+   is a plate that has detached, and a plate's title is a card title. */
+.kc-dialog__title {
+  margin: 0;
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-display);
+  font-size: var(--kc-font-size-xl);
+  font-weight: var(--kc-font-weight-title);
+  line-height: var(--kc-line-height-heading);
+}
+
+.kc-dialog__description {
+  margin: 0;
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-sm);
+  line-height: var(--kc-line-height-label);
+}
+
+.kc-dialog__close {
+  flex: none;
+  /* The key keeps its 44px target while the visual gap stays step 6, the same
+     trade the banner's dismiss makes. */
+  margin: calc(var(--kc-space-2) * -1);
+}
+
+.kc-dialog__close svg {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+}
+
+/* Step 5 between children, because what stacks in a dialog body is whole
+   components — the same reasoning, and the same step, as a card body. */
+.kc-dialog__body {
+  display: grid;
+  overflow: auto;
+  align-content: start;
+  gap: var(--kc-space-5);
+  padding: var(--kc-space-6);
+}
+
+.kc-dialog__body > :first-child {
+  margin-block-start: 0;
+}
+
+.kc-dialog__body > :last-child {
+  margin-block-end: 0;
+}
+
+/* The Concentric Radius Rule with a gap of zero. The body is flush with the
+   dialog's inner edge, so its corner is the parent's radius less nothing — and
+   because the dialog itself may not clip, this is what stops scrolled content
+   painting into the rounded corner. Only when the body reaches the bottom: with
+   a footer below it, it has no corner there to round. */
+.kc-dialog__body:last-child {
+  border-end-start-radius: var(--kc-radius-plate);
+  border-end-end-radius: var(--kc-radius-plate);
+}
+
+.kc-dialog__footer {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--kc-space-3);
+  padding: var(--kc-space-6);
+  border-block-start: 1px solid var(--kc-color-divider);
+}
+
 .kc-banner {
   display: flex;
   inline-size: min(100%, 48rem);
@@ -1196,6 +1390,16 @@ h3.kc-page-header__title {
   }
 }
 
+/* The scrim fades on its own timing rather than inheriting the panel's, because
+   `::backdrop` is a sibling box rather than a parent. Same duration, so the two
+   arrive together, and the same token — so reduced motion takes both to 0ms
+   from the tokens layer with no branch here. */
+@keyframes kc-scrim-in {
+  from {
+    opacity: 0;
+  }
+}
+
 @media (max-width: 30rem) {
   .kc-card {
     padding: var(--kc-space-5);
@@ -1207,6 +1411,12 @@ h3.kc-page-header__title {
 
   .kc-empty-state {
     padding: var(--kc-space-6) var(--kc-space-5);
+  }
+
+  .kc-dialog__head,
+  .kc-dialog__body,
+  .kc-dialog__footer {
+    padding: var(--kc-space-5);
   }
 
   .kc-code .kc-code__pre {
@@ -1237,6 +1447,7 @@ h3.kc-page-header__title {
   .kc-select__trigger,
   .kc-popover,
   .kc-select__popover,
+  .kc-dialog,
   .kc-banner,
   .kc-badge,
   .kc-card,
@@ -1264,7 +1475,9 @@ h3.kc-page-header__title {
   .kc-app-shell__sidebar,
   .kc-app-shell__footer,
   .kc-page-header[data-divided],
-  .kc-dl[data-divided] .kc-dl__item {
+  .kc-dl[data-divided] .kc-dl__item,
+  .kc-dialog__head,
+  .kc-dialog__footer {
     border-color: ButtonText;
   }
 

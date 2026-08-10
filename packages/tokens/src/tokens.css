@@ -218,6 +218,16 @@
   --kc-shadow-plate: 0 1px 2px rgb(58 63 71 / 0.06),
     0 10px 28px rgb(58 63 71 / 0.1);
   --kc-shadow-overlay: 0 14px 40px rgb(58 63 71 / 0.2);
+  /* The scrim behind a modal dialog. It is tinted with the graphite ink, the
+     same tint both shadows carry, so the scrim and the shadow are one material
+     rather than two darks that happen to sit together.
+
+     The alpha is the one number the survey handed over: `assistant-workbench`
+     and `retirement-dashboard` picked different colours and the *same* 0.68
+     without coordinating, which is the strongest evidence available for a value
+     nobody can reason to from first principles. Their colours do not survive —
+     both are raw literals — but their agreement does. */
+  --kc-color-scrim: rgb(58 63 71 / 0.68);
   --kc-focus-ring: 3px solid var(--kc-color-focus);
   --kc-focus-ring-offset: 3px;
 }
@@ -258,6 +268,10 @@
     --kc-color-info-border: #285b72;
     --kc-shadow-plate: none;
     --kc-shadow-overlay: 0 18px 44px rgb(0 0 0 / 0.45);
+    /* The scrim keeps its alpha across themes and swaps its tint the way the
+       overlay shadow does: a graphite scrim over a #15181d ground is barely a
+       scrim at all. */
+    --kc-color-scrim: rgb(0 0 0 / 0.68);
   }
 }
 
@@ -296,6 +310,7 @@
   --kc-color-info-border: #285b72;
   --kc-shadow-plate: none;
   --kc-shadow-overlay: 0 18px 44px rgb(0 0 0 / 0.45);
+  --kc-color-scrim: rgb(0 0 0 / 0.68);
 }
 
 :root[data-theme="light"] {
@@ -380,5 +395,12 @@
     --kc-color-info-border: ButtonText;
     --kc-shadow-plate: none;
     --kc-shadow-overlay: none;
+    /* Both shadows resolve to `none` here, which leaves a modal dialog with
+       nothing between it and the page but the scrim. So the scrim stops being a
+       wash and becomes opaque `Canvas`: the page behind it is genuinely hidden,
+       and the dialog's own `ButtonText` border is what draws the boundary. A
+       translucent scrim would need `forced-color-adjust: none` to survive, which
+       is fighting the mode rather than answering it. */
+    --kc-color-scrim: Canvas;
   }
 }
