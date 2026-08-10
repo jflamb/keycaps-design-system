@@ -22,6 +22,13 @@ number. Where this plan contradicts the inventory, the contradiction is recorded
 in [Corrections to the survey](#corrections-to-the-survey) rather than quietly
 fixed.
 
+**Every such fact is measured from `origin/main`, never from a working tree.**
+That is not pedantry: Phase 4's inputs were wrong by 47 lines and 142 lines
+because they were read from a local checkout of `mcp-unifi` in which `site/` is
+untracked, so the files on disk belonged to no commit. A stale figure in a plan
+is cheap to fix and expensive to trust. Re-measure with
+`git show origin/main:<path>` before relying on any number here.
+
 ## Premises
 
 Settled, not up for renegotiation inside this program:
@@ -196,7 +203,16 @@ Keycaps' invariants were ever in scope for it.
   `dependabot.yml` in this repo watches Keycaps' own dependencies and does
   nothing for consumers; the config has to live in each of them.
 - Point `tests/consumer/` at this repo's `main` rather than a release, so a
-  breaking change surfaces here before five repos find it separately.
+  breaking change surfaces here before five repos find it separately. **This was
+  already true when the plan was written**, and stating it as work to do was an
+  error: the fixture has used `workspace:*` since the scaffold commit `b089fcc`,
+  resolving to `link:../../packages/react` and `link:../../packages/tokens` in
+  `pnpm-lock.yaml`, which is stricter than tracking `main` — it is the working
+  tree, not a branch. What Phase 2 actually added is an assertion in
+  `tests/consumer/prerender.mjs` that checks both halves, the specifier and the
+  resolved path, so the fixture cannot regress to a published release while
+  still looking green. That regression is the one failure mode that proves the
+  opposite of what it claims, so it is worth a check rather than a convention.
 
 **2.2 — Enforcement in each consumer.** Two CI rules, run by `keycaps-css-lint`
 — a bin shipped on `@jflamb/keycaps-tokens` — and wired into each repo's existing
@@ -229,19 +245,54 @@ a ratchet and its length is a progress bar. The linter prints the allowlisted
 count on every run, because an allowlist that stops being visible stops being
 temporary.
 
+As shipped in `0.1.2`, `allowFiles` suppresses **only** rule 1 — the token and
+color debt. Rule 2 still runs inside an allowlisted file, so a `.kc-` selector
+is a failure there as much as anywhere else. That asymmetry is the point:
+pre-migration color debt is debt, to be paid down by the phase that owns the
+file, but redefining Keycaps' vocabulary is new divergence and there is no
+migration phase in which it becomes acceptable. The practical consequence for
+Phases 3 through 7 is that an allowlisted file is not an unchecked file, and the
+gate is not inert in a repo whose every styling surface is allowlisted.
+
+Also as shipped in `0.1.2`: a non-empty `include` whose globs match no files at
+all exits `2` rather than passing, because a check reading zero bytes is worse
+than no check. The test is deliberately **aggregate** rather than per-glob, so a
+config may carry a pattern for a stylesheet that does not exist yet — which is
+how `mcp-dnsimple`'s `src/**/*.css` and `mcp-unifi`'s `site/**/*.css` act as
+ratchets for surfaces those phases will create.
+
 For a repo the size of `retirement-dashboard` the debt allowlist is file-scoped
 rather than occurrence-scoped; enumerating individual findings across 6,783 lines
 of CSS would produce a list nobody reads.
 
 Wiring per repo:
 
-| Repo | Workflow to extend | Existing gate |
-| --- | --- | --- |
-| `assistant-workbench` | `.github/workflows/deploy-assistant-web.yml` | `npm run format`, `typecheck`, `test`, `test:e2e` |
-| `retirement-dashboard` | `.github/workflows/check.yml` (`quality` job) | `format`, `typecheck`, `lint`, `build` |
-| `knowledge` | `.github/workflows/ci.yml` (`validate` job) | `check`, `test`, `build`, `test:e2e` |
-| `mcp-dnsimple` | `.github/workflows/quality.yml` | lint, typecheck, test, build, `npm audit` |
-| `mcp-unifi` | `.github/workflows/quality.yml` | lint, typecheck, test, build |
+| Repo | Workflow to extend | Existing checks | Gated a PR? |
+| --- | --- | --- | --- |
+| `assistant-workbench` | `.github/workflows/deploy-assistant-web.yml` | `npm run format`, `typecheck`, `test`, `test:e2e` | **no** |
+| `retirement-dashboard` | `.github/workflows/check.yml` (`quality` job) | `format`, `typecheck`, `lint`, `build` | yes |
+| `knowledge` | `.github/workflows/ci.yml` (`validate` job) | `check`, `test`, `build`, `test:e2e` | yes |
+| `mcp-dnsimple` | `.github/workflows/quality.yml` | lint, typecheck, test, build, `npm audit` | yes |
+| `mcp-unifi` | `.github/workflows/quality.yml` | lint, typecheck, test, build | yes |
+
+The fourth column is the correction. An earlier draft of this table called all
+five "existing gates"; `assistant-workbench` was not one.
+`deploy-assistant-web.yml` had **no `pull_request` trigger** — only `push` to
+`main` and `workflow_dispatch`, both of which deploy to production. It held every
+check `apps/web` has and none of it stood between a pull request and a merge, so
+a drift rule wired into it would have had nothing to fail on: the rule would run
+for the first time after the change it was meant to reject had already shipped.
+
+Phase 2 therefore had to build the gate before it could wire anything into it. It
+added a `pull_request` trigger with the same paths filter as the existing `push`,
+and gated the four production steps — `Check D1 migration changes`, `Apply D1
+migrations`, `Sync approval bridge secret`, and `Deploy to Cloudflare Pages` —
+behind `github.event_name != 'pull_request'`. The checks run on a pull request;
+nothing that mutates production does. This is worth recording beyond its own
+repo, because it is the one place in the program where "wire the rule into the
+existing check workflow" was not a one-line change, and because it means every
+`apps/web` check — not only the Keycaps one — now runs before a merge rather than
+after it.
 
 **2.3 — Two repos need a stylesheet gate they do not have.** `mcp-dnsimple`'s
 CSS is a string inside `src/branding.ts` (lines 106–818), and `mcp-unifi`'s
@@ -249,15 +300,70 @@ CSS is a string inside `src/branding.ts` (lines 106–818), and `mcp-unifi`'s
 entirely — the landing page has no automated coverage of any kind. The rule
 scripts must read those two surfaces specifically, not glob `**/*.css`.
 
+One filename in that guidance cannot be written literally.
+`assistant-workbench`'s fourth CSS surface is
+`functions/approvals/[approvalRequestId].ts`, and in an `include` pattern the
+square brackets are a glob **character class** — the literal name matches
+nothing. Combined with the old linter behaviour of passing on an empty file set,
+writing it out produces a permanently green check that reads zero bytes: the
+exact shape of failure this phase exists to prevent, arriving through the config
+rather than through the CSS. The shipped config uses
+`functions/approvals/*.ts`. An `allowFiles` entry is compared as an exact path
+rather than as a glob, so the literal name is correct *there* and wrong in
+`include` — which is why the two lists in that repo's config do not read the
+same.
+
 ### Exit criteria
 
-- A Keycaps release exists containing Phase 1, and both packages are on npm.
+All met. Five consumer pull requests are merged and green on `main`.
+
+- A Keycaps release exists containing Phase 1, and both packages are on npm —
+  `@jflamb/keycaps-tokens@0.1.2` and `@jflamb/keycaps-react@0.1.2`.
 - Five dependency-update configs merged, one per consumer.
 - Both CI rules run and pass in all five consumers, against their **current**
   pre-migration code. They will fail at first; the allowlist is how a repo
   declares its pre-migration debt, and each allowlist entry is deleted by the
   phase that migrates that repo.
-- `tests/consumer/` tracks `main`.
+- `tests/consumer/` tracks `main`, and now asserts that it does.
+
+### The measured baseline
+
+What each allowlist declares, run with no allowance of any kind — the honest
+figure for how much debt each migration carries into its phase:
+
+| Repo | Findings | raw-color / local-token / kc-override | Debt files allowlisted |
+| --- | ---: | --- | ---: |
+| `assistant-workbench` | 247 | 90 / 157 / 0 | 4 |
+| `retirement-dashboard` | 324 | 206 / 118 / 0 | 4 |
+| `knowledge` | 226 | 217 / 9 / 0 | 1 |
+| `mcp-dnsimple` | 67 | 55 / 12 / 0 | 1 |
+| `mcp-unifi` | 19 | 15 / 4 / 0 | 2 |
+| **total** | **883** | | **12** |
+
+Thirty of `retirement-dashboard`'s 324 are the `--chart-*` series — the nine
+colors declared three times over, 27 findings, plus the three `--chart-ink`
+declarations that carry them — which `allowTokens` covers permanently rather than
+as debt. Its migration therefore carries 294. The 324 is what the two rules find
+with nothing allowed at all, and it is the figure its own `.keycaps-lint.json`
+quotes, which is why the table uses it.
+
+The concentrations are worth keeping, because they say where each phase's effort
+actually goes. `assistant-workbench`'s `public/ledger.css` alone is 241 of its
+247 — the fork this program exists to end is also very nearly the whole of that
+repo's debt. `retirement-dashboard` spreads across four files: `styles.css` 143,
+`print.css` 89, `ledger-preview.css` 67, `auth.css` 25.
+
+**Zero `.kc-` overrides exist in any of the five today.** Every one of the 883
+findings is rule 1. Rule 2 has never fired, which is the result to want from it —
+it is there to stop a second `ledger.css`, and no repo has started one.
+
+The other thing the baseline shows is that `mcp-dnsimple` and `mcp-unifi`
+currently have **no files actively checked by rule 1**, because in both repos the
+only styling surface is also the only debt entry. Rule 2 does run on those files,
+so the gate is not inert, and the `include` globs cover stylesheets neither repo
+has yet — but rule 1's live coverage in the two Mode 1 repos is zero until Phases
+3 and 4 empty their allowlists. That makes those two phases the ones that turn
+the control on, rather than the ones that merely satisfy it.
 
 ### Validation
 
@@ -295,11 +401,23 @@ depends on it.
 
 ### Work, in order
 
+**This phase is blocked before step 1.** The published `@jflamb/keycaps-react`
+root entry does not resolve under `moduleResolution: Node16`, which is what this
+repo compiles with, so `import { Button } from "@jflamb/keycaps-react"` here
+typechecks against `any` rather than failing — the migration would appear to work
+and would carry no type safety at all. The measurement and the fix are recorded
+under [Versioning and release](#versioning-and-release). Nothing below is
+verifiable until a Keycaps release ships a root `.d.ts` this repo can read.
+
 1. **Enable JSX and add the dependencies.** Set `"jsx": "react-jsx"` and
    `"jsxImportSource": "react"` in `tsconfig.json`. Add `react`, `react-dom`,
-   `@jflamb/keycaps-react`, `@jflamb/keycaps-tokens`, and the React types. Under
-   `moduleResolution: Node16`, subpath exports resolve from the package
-   `exports` map, which both Keycaps packages declare — no change needed there.
+   `@jflamb/keycaps-react`, `@jflamb/keycaps-tokens`, and the React types —
+   `@types/react` and `@types/react-dom` are absent today; `react` and
+   `react-dom` arrive as auto-installed peers but carry no types of their own.
+   Under `moduleResolution: Node16` the *package* `exports` maps resolve
+   correctly, and both Keycaps packages declare one — but that is only the outer
+   half of resolution, and the inner half is where this breaks. See the note
+   above this list.
 2. **Render at module load.** `branding.ts` already computes its page from a
    `HomePageModel`; keep that contract. Replace the body of `renderHomePage`
    with a `renderStaticDocument` call whose children are Keycaps components. The
@@ -342,7 +460,19 @@ depends on it.
 
 - `src/branding.ts` contains no `<style>` block of its own and no CSS class
   names outside `kc-`.
-- The Phase 2 rules pass with an empty allowlist.
+- The Phase 2 rules pass with an empty allowlist. **Not reachable as written**,
+  and this phase owes the fix. `src/branding.ts` carries `FAVICON_SVG` and
+  `OG_CARD_SVG` alongside the CSS, and their `fill` and `stop-color` hexes are
+  legitimately raw — an SVG cannot read a CSS custom property it is not inside.
+  Deleting the `<style>` block clears 50 of the file's 67 findings and leaves 17:
+  two in `FAVICON_SVG`, fourteen in `OG_CARD_SVG`, and the unconditional
+  `<meta name="theme-color" content="#f5f4ed">` at line 88, which step 6 replaces
+  anyway. So the allowlist cannot empty while the two SVG constants share a file
+  with the page. Either move them to their own module, which can then carry its
+  own narrow allowance and say why, or drive their colors from token values at
+  render time — the second is better, because it is the only version in which the
+  OG card follows the palette. Pick one during this phase rather than discovering
+  it at the exit gate.
 - The page makes zero off-origin requests. Assert it the way
   `scripts/verify-pages-build.mjs` already does here: fail the test if any
   request leaves the origin.
@@ -378,16 +508,28 @@ site with no build step, and this repo's first dark theme.
 
 ### Inputs
 
-- `site/index.html`, 190 lines of hand-authored static HTML, and
-  `site/styles.css`, 816 lines. No inline `<style>`, and the page ships **zero
+- `site/index.html`, 143 lines of hand-authored static HTML, and
+  `site/styles.css`, 674 lines. No inline `<style>`, and the page ships **zero
   JavaScript**.
+
+  Both figures are corrections. An earlier draft of this plan said 190 and 816,
+  and those files do not exist in the repository: they were read from a local
+  checkout sitting on `codex/dependency-audit-remediation`, where `site/` is
+  **untracked** — `git status --porcelain -- site/` prints `?? site/` — so the
+  on-disk copies match no commit on any branch. Phase 4's inputs are 25% and 17%
+  smaller than the plan assumed, and every line number below is derived from
+  `origin/main`. The general rule this bought: measure a consumer with
+  `git show origin/main:<path>`, never by reading its working tree.
 - `.github/workflows/deploy.yml` uploads `site/` byte-for-byte to GitHub Pages.
   There is **no `npm ci` and no build step in the deploy job**.
 - `site/` is outside `tsconfig.json`'s include and outside the ESLint globs, so
   the landing page has no automated coverage at all.
 - Fonts are self-hosted WOFF2: Fraunces Variable and Nunito Sans 400/600/700 —
-  the retired pairing — driven by `font-variation-settings: "opsz" 18, "SOFT" 55`
-  and `"opsz" 14, "SOFT" 45`.
+  the retired pairing — with one pinned optical axis,
+  `font-variation-settings: "opsz" 18, "SOFT" 55` at `styles.css:174`. The plan
+  previously named a second pin, `"opsz" 14, "SOFT" 45`; on `origin/main` there
+  is no such declaration anywhere in the repository. It is the same
+  untracked-working-tree reading as the line counts above.
 
 ### Work, in order
 
@@ -401,9 +543,10 @@ site with no build step, and this repo's first dark theme.
    Add it to `.prettierignore`-equivalents and state in the file header that it
    is generated — an editable generated file is a drift source.
 3. **Delete the local fonts.** Remove `site/fonts/*.woff2` (four files, ~163 KB)
-   and the four `@font-face` blocks at `styles.css` lines 1–31. Both
-   `font-variation-settings` declarations go with them: Piazzolla's `opsz` axis
-   is never pinned, per the Optical Sizing Rule, and `SOFT` does not exist on it.
+   and the four `@font-face` blocks at `styles.css` lines 1–31. The
+   `font-variation-settings` declaration at line 174 goes with them: Piazzolla's
+   `opsz` axis is never pinned, per the Optical Sizing Rule, and `SOFT` does not
+   exist on it.
 4. **Map the surfaces.** `.site-header` → AppShellHeader. `.hero` → PageHeader
    plus a Card. `.primary-key` → LinkButton. The `.diagnostic` block is a `<dl>`
    of four `.diagnostic-row` — DescriptionList in `rows` layout, `divided`.
@@ -421,9 +564,10 @@ site with no build step, and this repo's first dark theme.
    second artifact claiming the Keycaps name is exactly the failure ADR 0002
    exists to prevent. Delete it and the repo-local `DESIGN.md`, and replace both
    with a pointer to this repo.
-7. **Fix the one hardcoded hex.** `styles.css:292` sets `#6d4e0e` on
-   `.confirmation-row dt` — it is `attention-ink` in the design JSON and never
-   became a variable. It maps to `--kc-color-warning-text`.
+7. **Fix the one hardcoded hex.** `.confirmation-row dt` at `styles.css:290`
+   sets `#6d4e0e` on line 291 — it is `attention-ink` in the design JSON and
+   never became a variable. It maps to `--kc-color-warning-text`. (The plan said
+   292; that too was read from the untracked working tree.)
 
 ### Exit criteria
 
@@ -477,8 +621,8 @@ whose fork this whole program exists to end.
 - `public/workbench-view.css`, 1,914 lines. `public/workbench-view.js`, 1,005
   lines, plain script, HTML-string templating with class names hardcoded in JS
   strings.
-- `public/index.html` is 1,753 lines, of which roughly 1,358 are inline
-  application JavaScript plus its own `<style>` block.
+- `public/index.html` is 1,764 lines, of which 1,370 are one inline
+  `<script>` of application JavaScript, plus its own 38-line `<style>` block.
 - **A fourth CSS surface:** `functions/approvals/[approvalRequestId].ts`, 1,076
   lines, emits a full document from a template literal with its own inline
   `<style>` carrying a third copy of the press CSS.
@@ -839,7 +983,9 @@ Two hazards:
   unreachable there today. Deleting those files and adopting the variable
   Keycaps faces is what makes the Optical Weight Rule implementable.
 - **Pinned optical axes must go.** `assistant-workbench` pins `"opsz" 11` on
-  panel titles; `mcp-unifi` pins `"opsz" 18, "SOFT" 55` and `"opsz" 14, "SOFT" 45`.
+  panel titles; `mcp-unifi` pins `"opsz" 18, "SOFT" 55` once, at
+  `site/styles.css:174` — one declaration on `origin/main`, not the two this
+  plan first recorded.
   The Optical Sizing Rule forbids pinning `opsz`, and `SOFT` does not exist on
   Piazzolla at all — a `font-variation-settings` referencing it fails silently,
   which is the intended cost under the No Faux Type Rule but still leaves a
@@ -893,6 +1039,57 @@ in the inventory:
   `retirement-dashboard` and ^5.6/^5.7 in the two MCP repos.** Two majors apart.
   The Keycaps packages ship `.d.ts` from TypeScript 7; verify they resolve under
   5.x before Phase 3, or the first Mode 1 repo fails at `tsc`.
+
+  **Verified, and the answer is no.** Both MCP repos resolve TypeScript 5.9.3
+  today (`npx tsc --version`). Against `0.1.2`:
+
+  - `@jflamb/keycaps-tokens` resolves. Its `dist/index.d.ts` is `export {}` —
+    there is no runtime API to break.
+  - `@jflamb/keycaps-react/static` resolves, completely.
+    `renderStatic`, `renderStaticDocument`, and `StaticRenderError` all arrive
+    with their real shapes, because `dist/static.d.ts` imports nothing but
+    `react`.
+  - `@jflamb/keycaps-react` — the root entry, and every component prop type with
+    it — **does not resolve**. `dist/index.d.ts` is a barrel of fifteen
+    extensionless relative re-exports (`export { … } from "./components/Button"`)
+    inside a package declaring `"type": "module"`. Under `moduleResolution:
+    Node16` or `NodeNext` that is exactly fifteen TS2834 errors: *relative import
+    paths need explicit file extensions in ECMAScript imports*. A sixteenth waits
+    in `dist/components/Badge.d.ts` (`../icons`) and is never reached, because
+    resolution already stopped at the barrel.
+
+  The failure mode is worse than an error, because both MCP repos set
+  `skipLibCheck: true`. That suppresses all fifteen and leaves every root
+  export typed as `any` — silently. `ButtonVariant` is assignable to `0`. A
+  Phase 3 migration would compile, deploy, render correctly, and carry no type
+  safety on a single component prop. The runtime is unaffected: `dist/index.js`
+  and `dist/index.cjs` are bundled by `tsup` and contain no relative specifiers
+  at all, so `import("@jflamb/keycaps-react")` works in Node. This is types-only,
+  which is exactly why nothing has noticed it.
+
+  Nor is it really about TypeScript 7 versus 5. The cause is this repo's
+  declaration emit: `tsconfig.base.json` sets `moduleResolution: "Bundler"`,
+  `packages/react/tsconfig.build.json` inherits it, and `tsc` faithfully
+  preserves the extensionless specifiers the source is entitled to use under that
+  setting. TypeScript 5 building the same tree would emit the same thing. The
+  package is consumable by a bundler-resolving consumer and not by a
+  Node16-resolving one — and the two Mode 1 repos, the ones Phases 3 and 4
+  migrate, are both Node16.
+
+  `tests/consumer/` did not catch it for the same reason: it extends
+  `tsconfig.base.json`, so it type-checks under `Bundler` too. **The fixture
+  resolves differently from every repo it claims to be the reference
+  implementation for.** Extending it to typecheck a second time under
+  `Node16` is the check that would have caught this before publication, and it
+  belongs beside the Vite-major gap already recorded below.
+
+  The fix is in `packages/react`, not in a consumer: emit a root `.d.ts` a
+  Node16 consumer can read — bundle the declarations with the same `tsup` run
+  that already bundles the JavaScript, or write explicit extensions in the
+  barrel — then release it. Until that ships, **Phase 3 is blocked**, and no
+  consumer-side setting is a legitimate way around it: switching an MCP server to
+  `moduleResolution: Bundler` would be describing the wrong runtime to make an
+  error disappear.
 - **Vite ^7 in `retirement-dashboard` against 8.1.5 in `knowledge`.** Only
   matters for the Storybook/consumer fixture parity, but it means
   `tests/consumer/` proves the package against one major and not the other.
@@ -1002,3 +1199,13 @@ here rather than silently corrected there.
     `tsc --noEmit` and **CI never invokes it** — the deploy workflow calls
     `typecheck` directly, so `build` is a dead alias. Phase 5 has to make
     `build` real before anything else is verifiable.
+
+13. **ADR 0002 asks for something that was already true.** It says
+    "`tests/consumer/` should additionally track this repo's `main` rather than a
+    release." It has used `workspace:*` since the fixture's scaffold commit
+    `b089fcc`, which predates the ADR, and `pnpm-lock.yaml` resolves that to
+    `link:../../packages/react` and `link:../../packages/tokens` — the working
+    tree, which is stricter than a branch. The real gap was that nothing said so:
+    a fixture silently re-pinned to a published version would have gone on
+    looking green while proving the opposite of its purpose. Phase 2 added the
+    assertion; the ADR's requirement needed a check, not a change.
