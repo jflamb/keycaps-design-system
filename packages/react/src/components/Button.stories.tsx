@@ -267,10 +267,29 @@ export const PressAndHold: Story = {
     await userEvent.pointer({ keys: "[MouseLeft>]", target: button });
     await expect(button).toHaveAttribute("data-pressed");
 
-    // The release needs the same target: React Aria captures the pointer on
-    // press, and a release without a target is delivered somewhere the capture
-    // never sees. `waitFor` covers the React commit, which is not synchronous.
-    await userEvent.pointer({ keys: "[/MouseLeft]", target: button });
+    /*
+     * The release is dispatched directly rather than through
+     * `userEvent.pointer({ keys: "[/MouseLeft]" })`, and the reason is pointer
+     * capture. React Aria calls `setPointerCapture` on press and then releases
+     * on the `pointerup` carrying the *same* `pointerId`; user-event's release
+     * did not deliver one that matched, so the key stayed down forever — this
+     * play function was failing in every run, and only looked green because the
+     * review harness navigated away before the assertion's timeout could log.
+     * A real mouse was never affected: pressing and releasing this key in a
+     * browser clears `data-pressed` correctly, which is what makes this a fault
+     * in the simulation rather than in the component. See correction 33.
+     */
+    button.dispatchEvent(
+      new PointerEvent("pointerup", {
+        bubbles: true,
+        cancelable: true,
+        button: 0,
+        buttons: 0,
+        isPrimary: true,
+        pointerId: 1,
+        pointerType: "mouse",
+      }),
+    );
     await waitFor(() => expect(button).not.toHaveAttribute("data-pressed"));
     await expect(args.onPress).toHaveBeenCalledTimes(1);
   },

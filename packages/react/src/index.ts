@@ -76,6 +76,11 @@ export {
   type DescriptionListLayout,
   type DescriptionListProps,
 } from "./components/DescriptionList.js";
+export {
+  Dialog,
+  type DialogPlacement,
+  type DialogProps,
+} from "./components/Dialog.js";
 export { Disclosure, type DisclosureProps } from "./components/Disclosure.js";
 export { EmptyState, type EmptyStateProps } from "./components/EmptyState.js";
 export { Field, type FieldProps } from "./components/Field.js";

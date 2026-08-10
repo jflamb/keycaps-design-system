@@ -20,6 +20,7 @@
 | Icon | Beta | Semantic SVG | Closed name union, decorative-vs-named accessibility contract, every glyph draws a distinct shape, status shapes match the prose masks |
 | CodeBlock | Experimental | Semantic HTML | Keyboard-reachable scroll region, syntax roles carried by attribute |
 | DataTable | Experimental | Semantic HTML | Named keyboard-reachable scroll region, `scope` on both header cells by construction, numeric alignment, `tfoot` totals, declaration-for-declaration parity with `prose.css`, static render, 320px reflow, axe in light and dark |
+| Dialog | Experimental | Native `dialog` with `showModal()` | Accessible name and description wired to the heading, close control by construction, Escape and scrim dismiss with `isDismissable` refusing both, focus trap and inertness of the page behind, focus return to the trigger, page scroll locked and released, drawer placement geometry, sticky head over a scrolling body, a nested `Select` portalled inside the dialog and clickable above the scrim, refused by `renderStatic`, 320px reflow, overlay shadow and scrim in both themes, axe in light and dark |
 | Disclosure | Experimental | Native `details`/`summary` | Toggle from pointer and keyboard with no runtime attached, two-slot summary, chevron drawn from the registry's `caret-down`, native `name` grouping, press geometry and no reflow below the key, one shared rule with `prose.css` asserted selector by selector, works under `styles.css` alone, static render, 320px reflow, forced colors keep the edge and both chevrons, axe in light and dark |
 
 ## Delivery modes
@@ -34,7 +35,7 @@ consumers as rendered HTML through `@jflamb/keycaps-react/static`.
 | AppShell, PageHeader, EmptyState, DescriptionList, SkipLink, CodeBlock | Yes | SkipLink needs no `static.css` entry — `base.css` already covers it in every mode |
 | DataTable | Yes | It has no interactive state at all, which is the price of this row. A row hover would have to come from React Aria's collection components, and those need a runtime; the scroll container's focus ring comes from `base.css` |
 | Disclosure | Yes | The only entry here that is fully interactive in Mode 1, because the interaction is the browser's. It needs no `static.css` entry and has no `styles.css` rule either — the whole treatment is in `base.css`, the standing SkipLink already has |
-| Select, Popover, ThemeToggle | **No** | Behavior cannot degrade to CSS. `renderStatic` throws on each |
+| Select, Popover, ThemeToggle, Dialog | **No** | Behavior cannot degrade to CSS. `renderStatic` throws on each. Dialog is the sharpest case: a `<dialog>` opens only when something calls `showModal()`, so on a page with no JavaScript it is not a degraded modal but an invisible element |
 
 Two controls render in Mode 1 but do nothing there, and neither has a no-JS
 behavior to degrade to: Banner's dismiss and CodeBlock's copy control. Do not

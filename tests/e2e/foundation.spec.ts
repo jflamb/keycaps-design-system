@@ -510,6 +510,16 @@ test("the new surfaces reflow at 320 CSS pixels", async ({ page }) => {
     // to nothing at this width; this one wraps it onto its own line instead.
     "components-disclosure--with-descriptions",
     "components-disclosure--rich-body",
+    // A `<dialog>` is capped by the UA at `calc(100% - 6px - 2em)` in each axis
+    // unless the component restates its own maximum, which silently clamped the
+    // panel to 282px here and made the browser rather than the component the
+    // thing enforcing the Intrinsic Maximum Rule.
+    "components-dialog--default",
+    "components-dialog--with-a-chooser",
+    // The drawer is the harder case: at this width it is the whole viewport, so
+    // one pixel of the wrong measure is a horizontal page scroll.
+    "components-dialog--drawer",
+    "components-dialog--long-body",
   ]) {
     await page.goto(`/iframe.html?id=${id}&viewMode=story&globals=theme:light`);
     const dimensions = await page.evaluate(() => ({
@@ -572,7 +582,312 @@ for (const theme of ["light", "dark"] as const) {
     await expect(page.locator(".kc-disclosure").first()).toHaveAttribute("open", "");
     expect(await run(), `${theme} open`).toEqual([]);
   });
+
+  test(`the dialog is axe-clean in ${theme}, with a footer and a nested chooser`, async ({
+    page,
+  }) => {
+    await page.goto(
+      `/iframe.html?id=components-dialog--with-a-chooser&viewMode=story&globals=theme:${theme}`,
+    );
+    const dialog = page.getByRole("dialog", { name: "Connect a spreadsheet" });
+    await expect(dialog).toBeVisible();
+
+    // The entrance fades from `opacity: 0` over 140ms, and axe samples whatever
+    // is painted when it runs. Sampled mid-fade, every colour in the dialog is
+    // its real value washed toward the page behind it — the muted description
+    // reported 3.23:1 against a background neither element declares. Settling
+    // first is the difference between measuring the component and measuring the
+    // animation.
+    await dialog.evaluate((element) =>
+      Promise.all(element.getAnimations().map((animation) => animation.finished)),
+    );
+
+    // Scoped to the component, like the table and the disclosure above: a
+    // component story is a sample rather than a document.
+    const accessibility = await new AxeBuilder({ page }).include(".kc-dialog").analyze();
+    expect(accessibility.violations, theme).toEqual([]);
+  });
+
+  test(`the dialog casts a shadow and a scrim in ${theme}`, async ({ page }) => {
+    await page.goto(
+      `/iframe.html?id=components-dialog--default&viewMode=story&globals=theme:${theme}`,
+    );
+    const dialog = page.locator("dialog.kc-dialog");
+    await expect(dialog).toBeVisible();
+
+    const painted = await dialog.evaluate((element) => ({
+      shadow: getComputedStyle(element).boxShadow,
+      scrim: getComputedStyle(element, "::backdrop").backgroundColor,
+    }));
+
+    // The Overlay Exception Rule: a dialog is genuinely detached, so it casts in
+    // *both* themes. This is `assistant-workbench`'s live defect — its panel
+    // takes `--shadow-plate`, which is `none` in dark, so its dialogs have no
+    // depth there at all. A `none` here in either theme is that bug arriving.
+    expect(painted.shadow, `${theme} shadow`).not.toBe("none");
+    // And the scrim is a real paint rather than a token that failed to resolve.
+    // Custom properties reach `::backdrop` only because it inherits from its
+    // originating element, which is worth pinning rather than assuming.
+    expect(painted.scrim, `${theme} scrim`).toMatch(/^rgba?\(/);
+    expect(painted.scrim, `${theme} scrim`).not.toBe("rgba(0, 0, 0, 0)");
+  });
 }
+
+/**
+ * The half of the dialog only a browser can check, and the reason the unit suite
+ * does not try.
+ *
+ * jsdom ships `HTMLDialogElement` with none of its methods, so the unit tests run
+ * against a shim that fakes the element's bookkeeping. The top layer, the focus
+ * trap, inertness, and the `::backdrop` cannot be shimmed honestly — they are the
+ * entire argument for building on the platform primitive, so they are asserted
+ * here against a real Chromium or nowhere.
+ */
+test("a Select inside a Dialog opens, is clickable, and paints above the scrim", async ({
+  page,
+}) => {
+  await page.goto(
+    "/iframe.html?id=components-dialog--with-a-chooser&viewMode=story&globals=theme:light",
+  );
+
+  const dialog = page.getByRole("dialog", { name: "Connect a spreadsheet" });
+  await expect(dialog).toBeVisible();
+
+  const trigger = page.locator(".kc-select__trigger");
+  await trigger.click();
+
+  const listbox = page.getByRole("listbox");
+  await expect(listbox).toBeVisible();
+
+  /*
+   * The failure this exists to catch, stated three ways because it fails three
+   * ways. `showModal()` puts the dialog in the top layer and makes everything
+   * outside it inert; React Aria portals to `document.body` by default. A
+   * listbox that landed there would be inert (so the click below would do
+   * nothing), painted under the scrim (so the hit test would find the dialog),
+   * and outside the dialog element entirely.
+   */
+  expect(
+    await listbox.evaluate((element) => element.closest("dialog.kc-dialog") !== null),
+    "the listbox is portalled outside the dialog",
+  ).toBe(true);
+
+  const option = page.getByRole("option", { name: /Retirement plan/ });
+  expect(
+    await option.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      const top = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      return element.contains(top) || element === top;
+    }),
+    "something paints over the option",
+  ).toBe(true);
+
+  // And it actually works end to end: the choice lands and the dialog stays open.
+  await option.click();
+  await expect(listbox).toHaveCount(0);
+  await expect(page.locator(".kc-select__value")).toContainText("Retirement plan");
+  await expect(dialog).toBeVisible();
+});
+
+test("the dialog traps focus and hands it back to the trigger on Escape", async ({ page }) => {
+  await page.goto(
+    "/iframe.html?id=components-dialog--default&viewMode=story&globals=theme:light",
+  );
+
+  const dialog = page.getByRole("dialog", { name: "Delete this plan" });
+  // Storybook mounts asynchronously, so awaiting the element before touching the
+  // keyboard is what stops a `press` landing on nothing.
+  await expect(dialog).toBeVisible();
+
+  const trigger = page.getByRole("button", { name: "Delete plan", exact: true }).first();
+
+  /*
+   * Inertness, checked directly rather than inferred from tabbing. Everything
+   * outside a modal `<dialog>` is inert, so the trigger behind the scrim cannot
+   * take focus even when something asks it to explicitly. This is the guarantee
+   * `assistant-workbench`'s hand-rolled `<div role="dialog">` does not have at
+   * all, and the single sharpest reason this component is built on the platform
+   * primitive.
+   */
+  expect(
+    await trigger.evaluate((element) => {
+      (element as HTMLElement).focus();
+      return document.activeElement === element;
+    }),
+    "a control behind the scrim took focus",
+  ).toBe(false);
+
+  /*
+   * And tabbing never lands on page content either. Chromium moves focus to its
+   * own chrome past the last control in a modal, which surfaces here as `body` —
+   * so `body` is allowed and any *element* outside the dialog is not. Asserting
+   * "always inside the dialog" would be asserting a browser behaviour that is
+   * not the guarantee; asserting "never on the page behind" is the guarantee.
+   */
+  for (let press = 0; press < 5; press += 1) {
+    await page.keyboard.press("Tab");
+    expect(
+      await page.evaluate(() => {
+        const active = document.activeElement;
+        if (!active || active === document.body) return true;
+        return active.closest("dialog.kc-dialog") !== null;
+      }),
+      `focus reached the page behind the scrim after ${press + 1} Tab presses`,
+    ).toBe(true);
+  }
+
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+
+  /*
+   * Focus return is asserted on a dialog that was *opened from the trigger*,
+   * which is a separate pass on purpose. A `<dialog>` restores focus to whatever
+   * held it when `showModal()` ran, and this story opens at mount — so nothing
+   * held it, and there is nothing to return to. Asserting focus return on the
+   * first open would have been asserting a thing that cannot happen rather than
+   * a thing the component does.
+   */
+  await trigger.click();
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+});
+
+test("a dialog that is not dismissable refuses Escape and keeps its close control", async ({
+  page,
+}) => {
+  await page.goto(
+    "/iframe.html?id=components-dialog--not-dismissable&viewMode=story&globals=theme:light",
+  );
+
+  const dialog = page.getByRole("dialog", { name: "Save before leaving?" });
+  await expect(dialog).toBeVisible();
+
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeVisible();
+
+  // A modal with no way out is a trap, so the close control stays and works —
+  // what `isDismissable={false}` removes is the accidental exit, not every exit.
+  await page.getByRole("button", { name: "Close dialog" }).click();
+  await expect(dialog).toHaveCount(0);
+});
+
+test("the page behind an open dialog does not scroll", async ({ page }) => {
+  await page.goto(
+    "/iframe.html?id=components-dialog--default&viewMode=story&globals=theme:light",
+  );
+  // A tall page behind the dialog, so there is something to scroll.
+  await page.addStyleTag({ content: "body { min-block-size: 300vh; }" });
+
+  const dialog = page.getByRole("dialog", { name: "Delete this plan" });
+  await expect(dialog).toBeVisible();
+
+  const wheel = async () => {
+    await page.mouse.move(400, 300);
+    await page.mouse.wheel(0, 500);
+    // Wheel scrolling is asynchronous; reading the offset in the same tick
+    // reports the position before the scroll rather than after it.
+    await page.waitForFunction(() => document.scrollingElement!.scrollTop !== -1);
+    await page.waitForTimeout(200);
+    return page.evaluate(() => document.scrollingElement!.scrollTop);
+  };
+
+  // The control, first. "It did not scroll" proves nothing unless this page can
+  // scroll at all, and a storybook canvas is exactly the kind of surface where
+  // it might not — so close the dialog and establish that it does.
+  await page.getByRole("button", { name: "Close dialog" }).click();
+  await expect(dialog).toHaveCount(0);
+  expect(
+    await page.evaluate(() => {
+      const scroller = document.scrollingElement!;
+      return scroller.scrollHeight > scroller.clientHeight;
+    }),
+    "the page behind the dialog is not scrollable, so this test proves nothing",
+  ).toBe(true);
+  expect(await wheel(), "the unlocked page did not scroll").toBeGreaterThan(0);
+
+  // The lock is released rather than leaked, restoring exactly what it found.
+  expect(
+    await page.evaluate(() => document.documentElement.style.overflow),
+    "the scroll lock outlived the dialog",
+  ).toBe("");
+
+  // Now reopen, and the same gesture goes nowhere. A native `<dialog>` does not
+  // do this on its own — the page keeps scrolling under the pointer, which is
+  // the modal defect users report and nobody writes down.
+  await page.evaluate(() => document.scrollingElement!.scrollTo(0, 0));
+  await page.getByRole("button", { name: "Delete plan", exact: true }).first().click();
+  await expect(dialog).toBeVisible();
+  expect(await wheel(), "the page scrolled under the modal").toBe(0);
+});
+
+test("the dialog head holds still while its body scrolls", async ({ page }) => {
+  await page.goto(
+    "/iframe.html?id=components-dialog--long-body&viewMode=story&globals=theme:light",
+  );
+
+  const dialog = page.locator("dialog.kc-dialog");
+  await expect(dialog).toBeVisible();
+
+  const measured = await dialog.evaluate(async (element) => {
+    await Promise.all(element.getAnimations().map((animation) => animation.finished));
+    const head = element.querySelector(".kc-dialog__head")!;
+    const body = element.querySelector(".kc-dialog__body")!;
+    const before = head.getBoundingClientRect().top;
+    body.scrollTop = body.scrollHeight;
+    return {
+      scrolls: body.scrollHeight > body.clientHeight,
+      scrolled: body.scrollTop,
+      headMoved: head.getBoundingClientRect().top !== before,
+      closeVisible:
+        element.querySelector(".kc-dialog__close")!.getBoundingClientRect().top >=
+        element.getBoundingClientRect().top,
+    };
+  });
+
+  expect(measured.scrolls, "the long-body story does not actually scroll").toBe(true);
+  expect(measured.scrolled).toBeGreaterThan(0);
+  // AW scrolls the whole panel including its header, so its close control leaves
+  // the viewport in a long dialog. This is the assertion that says Keycaps does
+  // not — carried by the flex column rather than by a sticky offset.
+  expect(measured.headMoved, "the head scrolled with the body").toBe(false);
+  expect(measured.closeVisible).toBe(true);
+});
+
+test("the drawer is the same dialog pinned to the inline-end edge", async ({ page }) => {
+  await page.goto(
+    "/iframe.html?id=components-dialog--drawer&viewMode=story&globals=theme:light",
+  );
+
+  const dialog = page.locator("dialog.kc-dialog");
+  await expect(dialog).toBeVisible();
+
+  const geometry = await dialog.evaluate(async (element) => {
+    // The entrance translates 4px, so a rect read mid-animation is off by four.
+    await Promise.all(element.getAnimations().map((animation) => animation.finished));
+    const rect = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    return {
+      rect: { top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width },
+      viewport: { width: window.innerWidth, height: window.innerHeight },
+      startStart: style.borderStartStartRadius,
+      startEnd: style.borderStartEndRadius,
+      tag: element.tagName,
+    };
+  });
+
+  // RD's `.assumptions-drawer` in Keycaps' terms: 560px is 35rem, pinned to the
+  // inline-end edge, full height. Geometry, not a sibling component.
+  expect(geometry.tag).toBe("DIALOG");
+  expect(geometry.rect.width).toBe(560);
+  expect(geometry.rect.top).toBe(0);
+  expect(geometry.rect.bottom).toBe(geometry.viewport.height);
+  expect(geometry.rect.right).toBe(geometry.viewport.width);
+  // Rounded on the edge that faces the page, square against the viewport edge.
+  expect(geometry.startStart).toBe("18px");
+  expect(geometry.startEnd).toBe("0px");
+});
 
 /**
  * The half of the disclosure only a browser can check.
