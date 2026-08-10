@@ -24,6 +24,7 @@
     "test:unit": "pnpm -r --if-present test",
     "test:package": "pnpm --filter @jflamb/keycaps-consumer build",
     "test:e2e": "playwright test",
+    "review:changed": "node scripts/run-review.mjs",
     "test:pages": "node scripts/verify-pages-build.mjs",
     "release:verify": "node scripts/verify-release.mjs",
     "release:dry-run": "pnpm typecheck && pnpm test && pnpm test:package && npm pack --dry-run --json ./packages/tokens && npm pack --dry-run --json ./packages/react",
