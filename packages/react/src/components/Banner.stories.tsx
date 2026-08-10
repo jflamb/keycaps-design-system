@@ -1,8 +1,8 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, within } from "storybook/test";
-import { Banner } from "./Banner";
-import { Button } from "./Button";
+import { Banner } from "./Banner.js";
+import { Button } from "./Button.js";
 
 const RELEASE_STATUS_LINK =
   '<a href="./?path=/docs/foundations-release-status--guidance" target="_top">Release status</a>';

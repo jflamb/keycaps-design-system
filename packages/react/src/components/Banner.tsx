@@ -1,7 +1,7 @@
 import type { HTMLAttributes, ReactNode } from "react";
-import { Button } from "./Button";
-import { CloseIcon } from "../icons";
-import { cx } from "../utils";
+import { Button } from "./Button.js";
+import { CloseIcon } from "../icons.js";
+import { cx } from "../utils.js";
 
 /** Status tone. Also selects the ARIA live role — see {@link BannerProps.tone}. */
 export type BannerTone = "info" | "success" | "warning" | "danger";

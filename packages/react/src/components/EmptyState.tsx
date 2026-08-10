@@ -1,5 +1,5 @@
 import { createElement, type HTMLAttributes, type ReactNode } from "react";
-import { cx } from "../utils";
+import { cx } from "../utils.js";
 
 export interface EmptyStateProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
   /** What to do about it. One action, occasionally two. */

@@ -1,5 +1,5 @@
 import type { HTMLAttributes } from "react";
-import { cx } from "../utils";
+import { cx } from "../utils.js";
 
 /**
  * How a term and its value sit relative to each other.

@@ -7,7 +7,7 @@ import {
   type Ref,
 } from "react";
 import { Link as AriaLink, type LinkProps as AriaLinkProps } from "react-aria-components";
-import { cx } from "../utils";
+import { cx } from "../utils.js";
 
 /** The element a Card renders. Choose by document semantics, not by appearance. */
 export type CardElement = "article" | "section" | "div" | "a";

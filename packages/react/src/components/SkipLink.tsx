@@ -1,5 +1,5 @@
 import type { AnchorHTMLAttributes } from "react";
-import { cx } from "../utils";
+import { cx } from "../utils.js";
 
 export interface SkipLinkProps
   extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> {

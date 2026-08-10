@@ -9,18 +9,18 @@ import {
   AppShellNav,
   AppShellNavLink,
   AppShellSidebar,
-} from "./AppShell";
-import { Badge } from "./Badge";
-import { Button, LinkButton } from "./Button";
-import { Card, CardBody, CardHeader, CardTitle } from "./Card";
+} from "./AppShell.js";
+import { Badge } from "./Badge.js";
+import { Button, LinkButton } from "./Button.js";
+import { Card, CardBody, CardHeader, CardTitle } from "./Card.js";
 import {
   DescriptionDetails,
   DescriptionList,
   DescriptionListItem,
   DescriptionTerm,
-} from "./DescriptionList";
-import { EmptyState } from "./EmptyState";
-import { PageHeader } from "./PageHeader";
+} from "./DescriptionList.js";
+import { EmptyState } from "./EmptyState.js";
+import { PageHeader } from "./PageHeader.js";
 
 const RELEASE_STATUS_LINK =
   '<a href="./?path=/docs/foundations-release-status--guidance" target="_top">Release status</a>';

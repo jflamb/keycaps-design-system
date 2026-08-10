@@ -1,0 +1,38 @@
+/*
+ * The consumer fixture, type-checked the way the consumers actually check.
+ *
+ * `tsconfig.json` extends the repository base, which is `moduleResolution:
+ * Bundler` — the same setting Vite, Vitest, and Storybook run under. Every repo
+ * this fixture is a reference implementation *for* is on `module` /
+ * `moduleResolution: Node16` or `NodeNext`, and those two resolvers disagree
+ * about published declarations: Bundler accepts an extensionless relative
+ * specifier inside a `"type": "module"` package, Node16 rejects it (TS2834).
+ *
+ * Checking only under Bundler is how `@jflamb/keycaps-react` shipped 0.1.2 with
+ * sixteen unresolvable specifiers in its declaration output. Consumers all set
+ * `skipLibCheck: true`, which turned those errors into silence and every root
+ * export into `any` — a migration that builds, deploys, renders correctly, and
+ * carries no type safety on any component prop.
+ *
+ * So this second pass exists to fail where the first one cannot:
+ *
+ * - `module` / `moduleResolution: Node16` resolves `@jflamb/keycaps-react` the
+ *   way `mcp-dnsimple` and `mcp-unifi` resolve it, through the `exports` map and
+ *   with ESM extension rules in force.
+ * - `skipLibCheck: false` is the point. With it on, the declaration errors are
+ *   suppressed and the damage is invisible. Turning it off is what makes the
+ *   published `.d.ts` a checked artifact rather than an assumed one.
+ *
+ * `src/types.ts` carries the other half of the guard: assertions that fail if
+ * the exports resolve but degrade to `any`. Those run under both configs,
+ * because `any` is the failure mode `skipLibCheck: true` leaves behind.
+ */
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "skipLibCheck": false
+  },
+  "include": ["src"]
+}

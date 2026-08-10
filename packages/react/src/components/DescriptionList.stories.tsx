@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Badge } from "./Badge";
+import { Badge } from "./Badge.js";
 import {
   DescriptionDetails,
   DescriptionList,
   DescriptionListItem,
   DescriptionTerm,
-} from "./DescriptionList";
+} from "./DescriptionList.js";
 
 const RELEASE_STATUS_LINK =
   '<a href="./?path=/docs/foundations-release-status--guidance" target="_top">Release status</a>';

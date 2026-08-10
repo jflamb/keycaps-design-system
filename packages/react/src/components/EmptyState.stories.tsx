@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
-import { Button } from "./Button";
-import { Card, CardBody, CardHeader, CardTitle } from "./Card";
-import { EmptyState } from "./EmptyState";
-import { SearchIcon, SuccessIcon } from "../icons";
+import { Button } from "./Button.js";
+import { Card, CardBody, CardHeader, CardTitle } from "./Card.js";
+import { EmptyState } from "./EmptyState.js";
+import { SearchIcon, SuccessIcon } from "../icons.js";
 
 const RELEASE_STATUS_LINK =
   '<a href="./?path=/docs/foundations-release-status--guidance" target="_top">Release status</a>';

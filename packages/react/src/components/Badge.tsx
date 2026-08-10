@@ -1,6 +1,6 @@
 import type { HTMLAttributes, ReactNode } from "react";
-import { StatusIcon, type StatusTone } from "../icons";
-import { cx } from "../utils";
+import { StatusIcon, type StatusTone } from "../icons.js";
+import { cx } from "../utils.js";
 
 /** Status tone. Badge is not a control, so the tone carries no role or behavior. */
 export type BadgeTone = "neutral" | StatusTone;

@@ -11,8 +11,8 @@ import {
   Text,
   type SelectProps as AriaSelectProps,
 } from "react-aria-components";
-import { ChevronDownIcon } from "../icons";
-import { cx } from "../utils";
+import { ChevronDownIcon } from "../icons.js";
+import { cx } from "../utils.js";
 
 /** One entry in a Select. Options are data, not children — Keycaps owns the markup. */
 export interface SelectOption {

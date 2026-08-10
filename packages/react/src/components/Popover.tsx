@@ -6,7 +6,7 @@ import {
   type DialogTriggerProps,
   type PopoverProps as AriaPopoverProps,
 } from "react-aria-components";
-import { cx } from "../utils";
+import { cx } from "../utils.js";
 
 export interface PopoverProps
   extends Omit<AriaPopoverProps, "children" | "className"> {

@@ -1,6 +1,6 @@
 import { useState, type HTMLAttributes, type ReactNode } from "react";
-import { Button } from "./Button";
-import { cx } from "../utils";
+import { Button } from "./Button.js";
+import { cx } from "../utils.js";
 
 /**
  * The syntax roles a code block understands.

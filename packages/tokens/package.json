@@ -1,6 +1,6 @@
 {
   "name": "@jflamb/keycaps-tokens",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Framework-neutral Keycaps design tokens and locally hosted fonts.",
   "license": "MIT AND OFL-1.1",
   "homepage": "https://jflamb.github.io/keycaps-design-system/",
