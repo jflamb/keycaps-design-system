@@ -12,6 +12,7 @@ import {
   type SelectProps as AriaSelectProps,
 } from "react-aria-components";
 import { Icon } from "../icons.js";
+import { useOverlayPortalContainer } from "../overlay-portal.js";
 import { cx } from "../utils.js";
 
 /** One entry in a Select. Options are data, not children — Keycaps owns the markup. */
@@ -58,6 +59,14 @@ export function Select({
   placeholder = "Select an option",
   ...props
 }: SelectProps) {
+  /*
+   * A Select inside a Dialog is the case that made this necessary: both dialogs
+   * this system exists to replace hold a chooser or a form. Portalled to
+   * `document.body` under an open `showModal()` dialog, the listbox is inert and
+   * paints under the scrim — it cannot be opened at all. See `overlay-portal.ts`.
+   */
+  const portalContainer = useOverlayPortalContainer();
+
   return (
     <AriaSelect<SelectOption>
       {...props}
@@ -75,7 +84,10 @@ export function Select({
         <Icon className="kc-select__chevron" name="caret-down" />
       </AriaButton>
       <FieldError className="kc-field__error">{errorMessage}</FieldError>
-      <AriaPopover className="kc-select__popover">
+      <AriaPopover
+        UNSTABLE_portalContainer={portalContainer}
+        className="kc-select__popover"
+      >
         <ListBox<SelectOption> className="kc-select__listbox" items={options}>
           {(item) => (
             <ListBoxItem

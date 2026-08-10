@@ -447,7 +447,14 @@ result and replaces the ranking derived from the inventory; corrections
 | # | Component | Consumers | Mode | Evidence |
 | ---: | --- | ---: | --- | --- |
 | 1 | Disclosure — **shipped** | **3/5** | **1 and 2** | AW `[approvalRequestId].ts:425`, `index.html:1203`; KN `DetailsDrawer.tsx:242`, `SafeVegaLiteChart.tsx:248`; RD 9 sites, `planner.ts:573`/`:3821`/`:4397-4410`, `assistantChat.ts:140`, `tillerPicker.ts:91` |
-| 2 | Modal dialog | **2/5** | 2 only | AW `index.html:368-387` (live: `openDialog` `:1083`); RD `planHistory.ts:6`, `tillerPicker.ts:17` |
+| 2 | Modal dialog — **shipped** | **2/5** | 2 only | AW `index.html:368-387` (live: `openDialog` `:1083`); RD `planHistory.ts:6`, `tillerPicker.ts:17` |
+
+The modal dialog shipped as `Dialog`, a native `<dialog>` opened with
+`showModal()`, with the drawer as a `placement` prop rather than a sibling
+component. `renderStatic` throws on it, so its mode is 2 only. Corrections
+[30](#corrections-to-the-survey) and [31](#corrections-to-the-survey) record what
+the build turned up about the scrim token and the React Aria portal APIs. **That
+completes the Phase 2a queue.**
 
 The disclosure shipped as a native `<details>`, so its mode is 1 *and* 2 rather
 than "2, progressive": `renderStatic` renders it and it genuinely works there,
@@ -1914,3 +1921,127 @@ here rather than silently corrected there.
     placement rather than either repo's grid that ships. Recorded because "the
     same two-slot shape" is true of the markup and not of the treatment, and the
     difference is a decision the direction left open rather than one it made.
+
+30. **The token layer shipped no scrim at all, and under forced colors the scrim
+    is the only separator left.** The design direction says "the token layer
+    ships one scrim and neither number is it." It shipped none:
+    `grep -rn "scrim\|backdrop" packages/tokens/src packages/react/src` returned
+    nothing before this component. So the builder was adding the token rather
+    than pointing two repos at an existing one, which is a different piece of
+    work and one the direction did not budget.
+
+    What the survey handed over is the *alpha* rather than a colour.
+    `assistant-workbench` uses `rgb(21 24 29 / 0.68)`
+    (`apps/web/public/workbench-view.css:1537`) and `retirement-dashboard`
+    `rgba(8, 15, 24, 0.68)` (`src/styles.css:1453`) — two different colours and
+    the same 0.68, chosen without coordinating. Both colours fail the Phase 2
+    colour rule and neither survives; the agreement on alpha is the strongest
+    evidence available for a value nobody can reason to from first principles,
+    so `--kc-color-scrim` keeps it and takes the graphite ink both shadows are
+    already tinted with.
+
+    The second half is the part the direction could not have known, because it
+    only appears once a dialog exists. `--kc-shadow-overlay` resolves to `none`
+    under `forced-colors: active` (`packages/tokens/src/tokens.css:382`), so in
+    that mode a dialog has no shadow, and the scrim is the only thing between it
+    and the page. A translucent scrim would need `forced-color-adjust: none` to
+    survive there, which is fighting the mode rather than answering it — so the
+    token resolves to an opaque `Canvas` instead, the page behind is genuinely
+    hidden, and the dialog's `ButtonText` border draws the boundary. Recorded
+    because "add the scrim token" and "decide what `::backdrop` does when the
+    shadow is gone" are two decisions and the direction anticipated neither.
+
+31. **`UNSAFE_PortalProvider` is not reachable from `packages/react`, and it does
+    not live where the plan says it does.** The Phase 2a brief states that the
+    replacement for the deprecated `UNSTABLE_portalContainer` "lives in
+    `@react-aria/overlays`, which is a transitive dependency and not a direct
+    one." Verified against the installed tree, both halves are off.
+    `@react-aria/overlays` is **not installed at all** —
+    `react-aria-components@1.20.0` depends on the monolithic `react-aria@3.51.0`,
+    which is where `UNSAFE_PortalProvider` is actually exported from
+    (`dist/types/exports/index.d.ts:92`).
+
+    The consequence is stronger than "transitive rather than direct". Under
+    pnpm's strict linking, `packages/react/node_modules` contains only
+    `react-aria-components`, so `react-aria` is **unresolvable** from this
+    package: `require.resolve("react-aria")` throws `MODULE_NOT_FOUND`. Reaching
+    the provider would mean adding a second React Aria package as a direct
+    dependency whose version has to track RAC's exactly, in order to obtain an
+    API whose own stability marker is `UNSAFE_` rather than `UNSTABLE_`.
+
+    So `Dialog` uses `UNSTABLE_portalContainer`, which is present, typed, and
+    does the job, and the system supplies the context the provider would have
+    supplied — `Dialog` publishes its element and `Popover` and `Select` read it.
+    The deprecation redirects to a different spelling of the same capability
+    rather than away from the capability, so when it moves, one module and two
+    call sites change. Recorded because the brief presented the two escape
+    hatches as a live choice, and on this installation only one of them exists.
+
+32. **The affected-story review matrix could not detect keyboard activation on
+    any React Aria control, and had never run the check.**
+    `tests/e2e/review-affected.spec.ts` focuses the first activatable control,
+    presses Enter, and counts a `click` event with `detail === 0`. That is the
+    right signal for a native control and the wrong one for a React Aria
+    component: `usePress` calls `preventDefault` on the keydown, which suppresses
+    the synthesized click, and invokes `onPress` directly. Verified against this
+    build — Enter on a focused Keycaps `Button` produces `keydown` and `keyup` at
+    `document` and **no `click` at all**, while the control genuinely activates.
+
+    Since every interactive Keycaps component is React Aria, that detector could
+    never have fired for one. It went unnoticed because the block is guarded by
+    `activatable.isVisible()`, which returns `false` on the stories sampled so
+    far, so the assertion was skipped rather than failing. The Dialog stories are
+    the first to satisfy the guard — an open modal is the only case where the
+    first activatable control in the document is reliably visible at that point
+    in the run — which is how a latent defect in the harness surfaced as six
+    failing dialog tests.
+
+    The check now accepts either signal: a `detail === 0` click, or a
+    `data-pressed` transition on the focused element, which is the attribute
+    React Aria's press machinery sets and the one `styles.css` already styles
+    every pressed state through. That widens what can be *detected* without
+    loosening what is *asserted*. Two neighbouring gaps in the same file were
+    fixed with it: the focusable count did not know that a modal `<dialog>`
+    blocks everything outside it — the platform's implicit state rather than an
+    `inert` attribute a filter can see, so `:modal` now scopes it — and axe ran
+    without waiting for entrance animations, reporting a dialog's body ink at
+    3.95:1 against a background no element declares because it sampled the fade
+    mid-flight.
+
+    Recorded because the harness landed one commit before this component
+    (`c4e0564`, PR #13) and is not part of `pnpm check`, so nothing local runs
+    it. Its `isVisible()` guard is still skipping the activation check on most
+    stories; that is a separate defect, left alone here rather than fixed
+    silently alongside a component change.
+
+33. **`components-button--press-and-hold`'s play function had never passed, and
+    the review harness could not tell.** Its release —
+    `userEvent.pointer({ keys: "[/MouseLeft]", target: button })` — never reached
+    React Aria, so `data-pressed` stayed `"true"` and the following
+    `waitFor(() => expect(button).not.toHaveAttribute("data-pressed"))` always
+    timed out. Verified in isolation with nothing else touching the page: four
+    seconds after load the key is still down and the assertion has logged.
+
+    It looked green because the harness never waited for a `play` function to
+    finish. It navigated away first, aborting the story before the assertion's
+    timeout could log, so the error was emitted into whichever collection window
+    happened to be open — usually none. The Dialog work shifted that timing by a
+    few hundred milliseconds and the failure became deterministic, which is the
+    only reason it is visible now.
+
+    The cause is pointer capture, and it is a fault in the simulation rather than
+    in the component: React Aria calls `setPointerCapture` on press and releases
+    on the `pointerup` carrying the same `pointerId`, and user-event's release
+    did not deliver a matching one. **A real mouse was never affected** — driven
+    with real Playwright input, `data-pressed` is set on press and cleared on
+    release, confirmed before changing anything. The play function now dispatches
+    the `pointerup` itself with an explicit `pointerId`.
+
+    Recorded rather than fixed quietly because it changes what a Phase 1 story
+    asserts, and because the general shape of the problem outlives this instance:
+    the harness collects console errors per stage while story `play` functions
+    run unsynchronised beside it, so a play failure lands in an unrelated
+    assertion or in none at all. `waitForPlaySettled` now covers the one window
+    where the harness's own keys collide with a running play — the
+    `components-search-field--clearing` failure in this PR's first CI run — and
+    the broader mis-attribution is left standing rather than papered over.
