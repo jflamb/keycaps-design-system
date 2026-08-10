@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { existsSync, readFileSync } from "node:fs";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 interface Receipt {
   version: "KeycapsAffectedStories v1";
@@ -12,6 +12,11 @@ const receiptPath = ".review/affected-stories.json";
 const receipt = existsSync(receiptPath)
   ? (JSON.parse(readFileSync(receiptPath, "utf8")) as Receipt)
   : ({ version: "KeycapsAffectedStories v1", headSha: "", stories: [] } as Receipt);
+
+async function waitForStoryReady(page: Page) {
+  await expect(page.locator("body")).toHaveClass(/sb-show-main/);
+  await expect(page.locator("#storybook-root")).not.toHaveAttribute("inert", "");
+}
 
 test.skip(
   receipt.stories.length === 0,
@@ -45,7 +50,7 @@ for (const story of receipt.stories) {
       await page.goto(
         `/iframe.html?id=${story.id}&viewMode=story&globals=theme:${theme}`,
       );
-      await page.waitForTimeout(150);
+      await waitForStoryReady(page);
       await expect(page.locator("body")).not.toBeEmpty();
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
       const accessibility = await new AxeBuilder({ page })
@@ -76,7 +81,7 @@ for (const story of receipt.stories) {
     await page.goto(
       `/iframe.html?id=${story.id}&viewMode=story&globals=theme:light`,
     );
-    await page.waitForTimeout(150);
+    await waitForStoryReady(page);
     expect(runtimeErrors, `${story.id} reflow console and page errors`).toEqual([]);
     runtimeErrors.length = 0;
     const reflow = await page.evaluate(() => ({
@@ -86,7 +91,7 @@ for (const story of receipt.stories) {
     expect(reflow.scrollWidth, story.id).toBeLessThanOrEqual(reflow.clientWidth);
 
     const focusableSelector =
-      'button:not([disabled]):not([tabindex="-1"]), a[href]:not([tabindex="-1"]), input:not([disabled]):not([tabindex="-1"]), select:not([disabled]):not([tabindex="-1"]), textarea:not([disabled]):not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])';
+      'button:not([disabled]):not([tabindex="-1"]), a[href]:not([tabindex="-1"]), input:not([disabled]):not([tabindex="-1"]), select:not([disabled]):not([tabindex="-1"]), textarea:not([disabled]):not([tabindex="-1"]), summary, [tabindex]:not([tabindex="-1"])';
     const visibleFocusableCount = await page.locator(focusableSelector).evaluateAll(
       (elements) => {
         const visible = elements.filter((element) => {
@@ -95,6 +100,9 @@ for (const story of receipt.stories) {
             (element as HTMLElement).tabIndex >= 0 &&
             element.getAttribute("aria-disabled") !== "true" &&
             !element.closest('[inert], [aria-hidden="true"]') &&
+            !element.closest(
+              'details:not([open]) > *:not(summary), details:not([open]) > *:not(summary) *',
+            ) &&
             style.visibility !== "hidden" &&
             style.display !== "none" &&
             element.getClientRects().length > 0
@@ -163,7 +171,7 @@ for (const story of receipt.stories) {
 
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.reload();
-    await page.waitForTimeout(150);
+    await waitForStoryReady(page);
     expect(runtimeErrors, `${story.id} reduced-motion console and page errors`).toEqual(
       [],
     );
@@ -187,7 +195,7 @@ for (const story of receipt.stories) {
 
     await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
     await page.reload();
-    await page.waitForTimeout(150);
+    await waitForStoryReady(page);
     expect(runtimeErrors, `${story.id} forced-colors console and page errors`).toEqual(
       [],
     );
