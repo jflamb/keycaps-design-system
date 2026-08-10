@@ -421,23 +421,153 @@ name union, the mask generator, and the `validate` pairing wired into
 `pnpm check`. `prose.css` moves onto the generated masks, which is what makes the
 Tone Trio Rule's shape-per-tone one source rather than two.
 
-**2a.2 — The Tier 2 union, ordered by repo count**, from
-[the inventory](component-inventory.md#gaps--no-keycaps-equivalent) rather than by
-any one repo's surface. Each gets stories, tests, an axe run, and a
+**2a.2 — The Tier 2 union, ordered by repo count.** The count that orders it is
+**not** the inventory's. The inventory counts repos in which a pattern's *class
+names are visible*; what the build queue needs is repos that can *consume a
+component*, which is a smaller number every time anyone has checked. Three
+entries were re-measured only by building them, and each fell:
+
+- the theme toggle from 5/5 to 3/5, because delivery mode filters it
+  ([correction 14](#corrections-to-the-survey));
+- the data table from 3/5 to 1/5, because one repo renders no tables and
+  another's two are article tables ([correction 17](#corrections-to-the-survey));
+- and Keycaps' own Storybook turned out to be an unlisted sixth surface with a
+  rival treatment ([correction 18](#corrections-to-the-survey)).
+
+The eight entries that remained after those two shipped were therefore surveyed
+**from the markup on each repo's `origin/main`** before anything else was built.
+Six of the eight stopped being components. The table below is that survey's
+result and replaces the ranking derived from the inventory; corrections
+[20](#corrections-to-the-survey) through
+[26](#corrections-to-the-survey) record every place it contradicts.
+
+**The queue.** Each entry gets stories, tests, an axe run, and a
 `docs/component-status.md` row, exactly as Phase 1's did:
 
-| Component | Repos | Note |
-| --- | ---: | --- |
-| Data table | 3/5 | RD 17 tables, KN 2, AW `.data-table` |
-| Theme toggle | 3/5 | AW and RD have divergent ones; KN needs one. Mode 1 gets no control — see below |
-| Modal dialog | 2/5 | RD 3 native `<dialog>`, AW `.dialog*` |
-| Drawer / side panel | 2/5 | KN `DetailsDrawer`, RD `.assumptions-drawer` |
-| Segmented control | 2/5 | RD `.segmented` (28 hits), KN `.browse-filter` |
-| Sidebar / tree navigation | 2/5 | KN `KnowledgeNavigation`, RD `.plan-rail` |
-| Loading / skeleton | 2/5 | AW `.loading-block`, KN `.loading-screen` |
-| Disclosure | 2/5 | RD 9, KN 2; `prose.css` already styles `summary` |
-| Timeline / activity feed | 2/5 | AW `.feed-entry`, RD `.timeline-list` |
-| Avatar | 1/5 | KN `.account-avatar`; below the bar on its own, built only if the app shell needs one |
+| # | Component | Consumers | Mode | Evidence |
+| ---: | --- | ---: | --- | --- |
+| 1 | Disclosure | **3/5** | 2 (progressive) | AW `[approvalRequestId].ts:425`, `index.html:1203`; KN `DetailsDrawer.tsx:242`, `SafeVegaLiteChart.tsx:248`; RD 9 sites, `planner.ts:573`/`:3821`/`:4397-4410`, `assistantChat.ts:140`, `tillerPicker.ts:91` |
+| 2 | Modal dialog | **2/5** | 2 only | AW `index.html:368-387` (live: `openDialog` `:1083`); RD `planHistory.ts:6`, `tillerPicker.ts:17` |
+
+Shipped earlier in this phase, and listed for completeness: **data table**
+(1 real consumer plus Keycaps' own docs — corrections 17 and 18) and **theme
+toggle** (3/5 — correction 14).
+
+**What left the queue, and where it went.**
+
+| Was | Claimed | Measured | Disposition |
+| --- | ---: | ---: | --- |
+| Drawer / side panel | 2/5 | **0** as a distinct component | Two unrelated things sharing a word. RD's `.assumptions-drawer` *is* a modal `<dialog>` (`planner.ts:4382`, `showModal()` at `:3989`) — it is entry 2 with a `placement` prop. KN's is a layout region, not an overlay (`styles.css:285`) — it is `AppShellSidebar`. **Overturns [correction 13](#corrections-to-the-survey); see [20](#corrections-to-the-survey).** |
+| Sidebar / tree navigation | 2/5 | **2/5, already served** | `AppShellNav`, `AppShellNavLink`, and `AppShellSidebar` shipped in Phase 1, `aria-current="page"` included (`styles.css:1044`). Neither consumer is a tree. What is genuinely missing is a group heading and a trailing count — two extensions at 2/5, which belong in the inventory's *variant or extension* table. **Overturns [correction 13](#corrections-to-the-survey); see [21](#corrections-to-the-survey).** |
+| Segmented control | 2/5 | **1/5** | KN's `.browse-filter` is a search input (`styles.css:1003-1034`), already `SearchField`. RD is the only consumer, 9 call sites all inside one drawer. Tier 3, stays local, owed upstream. [22](#corrections-to-the-survey) |
+| Loading / skeleton | 2/5 | **1/5** | KN's three "loading" classes are text status lines (`App.tsx:599`), not skeletons. AW alone has the pulsing placeholder (`workbench-view.css:956-977`). Tier 3, stays local, owed upstream. [23](#corrections-to-the-survey) |
+| Timeline / activity feed | 2/5 | **1/5** | RD's `.timeline-list` is the year-by-year model output the inventory *already* classifies Tier 3, not a feed (`planner.ts:3821`). AW's is the only activity feed. Tier 3, stays local, owed upstream. [24](#corrections-to-the-survey) |
+| Avatar | 1/5 | **1/5** | Unchanged, and its one conditional expired: it was to be "built only if the app shell needs one", and `AppShell` shipped in Phase 1 without one. Tier 3, stays local, owed upstream. [25](#corrections-to-the-survey) |
+
+Four of the six leave as Tier 3 — one repo each, recorded as owed upstream per
+ADR 0002 rather than dropped, so a second consumer promotes them without a
+re-survey. Two leave because an existing component already covers them.
+
+### Design direction for the two survivors
+
+Under the Premises, where repos differ only visually **Keycaps picks one and the
+repos change**. Both calls below are made against the Named Rules in `DESIGN.md`,
+and in both cases what wins is *not* whichever look is most common — several of
+these treatments are the drift this program exists to remove.
+
+**Disclosure — `prose.css`'s treatment wins outright, and none of the three
+consumers' does.**
+
+`DESIGN.md` already decided this element by name: under
+[the Pressable Edge Rule](../../DESIGN.md), `summary` is a real control, so it
+wears the edge and keeps the promise — 3px down, 4px compressing to 1px, from
+the same tokens a Button reads, with the padding giving up exactly what the edge
+takes so the border box is the same height on every frame. `prose.css` ships that
+(`packages/tokens/src/prose.css:587-665`). **All three consumers ship zero press
+and zero edge**, so this is not Keycaps choosing between three looks — it is
+Keycaps having already published the answer to a surface that could not reach it.
+
+So the component is that CSS re-scoped to a `kc-disclosure` class rather than a
+second drawing of it. Redefining the same element twice in one package is the
+`.kc-table` failure [correction 18](#corrections-to-the-survey) records, and it
+should not be re-committed one component later.
+
+Four specifics the builder should not re-decide:
+
+- **The chevron comes from the icon registry, not from a rotated border box.**
+  RD draws it twice, identically, out of two `2px` borders on a 7px square
+  (`styles.css:1312-1323` and `:2770-2782`). ADR 0003 made the icon set one
+  source precisely so a glyph is not re-derived per surface, and a border
+  triangle cannot be masked, recolored by tone, or replaced by the registry.
+- **The summary takes a label and an optional description.** KN and RD
+  independently invented the same two-slot summary — `<span>` plus `<small>`
+  (`DetailsDrawer.tsx:243-247`, `planner.ts:4398`). Two repos arriving at one
+  shape without coordinating is the strongest evidence a component can get, and
+  it is a slot, not a variant.
+- **Exclusive accordion grouping is a prop, not a variant.** RD passes
+  `name="assumption-section"` to four sibling disclosures (`planner.ts:4397-4410`)
+  so opening one closes the rest. That is native `<details name>` behavior and a
+  functional difference — one pass-through prop, and one component still doing
+  one job.
+- **AW's body rule does not survive.** `.technical-detail p` carries
+  `border-left: 2px solid var(--divider)` (`workbench-view.css:1633`). Under
+  [the Leading Edge Rule](../../DESIGN.md) a weighted inline-start border marks a
+  block *quoted from or attributed to* something outside the flow, and a
+  disclosure's own body is not quoted from anywhere — it is the thing the summary
+  promised. It is also `border-left` rather than `border-inline-start`, so it does
+  not flip for RTL. Delete it rather than porting it.
+
+Build this first. It is the highest count of the eight, its treatment is already
+designed and shipped, and it is the only entry that degrades honestly with no
+JavaScript — a `<details>` opens in Mode 1 as well as Mode 2, so it is the one
+Tier 2 component both marketing repos could ever use.
+
+**Modal dialog — `retirement-dashboard`'s treatment wins; `assistant-workbench`
+changes.**
+
+The structural half is not a matter of taste. RD uses a native `<dialog>` with
+`showModal()` (`planner.ts:4802`, `:5083`), which is where inertness, the focus
+trap, Escape, and top-layer stacking come from. AW hand-rolls
+`<div role="dialog" aria-modal="true">` over a `hidden` backdrop
+(`index.html:368-372`) and re-implements a strict subset: Escape at `:1754`,
+initial focus at `:1097`, and **no inertness and no focus trap at all**. Keycaps
+builds on the platform primitive.
+
+Where the visual rule genuinely applies, RD still wins, and for a reason worth
+stating:
+
+- **Depth.** Under
+  [the Overlay Exception Rule](../../DESIGN.md) a dialog is a genuinely detached
+  surface and casts in *both* themes. RD declares `--floating-shadow` twice, light
+  and dark (`styles.css:75` and `:134`), so its dialogs do. AW's panel takes
+  `var(--shadow-plate)` (`workbench-view.css:1549`), and `--shadow-plate` is
+  `none` in dark (`ledger.css:201`, `:242`, `:291`) — **AW's dialogs have no depth
+  in dark mode**, which is [correction 10](#corrections-to-the-survey) landing on
+  a specific component. The Keycaps dialog reads `--kc-shadow-overlay`.
+- **The header stays put.** RD's dialogs set `padding: 0` (`styles.css:1443`,
+  `:1615`) and make the head `position: sticky` (`:1457`, `:1629`), so the close
+  control is reachable at any scroll offset. AW scrolls the whole panel including
+  its header (`workbench-view.css:1543-1544`) — its close button leaves the
+  viewport in a long dialog. Sticky head, scrolling body.
+- **Neither repo's scrim survives.** AW uses `rgb(21 24 29 / 0.68)`
+  (`workbench-view.css:1537`), RD `rgba(8, 15, 24, 0.68)` (`styles.css:1453`).
+  Both are raw literals that fail the Phase 2 color rule; the token layer ships
+  one scrim and neither number is it. Same for RD's `border-radius: 12px` — a
+  dialog is a plate that has detached, so it takes `--kc-radius-plate`, and
+  anything nested in it takes the Concentric Radius Rule.
+- **The component declares its own ceiling.** Both repos already write
+  `min(100%, 600px)` and `min(42rem, calc(100vw - 2rem))`. Under the Intrinsic
+  Maximum Rule that belongs to the component, so neither repo constrains it from
+  outside afterwards.
+
+Two things this component absorbs rather than spawning siblings. **The drawer is
+a `placement` prop.** RD's `.assumptions-drawer` is the same `<dialog>` pinned to
+the inline-end edge at full height — `margin: 0 0 0 auto`, `height: 100%`,
+`width: min(560px, 100%)` (`styles.css:2606-2617`). That is geometry. A sibling
+Drawer is "close to never correct" by the Premises, and this is the case that
+proves it. **And `renderStatic` must throw on it**, the way it already does on
+Select, Popover, and ThemeToggle: a modal that cannot open is not a degraded
+dialog, and the Mode 1 exclusion belongs in the build rather than in a note.
 
 **The theme toggle is the one to build first — shipped.** Keycaps has defined the
 `data-theme` contract since ADR 0001 and shipped no control, so `assistant-workbench`
