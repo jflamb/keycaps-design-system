@@ -47,6 +47,20 @@ Settled, not up for renegotiation inside this program:
   prerequisite, not parallel work.
 - **The Named Rules in `DESIGN.md` are binding**, including on consumer code
   after migration.
+- **Two repos needing the same thing makes it a Keycaps component.** The repo
+  count in [the inventory's cross-reference](component-inventory.md#cross-reference)
+  is the test — not how novel or how repo-specific the pattern looks. One repo:
+  it stays local and is recorded as owed upstream, per ADR 0002.
+- **A functional difference between repos is a prop.** Only a difference
+  substantial enough that one component would be doing two jobs earns a variant,
+  and a sibling component is close to never correct. The existing
+  danger/icon-only/link/pill/card-as-link work is the precedent: five apparent
+  gaps, five props.
+- **Where repos differ only visually, Keycaps picks one and the repos change.**
+  Convergence on a common look is the objective, so preserving a repo's current
+  appearance is not a reason to fork a component, widen an API, or keep a local
+  one. Visual change in a consumer is an expected output of this program rather
+  than a cost to be minimized.
 
 ## Phase map
 
@@ -54,15 +68,24 @@ Settled, not up for renegotiation inside this program:
 | --- | --- | --- | --- |
 | 1 | Static-render path, variant gaps, Tier 1 components | Keycaps | 2–7 |
 | 2 | Drift controls and release plumbing | Keycaps + all five | 3–7 |
+| 2a | Icon registry, and the Tier 2 union | Keycaps | 3–7 (partly) |
 | 3 | Mode 1 proof | `mcp-dnsimple` | 4 |
 | 4 | Mode 1 with no build step; first dark theme | `mcp-unifi` | 5 |
 | 5 | Mode 2 proof; end the `ledger.css` fork | `assistant-workbench` | 6 |
 | 6 | Pure component adoption; second dark theme | `knowledge` | 7 |
-| 7 | Tier 2 components, then the re-skin | `retirement-dashboard` | — |
+| 7 | The `retirement-dashboard` re-skin | `retirement-dashboard` | — |
 
 Phases 3–7 are strictly ordered. Phases 1 and 2 could overlap, but 2's CI rules
 are cheap to land and worthless after the fact, so 2 follows 1 immediately and
 precedes 3.
+
+**Phase 2a is library work with no consumer dependency, and it runs in parallel
+with 3 through 6.** It was previously Phase 7 step 1, scoped to "the Tier 2
+components `retirement-dashboard` needs," which is repo-shaped reasoning in a
+program whose objective is convergence — and it put the largest remaining library
+build at the end of a five-repo serial chain for no technical reason. The
+inventory already ranks these by how many repos need them; that ranking is the
+build queue. Only the last consumer's own re-skin stays in Phase 7.
 
 ---
 
@@ -376,6 +399,78 @@ must fail. A rule that has never been seen failing has not been tested.
 Each control is one file plus one workflow step per repo. Reverting a repo's PR
 restores its previous CI exactly. No application code changes in this phase, so
 nothing can break at runtime.
+
+---
+
+## Phase 2a — The icon registry and the Tier 2 union
+
+**Repo:** `keycaps-design-system` only. Runs in parallel with Phases 3–6.
+
+### Why it is separate
+
+Two pieces of library work were sitting on the critical path with nothing
+technical holding them there. The icon decision ([ADR 0003](../decisions/0003-icons.md))
+affects every phase from 3 onward, so it has to precede 3. The Tier 2 build was
+Phase 7 step 1 and blocked on four consumer migrations it does not depend on.
+
+### Work
+
+**2a.1 — The icon registry**, per ADR 0003: the vendored data module, the
+registry with its sanitizing `register`, the React icon component, the generated
+name union, the mask generator, and the `validate` pairing wired into
+`pnpm check`. `prose.css` moves onto the generated masks, which is what makes the
+Tone Trio Rule's shape-per-tone one source rather than two.
+
+**2a.2 — The Tier 2 union, ordered by repo count**, from
+[the inventory](component-inventory.md#gaps--no-keycaps-equivalent) rather than by
+any one repo's surface. Each gets stories, tests, an axe run, and a
+`docs/component-status.md` row, exactly as Phase 1's did:
+
+| Component | Repos | Note |
+| --- | ---: | --- |
+| Data table | 3/5 | RD 17 tables, KN 2, AW `.data-table` |
+| Theme toggle | 2/5 → **5/5** | See below |
+| Modal dialog | 2/5 | RD 3 native `<dialog>`, AW `.dialog*` |
+| Drawer / side panel | 2/5 | KN `DetailsDrawer`, RD `.assumptions-drawer` |
+| Segmented control | 2/5 | RD `.segmented` (28 hits), KN `.browse-filter` |
+| Sidebar / tree navigation | 2/5 | KN `KnowledgeNavigation`, RD `.plan-rail` |
+| Loading / skeleton | 2/5 | AW `.loading-block`, KN `.loading-screen` |
+| Disclosure | 2/5 | RD 9, KN 2; `prose.css` already styles `summary` |
+| Timeline / activity feed | 2/5 | AW `.feed-entry`, RD `.timeline-list` |
+| Avatar | 1/5 | KN `.account-avatar`; below the bar on its own, built only if the app shell needs one |
+
+**The theme toggle is the one to build first, and the inventory's 2/5 understates
+it.** Phases 3, 4, and 6 each author a dark theme for a repo that has none, so
+the count becomes 5/5 as a direct result of this program. Keycaps already defines
+the `data-theme` contract and ships no control, which means three phases would
+each hand-roll one before Phase 7 noticed. Note the two existing implementations
+differ in storage — `assistant-workbench` uses a `jflamb-theme` cookie on
+`Domain=.jflamb.com` shared with `enter.jflamb.com`, `retirement-dashboard` uses
+`retirement-dashboard-theme` in `localStorage` — so persistence is injected
+rather than assumed by the component. That is a functional difference, so it is a
+prop.
+
+### Exit criteria
+
+- Every component above is exported, has a story, a unit test, an axe run, and a
+  `docs/component-status.md` row.
+- `prose.css` contains no inline SVG data URI; its shapes come from generated
+  masks, and `validate:icon-masks` runs in `pnpm check`.
+- Rebuilding the masks produces no diff.
+- A release is cut, since Phases 5 through 7 consume these from npm.
+
+### Validation
+
+`pnpm check`, unchanged in shape from Phase 1 — including the second
+`tests/consumer/` pass under `Node16` with `skipLibCheck: false` that 0.1.3 added,
+which is the standing guarantee that new exports carry real types rather than
+`any` in a consumer.
+
+### Rollback
+
+Additive: new components, new exports, one rewritten `prose.css` block. The
+`prose.css` change is the only edit to existing shipped CSS, and it is revertible
+on its own.
 
 ---
 
@@ -801,11 +896,19 @@ The real work is its first dark theme and unwinding the token layer.
    `iconOnly`. `.vault-inline-action` → Button `variant="link"`. `.home-update`
    → linked Card. `.markdown-article` → `.kc-prose`. `.topic-select` → Select.
    `.skip-link` → SkipLink.
-6. **Leave the genuinely novel components local**, per Tier 3:
-   `KnowledgeNavigation` (365 lines), `DetailsDrawer` (350), `VaultWorkspace`
-   (673), `SafeVegaLiteChart` (269). They need tokens and type, not components.
-   Record each in the repo's adoption notes as owed upstream, per ADR 0002, and
-   confirm none uses the `kc-` prefix.
+6. **Leave the genuinely novel components local**, per Tier 3: `VaultWorkspace`
+   (673 lines) and `SafeVegaLiteChart` (269). They need tokens and type, not
+   components. Record each in the repo's adoption notes as owed upstream, per
+   ADR 0002, and confirm neither uses the `kc-` prefix.
+
+   **`KnowledgeNavigation` (365 lines) and `DetailsDrawer` (350) are not on this
+   list any more**, and the earlier draft that put them here contradicted the
+   inventory it was derived from. Both are Tier 2 gaps needed by two repos —
+   sidebar/tree navigation pairs `.knowledge-nav` with `retirement-dashboard`'s
+   `.plan-rail`, and drawer pairs `.details-drawer` with `.assumptions-drawer`.
+   Size is what made them read as novel, and size is not the test; the repo count
+   is. Both are built in Phase 2a and consumed here. See
+   [correction 13](#corrections-to-the-survey).
 7. **Normalize the class naming that survives.** The repo currently mixes BEM
    (`search-field__clear`), modifier-BEM (`knowledge-state--attention`), flat
    semantic (`empty-copy`), and state classes (`.is-starred`). Anything that
@@ -883,13 +986,15 @@ Tier 2 build is scoped by what this repo needs rather than built up front.
 
 ### Work, in order
 
-1. **Build the Tier 2 components this repo needs, in Keycaps, before touching
-   it.** In order of how much of the surface they unlock: data table (17 tables
-   plus `.table-scroll`, which already implements the Prose Markup Rule's
-   `tabindex="0"`), segmented control (`.segmented`/`.segment`/`.segment-label`/`.segment-sub`,
-   28 hits and the primary assumption control), modal dialog (3 native
-   `<dialog>`), drawer, disclosure, timeline, and loading/skeleton. Each follows
-   the same contract and gets stories and tests, exactly as Phase 1's did.
+1. **Confirm Phase 2a shipped the components this repo consumes.** The Tier 2
+   build moved out of this phase and into 2a, where it is scoped by the
+   inventory's repo counts rather than by this repo's surface. What this phase
+   needs from it: data table (17 tables plus `.table-scroll`, which already
+   implements the Prose Markup Rule's `tabindex="0"`), segmented control
+   (`.segmented`/`.segment`/`.segment-label`/`.segment-sub`, 28 hits and the
+   primary assumption control), modal dialog (3 native `<dialog>`), drawer,
+   disclosure, timeline, loading/skeleton, sidebar navigation for `.plan-rail`,
+   and the theme toggle.
 2. **Add React and the plugin.** `react`, `react-dom`, `@vitejs/plugin-react`,
    and a `plugins: [react()]` array. Verify `npm run test:artifact` still passes
    — the `protected-assets/` split is enforced by an AST audit and a new plugin
@@ -1025,10 +1130,22 @@ Trio Rule that requires a **distinct icon shape per tone**. Phase 1 closes that
 by shipping the four status shapes, drawn from the same paths `prose.css` already
 masks, so a callout in an article and a badge in an app are one glyph.
 
-Everything else stays local. `knowledge` keeps `lucide-react`;
-`assistant-workbench` keeps its vendored `lucide.min.js` at
-`public/vendor/lucide.min.js`. Keycaps does not become an icon library — it ships
-only the glyphs its own rules require.
+**The rest of this section is superseded by [ADR 0003](../decisions/0003-icons.md),
+and the position it reversed is left standing below rather than edited away.**
+
+Keycaps adopts Phosphor: path data vendored into a registry, rendered inline by a
+component, and generated into `mask-image` custom properties that `prose.css`
+consumes. `lucide-react`, the vendored `lucide.min.js`, and `knowledge`'s
+`Icons.tsx` all retire. Every phase from 3 onward carries an icon-mapping step,
+and Phases 5 and 6 carry a deletion.
+
+The superseded position, for the record: *"Everything else stays local.
+`knowledge` keeps `lucide-react`; `assistant-workbench` keeps its vendored
+`lucide.min.js` at `public/vendor/lucide.min.js`. Keycaps does not become an icon
+library — it ships only the glyphs its own rules require."* It was wrong on this
+program's own terms — two icon runtimes and a hand-rolled set across five repos
+is divergence that no rule happened to name — and it left the Tone Trio Rule with
+two independent shape sources, one in `prose.css` and one in the components.
 
 ### Versioning and release
 
@@ -1268,7 +1385,37 @@ here rather than silently corrected there.
     `typecheck` directly, so `build` is a dead alias. Phase 5 has to make
     `build` real before anything else is verifiable.
 
-13. **ADR 0002 asks for something that was already true.** It says
+13. **This plan contradicted the inventory on two of `knowledge`'s components.**
+    Phase 6 step 6 listed `KnowledgeNavigation` and `DetailsDrawer` as Tier 3,
+    "genuinely novel," to be left local. The inventory classifies both as Tier 2
+    gaps at 2/5 repos: sidebar/tree navigation (`.knowledge-nav` with
+    `retirement-dashboard`'s `.plan-rail`) and drawer/side panel
+    (`.details-drawer` with `.assumptions-drawer`). Both entries even cite the
+    365-line and 430px figures the phase used as evidence of novelty. What went
+    wrong is worth naming because it will recur: the two components are large and
+    repo-specific-looking, and that read as Tier 3 without anyone checking the
+    count. Size is not the test. Under the normalization premise the inventory is
+    right, and both move to Phase 2a. `VaultWorkspace` and `SafeVegaLiteChart`
+    remain Tier 3 correctly.
+
+14. **The theme toggle's 2/5 is an undercount created by this program.** The
+    inventory records `assistant-workbench` and `retirement-dashboard` as the two
+    repos with a theme control, and notes that Keycaps defines the CSS contract
+    but ships none. Phases 3, 4, and 6 each author a dark theme for a repo that
+    has none — so on completion all five need the control, and without it three
+    separate phases would each hand-roll one. It is first in the Phase 2a queue
+    for that reason rather than for its repo count.
+
+15. **The Tier 2 build was scoped to one repo in a program about convergence.**
+    Phase 7 step 1 read "build the Tier 2 components *this repo* needs," and its
+    list of seven omitted three of the inventory's eleven — sidebar/tree
+    navigation, avatar, and theme toggle — because `retirement-dashboard`'s
+    surface did not obviously demand them. The inventory is already ordered by
+    how many repos need each pattern, which is the ordering a convergence program
+    wants. The build is now Phase 2a, scoped by that count, and off the serial
+    consumer chain it never depended on.
+
+16. **ADR 0002 asks for something that was already true.** It says
     "`tests/consumer/` should additionally track this repo's `main` rather than a
     release." It has used `workspace:*` since the fixture's scaffold commit
     `b089fcc`, which predates the ADR, and `pnpm-lock.yaml` resolves that to
