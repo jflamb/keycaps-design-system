@@ -18,6 +18,37 @@ async function waitForStoryReady(page: Page) {
   await expect(page.locator("#storybook-root")).not.toHaveAttribute("inert", "");
 }
 
+/**
+ * Let entrance animations finish before measuring colour.
+ *
+ * axe samples whatever is painted when it runs, and a surface that fades in from
+ * `opacity: 0` is, mid-fade, every one of its real colours blended toward
+ * whatever is behind it. A dialog caught at that moment reported its body ink at
+ * 3.95:1 against a background no element declares — a violation belonging to the
+ * frame rather than to the component.
+ *
+ * Deliberately *not* folded into `waitForStoryReady`. The reduced-motion section
+ * below asserts that no animation is still running shortly after load, and
+ * settling first would make that check pass by construction. So this is called
+ * only before the runs that measure colour.
+ */
+async function settleAnimations(page: Page) {
+  await page.evaluate(async () => {
+    const finite = document.getAnimations().filter((animation) => {
+      const timing = animation.effect?.getComputedTiming();
+      return timing?.iterations !== Infinity;
+    });
+    await Promise.all(
+      finite.map((animation) =>
+        Promise.race([
+          animation.finished,
+          new Promise((resolve) => setTimeout(resolve, 1000)),
+        ]).catch(() => undefined),
+      ),
+    );
+  });
+}
+
 test.skip(
   receipt.stories.length === 0,
   "run pnpm review:changed with exact --base and --head SHAs",
@@ -53,6 +84,7 @@ for (const story of receipt.stories) {
       await waitForStoryReady(page);
       await expect(page.locator("body")).not.toBeEmpty();
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+      await settleAnimations(page);
       const accessibility = await new AxeBuilder({ page })
         .include("#storybook-root")
         .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
@@ -94,12 +126,25 @@ for (const story of receipt.stories) {
       'button:not([disabled]):not([tabindex="-1"]), a[href]:not([tabindex="-1"]), input:not([disabled]):not([tabindex="-1"]), select:not([disabled]):not([tabindex="-1"]), textarea:not([disabled]):not([tabindex="-1"]), summary, [tabindex]:not([tabindex="-1"])';
     const visibleFocusableCount = await page.locator(focusableSelector).evaluateAll(
       (elements) => {
+        /*
+         * A modal `<dialog>` blocks everything outside it, and it does so
+         * *implicitly* — the platform's "blocked by a modal dialog" state, not
+         * an `inert` attribute this filter could see. So a story with an open
+         * modal counted the trigger behind the scrim as a reachable control,
+         * then failed because it is correctly unreachable. `:modal` is the
+         * pseudo-class for exactly this state; scoping to it makes the
+         * assertion stronger rather than weaker, since it now demands that
+         * every control inside the modal is reachable and says nothing about
+         * the page the modal has taken over.
+         */
+        const modal = document.querySelector("dialog:modal");
         const visible = elements.filter((element) => {
           const style = getComputedStyle(element);
           return (
             (element as HTMLElement).tabIndex >= 0 &&
             element.getAttribute("aria-disabled") !== "true" &&
             !["listbox", "option"].includes(element.getAttribute("role") || "") &&
+            (!modal || modal.contains(element)) &&
             !element.closest('[inert], [aria-hidden="true"]') &&
             !element.closest(
               'details:not([open]) > *:not(summary), details:not([open]) > *:not(summary) *',
@@ -131,28 +176,65 @@ for (const story of receipt.stories) {
       expect(reached.size, `${story.id} keyboard traversal`).toBe(
         visibleFocusableCount,
       );
+      // Scoped for the same reason as the count above: the first button in DOM
+      // order may be behind an open modal, where focus and Enter cannot reach
+      // it. The control this checks has to be one a keyboard can actually get to.
+      const modalPrefix = await page.evaluate(() =>
+        document.querySelector("dialog:modal") ? "dialog:modal " : "",
+      );
       const activatable = page
         .locator(
-          'button:not([disabled]):not([aria-disabled="true"]):not([tabindex="-1"]), [role="button"]:not([aria-disabled="true"]):not([tabindex="-1"])',
+          `${modalPrefix}button:not([disabled]):not([aria-disabled="true"]):not([tabindex="-1"]), ${modalPrefix}[role="button"]:not([aria-disabled="true"]):not([tabindex="-1"])`,
         )
         .first();
       if (await activatable.isVisible().catch(() => false)) {
-        await page.evaluate(() => {
-          (window as typeof window & { __ellisKeyboardActivations?: number })
-            .__ellisKeyboardActivations = 0;
+        /*
+         * Activation is counted two ways, because this system has two kinds of
+         * control and only one of them dispatches a DOM click.
+         *
+         * A native control activated by Enter fires a `click` with `detail === 0`,
+         * which is what this originally looked for. A React Aria control does
+         * not: `usePress` calls `preventDefault` on the keydown, suppressing the
+         * synthesized click, and invokes `onPress` directly — verified against
+         * this build, where Enter on a Keycaps Button produces `keydown` and
+         * `keyup` at `document` and no `click` at all. Since every interactive
+         * Keycaps component is React Aria, the click-only detector could never
+         * fire for one; it had simply never run, because every story sampled so
+         * far skips this block on the `isVisible` guard above. The Dialog stories
+         * are the first to satisfy the guard, which is how it surfaced. See
+         * correction 32.
+         *
+         * The React Aria signal is the `data-pressed` attribute the press
+         * machinery sets while the control is down — the same attribute
+         * `styles.css` styles every pressed state through. Accepting either
+         * signal widens what can be detected without loosening what is asserted:
+         * the claim is still that pressing Enter on a focused control activated
+         * it.
+         */
+        await activatable.evaluate((element) => {
+          const scope = window as typeof window & {
+            __ellisKeyboardActivations?: number;
+          };
+          scope.__ellisKeyboardActivations = 0;
           document.addEventListener(
             "click",
             (event) => {
               if (event.detail === 0) {
-                const value = window as typeof window & {
-                  __ellisKeyboardActivations?: number;
-                };
-                value.__ellisKeyboardActivations =
-                  (value.__ellisKeyboardActivations || 0) + 1;
+                scope.__ellisKeyboardActivations =
+                  (scope.__ellisKeyboardActivations || 0) + 1;
               }
             },
             { capture: true, once: true },
           );
+          new MutationObserver(() => {
+            if (element.getAttribute("data-pressed") === "true") {
+              scope.__ellisKeyboardActivations =
+                (scope.__ellisKeyboardActivations || 0) + 1;
+            }
+          }).observe(element, {
+            attributes: true,
+            attributeFilter: ["data-pressed"],
+          });
         });
         await activatable.focus();
         await page.keyboard.press("Enter");
@@ -163,7 +245,7 @@ for (const story of receipt.stories) {
                 .__ellisKeyboardActivations || 0,
           ),
           `${story.id} keyboard activation`,
-        ).toBe(1);
+        ).toBeGreaterThanOrEqual(1);
       }
       await page.keyboard.press("Escape");
       await page.keyboard.press("ArrowDown");
@@ -204,6 +286,7 @@ for (const story of receipt.stories) {
     expect(
       await page.evaluate(() => matchMedia("(forced-colors: active)").matches),
     ).toBe(true);
+    await settleAnimations(page);
     const forcedColorsAccessibility = await new AxeBuilder({ page })
       .include("#storybook-root")
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])

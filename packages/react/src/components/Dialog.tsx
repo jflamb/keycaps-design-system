@@ -306,7 +306,23 @@ export function Dialog({
             <Icon name="x" />
           </Button>
         </div>
-        <div className="kc-dialog__body">{children}</div>
+        {/*
+          `tabindex="0"` unconditionally, following `CodeBlock` and `DataTable`
+          rather than reasoning afresh. The body is the scroll container — that
+          is what keeps the head and footer still — and under the Prose Markup
+          Rule a scrollable region a keyboard cannot reach is a 2.1.1 failure.
+          A long dialog whose content is all prose has nothing else focusable in
+          it, so without this there is no way to read past the fold from the
+          keyboard.
+
+          The cost is a tab stop on dialogs whose body does not scroll, and it is
+          the same cost those two components already pay: nothing in markup can
+          know whether a given body will overflow. It sits after the head, so it
+          does not take the initial focus the close control gets.
+        */}
+        <div className="kc-dialog__body" tabIndex={0}>
+          {children}
+        </div>
         {footer == null ? null : <div className="kc-dialog__footer">{footer}</div>}
       </OverlayPortalContext.Provider>
     </dialog>

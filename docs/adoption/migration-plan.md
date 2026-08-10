@@ -1976,3 +1976,40 @@ here rather than silently corrected there.
     rather than away from the capability, so when it moves, one module and two
     call sites change. Recorded because the brief presented the two escape
     hatches as a live choice, and on this installation only one of them exists.
+
+32. **The affected-story review matrix could not detect keyboard activation on
+    any React Aria control, and had never run the check.**
+    `tests/e2e/review-affected.spec.ts` focuses the first activatable control,
+    presses Enter, and counts a `click` event with `detail === 0`. That is the
+    right signal for a native control and the wrong one for a React Aria
+    component: `usePress` calls `preventDefault` on the keydown, which suppresses
+    the synthesized click, and invokes `onPress` directly. Verified against this
+    build — Enter on a focused Keycaps `Button` produces `keydown` and `keyup` at
+    `document` and **no `click` at all**, while the control genuinely activates.
+
+    Since every interactive Keycaps component is React Aria, that detector could
+    never have fired for one. It went unnoticed because the block is guarded by
+    `activatable.isVisible()`, which returns `false` on the stories sampled so
+    far, so the assertion was skipped rather than failing. The Dialog stories are
+    the first to satisfy the guard — an open modal is the only case where the
+    first activatable control in the document is reliably visible at that point
+    in the run — which is how a latent defect in the harness surfaced as six
+    failing dialog tests.
+
+    The check now accepts either signal: a `detail === 0` click, or a
+    `data-pressed` transition on the focused element, which is the attribute
+    React Aria's press machinery sets and the one `styles.css` already styles
+    every pressed state through. That widens what can be *detected* without
+    loosening what is *asserted*. Two neighbouring gaps in the same file were
+    fixed with it: the focusable count did not know that a modal `<dialog>`
+    blocks everything outside it — the platform's implicit state rather than an
+    `inert` attribute a filter can see, so `:modal` now scopes it — and axe ran
+    without waiting for entrance animations, reporting a dialog's body ink at
+    3.95:1 against a background no element declares because it sampled the fade
+    mid-flight.
+
+    Recorded because the harness landed one commit before this component
+    (`c4e0564`, PR #13) and is not part of `pnpm check`, so nothing local runs
+    it. Its `isVisible()` guard is still skipping the activation check on most
+    stories; that is a separate defect, left alone here rather than fixed
+    silently alongside a component change.
