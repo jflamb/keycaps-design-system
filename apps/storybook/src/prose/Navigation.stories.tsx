@@ -121,14 +121,22 @@ export const Footnotes: Story = {
         <ol>
           <li id="fn-1">
             0.482em against 0.488em, measured at 1rem.{" "}
-            <a href="#fnref-1" role="doc-backlink">
+            <a
+              aria-label="Back to reference 1"
+              href="#fnref-1"
+              role="doc-backlink"
+            >
               ↩
               <span className="kc-sr-only"> Back to reference 1</span>
             </a>
           </li>
           <li id="fn-2">
             Piazzolla 100–900, Sofia Sans 1–1000.{" "}
-            <a href="#fnref-2" role="doc-backlink">
+            <a
+              aria-label="Back to reference 2"
+              href="#fnref-2"
+              role="doc-backlink"
+            >
               ↩
               <span className="kc-sr-only"> Back to reference 2</span>
             </a>

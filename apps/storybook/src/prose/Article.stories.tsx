@@ -252,7 +252,11 @@ export const FullPage: Story = {
           <li id="article-fn-1">
             The two exceptions are <code>box-sizing</code> and the 320px minimum
             width, both of which are set unconditionally.{" "}
-            <a href="#article-fnref-1" role="doc-backlink">
+            <a
+              aria-label="Back to reference 1"
+              href="#article-fnref-1"
+              role="doc-backlink"
+            >
               ↩<span className="kc-sr-only"> Back to reference 1</span>
             </a>
           </li>

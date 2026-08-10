@@ -14,6 +14,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: pnpm/setup@v2
         with:
           version: 11.16.0
@@ -23,3 +25,23 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm check
+      - name: Validate affected Storybook stories
+        if: github.event_name == 'pull_request'
+        env:
+          REVIEW_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          REVIEW_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: >-
+          pnpm review:changed --
+          --base "$REVIEW_BASE_SHA"
+          --head "$REVIEW_HEAD_SHA"
+      - name: Retain Playwright failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: keycaps-playwright-${{ github.run_id }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            playwright-report
+            test-results/playwright
+            .review/affected-stories.json
+          if-no-files-found: ignore
+          retention-days: 14
