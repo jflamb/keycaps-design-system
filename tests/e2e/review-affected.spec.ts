@@ -93,6 +93,7 @@ for (const story of receipt.stories) {
           const style = getComputedStyle(element);
           return (
             (element as HTMLElement).tabIndex >= 0 &&
+            element.getAttribute("aria-disabled") !== "true" &&
             !element.closest('[inert], [aria-hidden="true"]') &&
             style.visibility !== "hidden" &&
             style.display !== "none" &&
@@ -122,7 +123,9 @@ for (const story of receipt.stories) {
         visibleFocusableCount,
       );
       const activatable = page
-        .locator('button:not([disabled]):not([tabindex="-1"]), [role="button"]:not([tabindex="-1"])')
+        .locator(
+          'button:not([disabled]):not([aria-disabled="true"]):not([tabindex="-1"]), [role="button"]:not([aria-disabled="true"]):not([tabindex="-1"])',
+        )
         .first();
       if (await activatable.isVisible().catch(() => false)) {
         await page.evaluate(() => {
