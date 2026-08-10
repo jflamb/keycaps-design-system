@@ -439,7 +439,7 @@ The eight entries that remained after those two shipped were therefore surveyed
 Six of the eight stopped being components. The table below is that survey's
 result and replaces the ranking derived from the inventory; corrections
 [20](#corrections-to-the-survey) through
-[26](#corrections-to-the-survey) record every place it contradicts.
+[27](#corrections-to-the-survey) record every place it contradicts.
 
 **The queue.** Each entry gets stories, tests, an axe run, and a
 `docs/component-status.md` row, exactly as Phase 1's did:
@@ -1638,3 +1638,175 @@ here rather than silently corrected there.
     to update both of those tests**, which is work the plan did not know about
     because it believed the attribute was already static. RD's third assertion,
     that no `.table-scroll` nests inside another, holds unchanged.
+
+20. **Correction 13 was wrong about the drawer, and the two components are not
+    one component.** That entry moved `knowledge`'s `DetailsDrawer` out of Tier 3
+    on the strength of a 2/5 repo count pairing `.details-drawer` with
+    `retirement-dashboard`'s `.assumptions-drawer`. It was made from counts
+    without reading either implementation, and the two are unrelated:
+
+    - RD's `.assumptions-drawer` **is a modal dialog**. It is a native
+      `<dialog>` (`src/planner.ts:4382`) opened with `showModal()`
+      (`:3989`, `:4978`), with a `::backdrop` (`src/styles.css:2619`), whose
+      drawer character is four declarations of geometry — `margin: 0 0 0 auto`,
+      `height: 100%`, `width: min(560px, 100%)`, a single `border-left`
+      (`:2606-2617`). Strip the geometry and it is the same primitive as
+      `.plan-history-dialog` and `.tiller-picker-dialog`.
+    - KN's `.details-drawer` **is not an overlay at all** on the surface it was
+      designed for. It is the third column of the shell's grid —
+      `grid-template-columns: var(--nav-width) minmax(0, 1fr) var(--drawer-width)`
+      (`src/styles.css:285`) — rendered as an `<aside>`
+      (`src/components/DetailsDrawer.tsx:60`), toggled between `display: none`
+      and `display: block` (`:1665`, `:1674`). It becomes `position: fixed` only
+      inside the narrow-viewport block (`:3357-3365`), and even there it is
+      **non-modal**: `git grep -iE "backdrop|inert|aria-modal|role=\"dialog\""`
+      over `src/` returns nothing in the entire repository.
+
+    So the drawer is not a component with two consumers. It is one dialog with a
+    `placement` prop and one `AppShellSidebar`, and it leaves the Phase 2a queue.
+    The lesson is the same one correction 13 drew and then did not apply far
+    enough: size was not the test, and neither is a shared word. Two repos
+    calling two different things "drawer" is not two consumers.
+
+21. **Correction 13 was also wrong about the sidebar, which Phase 1 already
+    shipped.** `AppShellNav`, `AppShellNavLink`, and `AppShellSidebar` are
+    exported from `packages/react/src/index.ts:1-15`, and `AppShellNavLink`
+    already sets `aria-current="page"`
+    (`packages/react/src/components/AppShell.tsx:142`) with the selected
+    treatment styled at `packages/react/src/styles.css:1044`. That is exactly
+    what both consumers need — RD's `.plan-rail a[aria-current="page"]`
+    (`src/styles.css:249`) is the same hook, and its markup is a `<nav>` of
+    grouped `<ul>`s of `<a>` (`src/ui/planViews.ts:203-238`).
+
+    **Neither consumer is a tree**, so the entry's name was wrong too. The
+    inventory describes `.knowledge-nav` as a "365-line component: branches,
+    chevrons, counts, collapse, mobile header"
+    ([component-inventory.md:172](component-inventory.md)). The line count is
+    right and the first two items are not:
+    `git grep -iE "chevron|treeitem|role=\"tree\"|aria-expanded"` over
+    `src/components/KnowledgeNavigation.tsx` returns **nothing**, and there is no
+    nested list anywhere in it. It is a flat sidebar of grouped `<button>`
+    filters. RD's own CSS comment says the same of its rail: "every entry is a
+    routed destination, not a disclosure" (`src/styles.css:170`).
+
+    What is genuinely missing from `AppShellNav` is two things, both at 2/5 and
+    both extensions rather than a component: a **group heading** inside the nav
+    (RD `.plan-rail-label`, `src/styles.css:186`; KN `<h2 id="spaces-heading">`,
+    `KnowledgeNavigation.tsx:292`) and a **trailing count** on an item (RD
+    `.plan-rail-badge`, `:226`; KN `.knowledge-nav__count`, `:412`). A third
+    difference — KN's items are `<button>` filters, RD's and AW's are `<a>`
+    links — is a functional difference and therefore a prop, per the Premises.
+    KN's collapse control (`KnowledgeNavigation.tsx:353-360`) is 1/5 and stays
+    local.
+
+    These belong in the inventory's *needs a variant or extension* table, not in
+    a build queue. Both corrections 13 and 15 were arguing that the inventory's
+    count should govern the build; the count was right that two repos need this
+    and wrong that Keycaps does not already have it.
+
+22. **The segmented control is 1/5, and `knowledge` has none.** The inventory
+    ([component-inventory.md:171](component-inventory.md)) and the Phase 2a queue
+    both paired RD's `.segmented` with KN's `.browse-filter`. `.browse-filter` is
+    a **search input** — a `<label>` wrapping a magnifier and
+    `<input type="search">` (`src/components/BrowseWorkspace.tsx:115-123`), styled
+    as a single bordered field (`src/styles.css:1003-1034`). It is `SearchField`,
+    which Phase 1 already shipped. The nearest thing KN has to a segmented
+    control is `.topic-filters`, and it is a wrapping row of separately bordered
+    buttons — `display: flex; flex-wrap: wrap; gap: 8px` with a border and radius
+    on each child (`src/styles.css:1035-1054`) — which is a filter chip row, not
+    a shared track.
+
+    RD's is real: one builder at `src/planner.ts:1256` emitting
+    `<label class="segment">` around a radio, selected through
+    `.segment:has(input:checked)` (`src/styles.css:3045`). The inventory's "28
+    hits" is a substring count of the string `segment`, not call sites; there are
+    **9**, and all nine are inside the assumptions drawer
+    (`src/planner.ts:4157-4238`). One repo, one surface. Tier 3, stays local,
+    recorded as owed upstream.
+
+23. **The skeleton is 1/5, and `knowledge`'s "loading" classes are sentences.**
+    `assistant-workbench` has a real skeleton: `.loading-line` at a fixed height
+    with a `loading-pulse` animation and `.medium`/`.short` width modifiers
+    (`apps/web/public/workbench-view.css:963-977`), used under `aria-busy` with
+    `aria-hidden` on the placeholder itself
+    (`apps/web/public/index.html:182-189`, `bills/index.html:84-87`,
+    `orders/index.html:91-93`).
+
+    `knowledge`'s three are text. `.loading-screen` is a `<main>` containing the
+    words "Loading Knowledge…" (`src/App.tsx:599-601`);
+    `.home-workspace__loading` and `.vault-loading` are `<p>` elements with
+    `aria-live="polite"` (`src/components/HomeWorkspace.tsx:158`,
+    `VaultWorkspace.tsx:635`). None of the three has a placeholder shape or an
+    animation, and two of them carry no dedicated styling at all — their only
+    rules are shared blocks naming a second selector on every line
+    (`.loading-screen, .signin` at `src/styles.css:2660`; `.vault-loading,
+    .vault-error` at `:3219`), which is the same reading error
+    [correction 17](#corrections-to-the-survey) found behind `.quiet-table`.
+
+    A status message is not a skeleton, and Keycaps has no gap there anyway. One
+    repo. Tier 3, stays local, recorded as owed upstream.
+
+24. **The timeline is 1/5, and the plan already classified the other half Tier
+    3.** The queue paired AW's `.feed-entry` with RD's `.timeline-list`. RD's is
+    the year-by-year output of the retirement model: a `<details>` per year
+    carrying ending balance, a delta badge, spend and withdrawal figures, a
+    milestone flag, and two ledgers (`src/planner.ts:3821-3845`), across 73
+    `.tl-` rules in `src/styles.css`. The inventory's own Tier 3 paragraph names
+    "RD's `.tl-*` year timeline" ([component-inventory.md:182](component-inventory.md))
+    and Phase 7 step 5 names it again — so this repo counted the same layer as
+    Tier 2 evidence and Tier 3 residue in one document.
+
+    AW's is a genuine reverse-chronological activity feed
+    (`apps/web/public/workbench-view.css:1032-1056`,
+    `apps/web/public/index.html:1598-1599`), and it is the only one. Tier 3,
+    stays local, recorded as owed upstream.
+
+25. **The avatar's one condition expired unnoticed.** The queue listed it at 1/5
+    with the note "built only if the app shell needs one". `AppShell` shipped in
+    Phase 1 with a `brand` and an `actions` slot and no avatar
+    (`packages/react/src/components/AppShell.tsx:83-102`), which resolved the
+    condition in the negative, and the row stayed in the queue anyway. The one
+    consumer is real and mounted — `UserAvatar` at `src/App.tsx:208`, asserted in
+    `e2e/knowledge.spec.ts:378-383` — so it is Tier 3, stays local, recorded as
+    owed upstream, rather than dropped.
+
+    Worth naming as a queue hazard rather than a component fact: a conditional
+    entry whose condition is settled elsewhere will sit in a list forever unless
+    something re-reads it. Prefer recording the disposition when the condition
+    resolves.
+
+26. **The disclosure is 3/5, not 2/5 — the inventory missed
+    `assistant-workbench` entirely.** Its row reads "RD 9, KN 2". RD's 9 is
+    right (`src/planner.ts` 6, `src/ui/assistantChat.ts` 1,
+    `src/ui/tillerPicker.ts` 2) and KN's 2 is right
+    (`src/components/DetailsDrawer.tsx:242`,
+    `src/components/SafeVegaLiteChart.tsx:248`, both styled at
+    `src/styles.css:1959-1966` and `:1433-1442`). AW has two more, each with its
+    own CSS: `public/index.html:1203` — locked in by a test at
+    `apps/web/test/publicDashboardHealthCopy.test.ts:43-44` — and
+    `functions/approvals/[approvalRequestId].ts:425`, which is inside the fourth
+    CSS surface [correction 2](#corrections-to-the-survey) records, and is
+    exactly the kind of thing a `public/`-scoped survey misses.
+
+    This is the first entry in this list to move *up*. It makes the disclosure
+    the highest-count item of the eight surveyed, and it is also the cheapest and
+    the only one that works without JavaScript, which is why it is first in the
+    queue.
+
+27. **A shared rule block is the third false consumer this survey has produced.**
+    `assistant-workbench`'s dialog CSS declares `.dialog-panel, .dialog`
+    (`apps/web/public/workbench-view.css:1540-1541`) and `.dialog-header h2,
+    .dialog h2` (`:1561-1562`). `git grep 'class="dialog"'` across `origin/main`
+    returns nothing: **`.dialog` matches no element in the repository.** There is
+    not one declaration that applies to it and not to `.dialog-panel`.
+
+    That is the same shape as `.quiet-table`
+    ([correction 17](#corrections-to-the-survey)) and
+    `.loading-screen`/`.vault-loading`
+    ([correction 23](#corrections-to-the-survey)): a selector that exists only as
+    a second name on someone else's rule, which a grep of class names reads as
+    evidence of a pattern. It costs nothing where it is — an unused selector is
+    dead CSS, not a defect — but it has now inflated three counts in this program,
+    so it is worth stating as a method rather than as three findings. **Count
+    elements, not selectors.** A pattern is present in a repo when markup renders
+    it, and a class name in a stylesheet is not markup.
