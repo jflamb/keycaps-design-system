@@ -101,9 +101,11 @@ export const EscapeReturnsFocus: Story = {
     await waitFor(() => expect(dialog).toBeVisible());
 
     await userEvent.keyboard("{Escape}");
-    await expect(
-      within(document.body).queryByRole("dialog", { name: "Account help" }),
-    ).not.toBeInTheDocument();
-    await expect(trigger).toHaveFocus();
+    await waitFor(() => {
+      expect(
+        within(document.body).queryByRole("dialog", { name: "Account help" }),
+      ).not.toBeInTheDocument();
+      expect(trigger).toHaveFocus();
+    });
   },
 };

@@ -21,6 +21,11 @@ test.skip(
 for (const story of receipt.stories) {
   test(`${story.id} satisfies the affected-story review matrix`, async ({ page }) => {
     const externalRequests = new Set<string>();
+    const runtimeErrors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") runtimeErrors.push(message.text());
+    });
+    page.on("pageerror", (error) => runtimeErrors.push(error.message));
     page.on("request", (request) => {
       const url = new URL(request.url());
       if (
@@ -29,12 +34,18 @@ for (const story of receipt.stories) {
       )
         externalRequests.add(url.origin);
     });
+    page.on("websocket", (socket) => {
+      const url = new URL(socket.url());
+      if (url.hostname !== "127.0.0.1" || url.port !== "6006")
+        externalRequests.add(url.origin);
+    });
 
     for (const theme of ["light", "dark"] as const) {
       await page.setViewportSize({ width: 1280, height: 900 });
       await page.goto(
         `/iframe.html?id=${story.id}&viewMode=story&globals=theme:${theme}`,
       );
+      await page.waitForTimeout(150);
       await expect(page.locator("body")).not.toBeEmpty();
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
       const accessibility = await new AxeBuilder({ page })
@@ -42,12 +53,32 @@ for (const story of receipt.stories) {
         .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
         .analyze();
       expect(accessibility.violations, `${story.id} ${theme}`).toEqual([]);
+      expect(runtimeErrors, `${story.id} ${theme} console and page errors`).toEqual(
+        [],
+      );
+      runtimeErrors.length = 0;
+    }
+
+    if (story.id === "components-popover--escape-returns-focus") {
+      const trigger = page.getByRole("button", { name: "Account help" });
+      await expect(
+        page.getByRole("dialog", { name: "Account help" }),
+      ).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+    }
+    if (story.id === "components-select--keyboard-selection") {
+      const trigger = page.getByRole("button", { name: /Destination/ });
+      await expect(trigger).toContainText("Resource");
+      await expect(trigger).toBeFocused();
     }
 
     await page.setViewportSize({ width: 320, height: 800 });
     await page.goto(
       `/iframe.html?id=${story.id}&viewMode=story&globals=theme:light`,
     );
+    await page.waitForTimeout(150);
+    expect(runtimeErrors, `${story.id} reflow console and page errors`).toEqual([]);
+    runtimeErrors.length = 0;
     const reflow = await page.evaluate(() => ({
       clientWidth: document.documentElement.clientWidth,
       scrollWidth: document.documentElement.scrollWidth,
@@ -55,37 +86,85 @@ for (const story of receipt.stories) {
     expect(reflow.scrollWidth, story.id).toBeLessThanOrEqual(reflow.clientWidth);
 
     const focusableSelector =
-      'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+      'button:not([disabled]):not([tabindex="-1"]), a[href]:not([tabindex="-1"]), input:not([disabled]):not([tabindex="-1"]), select:not([disabled]):not([tabindex="-1"]), textarea:not([disabled]):not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])';
     const visibleFocusableCount = await page.locator(focusableSelector).evaluateAll(
-      (elements) =>
-        elements.filter((element) => {
+      (elements) => {
+        const visible = elements.filter((element) => {
           const style = getComputedStyle(element);
           return (
+            (element as HTMLElement).tabIndex >= 0 &&
+            !element.closest('[inert], [aria-hidden="true"]') &&
             style.visibility !== "hidden" &&
             style.display !== "none" &&
             element.getClientRects().length > 0
           );
-        }).length,
+        });
+        visible.forEach((element, index) => {
+          (element as HTMLElement).dataset.ellisReviewFocus = String(index);
+        });
+        return visible.length;
+      },
     );
     if (visibleFocusableCount > 0) {
       await page.evaluate(() => {
         document.body.tabIndex = -1;
         document.body.focus();
       });
-      let reachedFocusableControl = false;
+      const reached = new Set<string>();
       for (let attempt = 0; attempt < visibleFocusableCount + 2; attempt += 1) {
         await page.keyboard.press("Tab");
-        reachedFocusableControl = await page.evaluate(
-          (selector) => document.activeElement?.matches(selector) ?? false,
-          focusableSelector,
+        const active = await page.evaluate(
+          () => (document.activeElement as HTMLElement | null)?.dataset.ellisReviewFocus,
         );
-        if (reachedFocusableControl) break;
+        if (active !== undefined) reached.add(active);
       }
-      expect(reachedFocusableControl, `${story.id} keyboard traversal`).toBe(true);
+      expect(reached.size, `${story.id} keyboard traversal`).toBe(
+        visibleFocusableCount,
+      );
+      const activatable = page
+        .locator('button:not([disabled]):not([tabindex="-1"]), [role="button"]:not([tabindex="-1"])')
+        .first();
+      if (await activatable.isVisible().catch(() => false)) {
+        await page.evaluate(() => {
+          (window as typeof window & { __ellisKeyboardActivations?: number })
+            .__ellisKeyboardActivations = 0;
+          document.addEventListener(
+            "click",
+            (event) => {
+              if (event.detail === 0) {
+                const value = window as typeof window & {
+                  __ellisKeyboardActivations?: number;
+                };
+                value.__ellisKeyboardActivations =
+                  (value.__ellisKeyboardActivations || 0) + 1;
+              }
+            },
+            { capture: true, once: true },
+          );
+        });
+        await activatable.focus();
+        await page.keyboard.press("Enter");
+        expect(
+          await page.evaluate(
+            () =>
+              (window as typeof window & { __ellisKeyboardActivations?: number })
+                .__ellisKeyboardActivations || 0,
+          ),
+          `${story.id} keyboard activation`,
+        ).toBe(1);
+      }
+      await page.keyboard.press("Escape");
+      await page.keyboard.press("ArrowDown");
+      await page.keyboard.press("ArrowUp");
     }
 
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.reload();
+    await page.waitForTimeout(150);
+    expect(runtimeErrors, `${story.id} reduced-motion console and page errors`).toEqual(
+      [],
+    );
+    runtimeErrors.length = 0;
     expect(
       await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches),
     ).toBe(true);
@@ -105,6 +184,11 @@ for (const story of receipt.stories) {
 
     await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
     await page.reload();
+    await page.waitForTimeout(150);
+    expect(runtimeErrors, `${story.id} forced-colors console and page errors`).toEqual(
+      [],
+    );
+    runtimeErrors.length = 0;
     expect(
       await page.evaluate(() => matchMedia("(forced-colors: active)").matches),
     ).toBe(true);

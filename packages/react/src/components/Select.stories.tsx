@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, userEvent, within } from "storybook/test";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Select, type SelectOption } from "./Select.js";
 
 const RELEASE_STATUS_LINK =
@@ -170,7 +170,9 @@ export const KeyboardSelection: Story = {
     await userEvent.keyboard("Resource");
     await userEvent.keyboard("{Enter}");
 
-    await expect(trigger).toHaveTextContent("Resource");
-    await expect(trigger).toHaveFocus();
+    await waitFor(() => {
+      expect(trigger).toHaveTextContent("Resource");
+      expect(trigger).toHaveFocus();
+    });
   },
 };
