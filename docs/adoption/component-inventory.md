@@ -121,6 +121,16 @@ cards, stats, footer. Fraunces again. Smallest surface, cleanest slate.
 
 "Repos" counts how many of the five contain the pattern.
 
+That is a count of repos in which a pattern's class names are *visible*, not of
+repos that can consume a component, and the two numbers have differed on every
+Tier 2 entry anyone has re-measured. Delivery mode filters it
+([correction 14](migration-plan.md#corrections-to-the-survey)), dead code and
+shared rule blocks inflate it
+([corrections 17 and 27](migration-plan.md#corrections-to-the-survey)), and an
+existing component may already serve it
+([correction 21](migration-plan.md#corrections-to-the-survey)). Read a count here
+as a place to look, never as a build decision.
+
 ### Covered by an existing component
 
 | Pattern | Repos | Keycaps | Note |
@@ -167,13 +177,13 @@ Ranked by how many repos need them.
 | --- | --- | --- |
 | Data table | 3/5 | RD 17 tables + `.table-scroll`/`.sensitivity-table`, KN 2, AW `.data-table`/`.quiet-table`. RD's scroll container already implements the Prose Markup Rule's `tabindex="0"`. |
 | Modal dialog | 2/5 | RD 3 native `<dialog>` (`.plan-history-dialog`, `.tiller-picker-dialog`), AW `.dialog`/`.dialog-backdrop`/`.dialog-panel`/`.dialog-actions`. |
-| Drawer / side panel | 2/5 | KN `.details-drawer` (430px, `--open` state, mobile close), RD `.assumptions-drawer`. |
-| Segmented control | 2/5 | RD `.segmented`/`.segment`/`.segment-label`/`.segment-sub` (28 hits — its primary assumption control), KN `.browse-filter`. |
-| Sidebar / tree navigation | 2/5 | KN `.knowledge-nav` (365-line component: branches, chevrons, counts, collapse, mobile header), RD `.plan-rail`/`.plan-rail-group`. |
-| Loading / skeleton | 2/5 | AW `.loading-block`/`.loading-line`, KN `.loading-screen`/`.vault-loading`/`.home-workspace__loading`. |
-| Disclosure (details/summary) | 2/5 | RD 9, KN 2. `prose.css` styles `summary` with the press edge already — the rule exists, the component does not. |
-| Timeline / activity feed | 2/5 | AW `.feed-entry`/`.activity-day`/`.date-heading`, RD `.timeline-list`/`.tl-*` (~30 classes). |
-| Avatar | 1/5 | KN `.account-avatar`. Listed because an app shell usually needs one. |
+| Drawer / side panel | 2/5 | KN `.details-drawer` (430px, `--open` state, mobile close), RD `.assumptions-drawer`. **Not one pattern** — see [correction 20](migration-plan.md#corrections-to-the-survey). |
+| Segmented control | 2/5 | RD `.segmented`/`.segment`/`.segment-label`/`.segment-sub` (28 hits — its primary assumption control), KN `.browse-filter`. **1/5, and both figures are wrong** — see [correction 22](migration-plan.md#corrections-to-the-survey). |
+| Sidebar / tree navigation | 2/5 | KN `.knowledge-nav` (365-line component: branches, chevrons, counts, collapse, mobile header), RD `.plan-rail`/`.plan-rail-group`. **Neither is a tree, and `AppShellNav` already ships it** — see [correction 21](migration-plan.md#corrections-to-the-survey). |
+| Loading / skeleton | 2/5 | AW `.loading-block`/`.loading-line`, KN `.loading-screen`/`.vault-loading`/`.home-workspace__loading`. **1/5; KN's three are text** — see [correction 23](migration-plan.md#corrections-to-the-survey). |
+| Disclosure (details/summary) | 2/5 | RD 9, KN 2. `prose.css` styles `summary` with the press edge already — the rule exists, the component does not. **3/5; AW has two more** — see [correction 26](migration-plan.md#corrections-to-the-survey). |
+| Timeline / activity feed | 2/5 | AW `.feed-entry`/`.activity-day`/`.date-heading`, RD `.timeline-list`/`.tl-*` (~30 classes). **1/5; RD's `.tl-*` is Tier 3 below** — see [correction 24](migration-plan.md#corrections-to-the-survey). |
+| Avatar | 1/5 | KN `.account-avatar`. Listed because an app shell usually needs one. **`AppShell` shipped without one** — see [correction 25](migration-plan.md#corrections-to-the-survey). |
 | Theme toggle | 2/5 | AW `.theme-toggle`/`.theme-toggle-floating`, RD `applyTheme`/`themeStorageKey`. Keycaps defines the CSS contract but ships no control. |
 
 **Tier 3 — specialized, likely stays local**
