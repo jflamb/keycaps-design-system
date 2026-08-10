@@ -34,7 +34,7 @@
     "check": "pnpm icons:verify && pnpm review:selector:test && pnpm typecheck && pnpm test && pnpm build && pnpm test:pages && pnpm test:package && pnpm test:e2e && pnpm audit:high"
   },
   "devDependencies": {
-    "@axe-core/playwright": "4.11.0",
+    "@axe-core/playwright": "4.12.1",
     "@phosphor-icons/core": "2.1.1",
     "@playwright/test": "1.62.1"
   }
