@@ -234,10 +234,18 @@ export const NotDismissable: Story = {
 };
 
 /**
- * Escape closes a dismissable dialog and focus returns to the trigger. Performed
- * rather than asserted in prose.
+ * Opening from a trigger and closing returns focus to it. Performed rather than
+ * asserted in prose.
+ *
+ * **Escape is deliberately not exercised here.** A native `<dialog>` closes on a
+ * *trusted* key event — the browser's close-request machinery — and
+ * `userEvent.keyboard("{Escape}")` dispatches a synthetic one, which it ignores.
+ * That is a genuine difference from `Popover`, whose Escape is React Aria's own
+ * `keydown` handler and does respond to a synthetic event. Asserting it here
+ * would have been asserting something that cannot happen, so Escape is covered
+ * in the Playwright suite, where the key press is real.
  */
-export const EscapeClosesIt: Story = {
+export const ClosingReturnsFocus: Story = {
   render: () => (
     <DialogDemo startOpen={false} title="Export data" triggerLabel="Export data">
       <p>Choose a format and a date range.</p>
@@ -251,7 +259,9 @@ export const EscapeClosesIt: Story = {
     const dialog = await within(document.body).findByRole("dialog");
     await expect(dialog).toHaveAccessibleName("Export data");
 
-    await userEvent.keyboard("{Escape}");
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Close dialog" }),
+    );
     await waitFor(() => expect(within(document.body).queryByRole("dialog")).toBeNull());
     await expect(trigger).toHaveFocus();
   },

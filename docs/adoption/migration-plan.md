@@ -2013,3 +2013,35 @@ here rather than silently corrected there.
     it. Its `isVisible()` guard is still skipping the activation check on most
     stories; that is a separate defect, left alone here rather than fixed
     silently alongside a component change.
+
+33. **`components-button--press-and-hold`'s play function had never passed, and
+    the review harness could not tell.** Its release —
+    `userEvent.pointer({ keys: "[/MouseLeft]", target: button })` — never reached
+    React Aria, so `data-pressed` stayed `"true"` and the following
+    `waitFor(() => expect(button).not.toHaveAttribute("data-pressed"))` always
+    timed out. Verified in isolation with nothing else touching the page: four
+    seconds after load the key is still down and the assertion has logged.
+
+    It looked green because the harness never waited for a `play` function to
+    finish. It navigated away first, aborting the story before the assertion's
+    timeout could log, so the error was emitted into whichever collection window
+    happened to be open — usually none. The Dialog work shifted that timing by a
+    few hundred milliseconds and the failure became deterministic, which is the
+    only reason it is visible now.
+
+    The cause is pointer capture, and it is a fault in the simulation rather than
+    in the component: React Aria calls `setPointerCapture` on press and releases
+    on the `pointerup` carrying the same `pointerId`, and user-event's release
+    did not deliver a matching one. **A real mouse was never affected** — driven
+    with real Playwright input, `data-pressed` is set on press and cleared on
+    release, confirmed before changing anything. The play function now dispatches
+    the `pointerup` itself with an explicit `pointerId`.
+
+    Recorded rather than fixed quietly because it changes what a Phase 1 story
+    asserts, and because the general shape of the problem outlives this instance:
+    the harness collects console errors per stage while story `play` functions
+    run unsynchronised beside it, so a play failure lands in an unrelated
+    assertion or in none at all. `waitForPlaySettled` now covers the one window
+    where the harness's own keys collide with a running play — the
+    `components-search-field--clearing` failure in this PR's first CI run — and
+    the broader mis-attribution is left standing rather than papered over.

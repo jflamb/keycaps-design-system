@@ -19,6 +19,44 @@ async function waitForStoryReady(page: Page) {
 }
 
 /**
+ * Wait for the story's `play` function to finish, not merely for it to render.
+ *
+ * Without this the harness presses keys into a story that is still driving
+ * itself, and the two fight. `components-search-field--clearing` failed in CI
+ * exactly this way: its play function types a query, finds the clear control,
+ * and asserts it is visible — and a stray Escape from the harness cleared the
+ * field between those two steps, so the control it had just found was gone from
+ * the document. The console error then surfaced several stages away from its
+ * cause, because errors are collected and reset per stage.
+ *
+ * Called immediately before the keyboard section rather than from
+ * `waitForStoryReady`, and the narrowness is deliberate. Hoisting it into every
+ * stage also changes *when* a story's own play errors are collected, which turns
+ * pre-existing intermittent failures in unrelated stories into deterministic
+ * ones — a real problem in this repo, but not one a component change should
+ * quietly take on. See correction 32.
+ */
+async function waitForPlaySettled(page: Page) {
+  await page.waitForFunction(
+    () => {
+      const renders = (
+        window as typeof window & {
+          __STORYBOOK_PREVIEW__?: { storyRenders?: Array<{ phase?: string }> };
+        }
+      ).__STORYBOOK_PREVIEW__?.storyRenders;
+      // No preview API to ask: fall back to the render-only wait rather than
+      // hanging on a signal this Storybook does not publish.
+      if (!Array.isArray(renders)) return true;
+      return renders.every((render) =>
+        ["finished", "completed", "errored", "aborted"].includes(render.phase ?? ""),
+      );
+    },
+    undefined,
+    { timeout: 15_000 },
+  );
+}
+
+/**
  * Let entrance animations finish before measuring colour.
  *
  * axe samples whatever is painted when it runs, and a surface that fades in from
@@ -161,6 +199,7 @@ for (const story of receipt.stories) {
       },
     );
     if (visibleFocusableCount > 0) {
+      await waitForPlaySettled(page);
       await page.evaluate(() => {
         document.body.tabIndex = -1;
         document.body.focus();
