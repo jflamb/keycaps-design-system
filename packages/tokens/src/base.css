@@ -107,6 +107,253 @@ body {
   text-decoration: none;
 }
 
+/* ---- Disclosure ---------------------------------------------------------- */
+
+/* The second treatment that lives in the token layer rather than in
+   `styles.css`, and for the same reason as the skip link above: it has to work
+   in every delivery mode, and an affordance that depends on which stylesheet a
+   page happened to import is not an affordance.
+ *
+ * ## Why it cannot live in `styles.css`
+ *
+ * `styles.css` expresses every interactive state through React Aria's data
+ * attributes and contains no `:hover`, `:active`, or `:focus-visible` rule, so
+ * that hand-authored `.kc-` markup is visibly inert (ADR 0002, and a unit test
+ * asserts it). A `<details>` breaks the premise of that rule rather than the
+ * rule itself: its press is the browser's, not React's. Hand-authored
+ * disclosure markup genuinely opens, genuinely takes the keyboard, and
+ * genuinely announces itself — there is nothing to be inert about, and styling
+ * it as though there were would be a lie in the opposite direction. So its
+ * states are real pseudo-classes, and they live here, where `styles.css` never
+ * has to carry one.
+ *
+ * The consequences are worth stating because they are the whole trade:
+ * `styles.css` gains nothing at all from this component, and `static.css` gains
+ * nothing either, because there is no state for a prerender path to restore.
+ *
+ * ## Why one rule set rather than two
+ *
+ * Every selector below names both the article element and the component class.
+ * The two are not "kept in agreement" — they are the same declaration block, so
+ * they cannot drift. `prose.css` reaches a summary by tag because a CMS cannot
+ * be passed a prop; `.kc-disclosure` reaches the same summary through one class
+ * on the `<details>`, so the markup is the same shape in both places.
+ *
+ * That is deliberately stronger than the arrangement the data table shipped
+ * with, where two parallel blocks are compared by a test. Declaring the same
+ * element twice in one package is how `retirement-dashboard` ended up with five
+ * disclosure treatments and four different expand affordances, and the failure
+ * does not become safe because the two copies start out identical.
+ *
+ * ## The press
+ *
+ * A summary is a real control, so under the Pressable Edge Rule it wears the
+ * keycap's bottom edge and keeps the promise — 3px down, 4px compressing to
+ * 1px, from the same tokens a Button reads. A Button pins its border box with
+ * `min-block-size` and lets the compressing wall redistribute space inside it; a
+ * summary wraps to as many lines as its label needs, so it has no fixed height
+ * to pin. The padding does that job instead: the edge gives up exactly what the
+ * padding takes, both over the same duration, so the border box is the same
+ * height on every frame and nothing below the disclosure reflows while the key
+ * is down. */
+
+.kc-prose details,
+.kc-disclosure {
+  /* Lets `::details-content` below interpolate to and from `auto`. It inherits,
+     so declaring it on the `details` puts it in scope for the pseudo-element
+     that needs it without reaching a whole document. */
+  interpolate-size: allow-keywords;
+}
+
+.kc-prose summary,
+.kc-disclosure > summary {
+  display: flex;
+  /* Wrapping is what gives the summary its second slot. The label and the
+     chevron share the first line; a description takes the next one whole. */
+  flex-wrap: wrap;
+  align-items: flex-start;
+  column-gap: var(--kc-space-3);
+  row-gap: var(--kc-space-1);
+  padding: var(--kc-space-3) var(--kc-space-4);
+  border: 1px solid var(--kc-color-border);
+  border-block-end: var(--kc-key-edge-width) solid var(--kc-color-border);
+  border-radius: var(--kc-radius-key);
+  background: var(--kc-color-surface-raised);
+  color: var(--kc-color-text);
+  font-weight: var(--kc-font-weight-label);
+  list-style: none;
+  cursor: pointer;
+  transition:
+    transform var(--kc-duration-press) var(--kc-ease-press),
+    border-block-end-width var(--kc-duration-press) var(--kc-ease-press),
+    padding-block-end var(--kc-duration-press) var(--kc-ease-press),
+    background-color var(--kc-duration-press) var(--kc-ease-press);
+}
+
+.kc-prose summary::-webkit-details-marker,
+.kc-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.kc-prose summary::marker,
+.kc-disclosure > summary::marker {
+  content: "";
+}
+
+/* The description. `<small>` rather than a class, because HTML already has the
+   element for a side comment and both repos that invented this slot reached for
+   it independently — a `<span>` label and a `<small>` beneath it.
+ *
+ * Beneath rather than beside, which is the one place neither consumer's layout
+ * survives contact with the 320 Rule: one gives it a fixed 250px column and the
+ * other an `auto` one, and both squeeze the label to nothing on a narrow
+ * viewport. A description wraps; a column does not. */
+.kc-prose summary > small,
+.kc-disclosure > summary > small {
+  order: 2;
+  flex-basis: 100%;
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-sm);
+  font-weight: var(--kc-font-weight-body);
+}
+
+.kc-prose summary:hover,
+.kc-disclosure > summary:hover {
+  background: var(--kc-color-surface-hover);
+}
+
+.kc-prose summary:active,
+.kc-disclosure > summary:active {
+  transform: translateY(var(--kc-press-travel));
+  border-block-end-width: var(--kc-press-edge-width);
+  padding-block-end: calc(
+    var(--kc-space-3) + var(--kc-key-edge-width) - var(--kc-press-edge-width)
+  );
+}
+
+.kc-prose summary:focus-visible,
+.kc-disclosure > summary:focus-visible {
+  outline: var(--kc-focus-ring);
+  outline-offset: var(--kc-focus-ring-offset);
+}
+
+/* The chevron's box, shared. The two surfaces differ only in what paints inside
+   it: prose has no element to reach, so it masks the shape onto a pseudo-element,
+   and the component renders the registry's `caret-down` as an inline `<svg>`
+   that paints with `currentColor`. Same glyph either way — both come from the
+   one vendoring run, and a unit test compares the mask against the drawn path.
+ *
+ * The element is the better carrier where one is available: an inline SVG keeps
+ * its paint under `forced-colors: active` on its own, while the mask needs the
+ * override further down this file to survive. */
+.kc-prose summary::after,
+.kc-disclosure > summary > .kc-disclosure__caret {
+  order: 1;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  flex: none;
+  margin-inline-start: auto;
+  transition: transform var(--kc-duration-press) var(--kc-ease-press);
+}
+
+.kc-prose summary::after {
+  content: "";
+  background-color: currentcolor;
+  mask-image: var(--kc-prose-icon-caret);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+/* `--kc-chevron-open-turn` resolves to `0deg` under reduced motion, which is the
+   same token the Select trigger reads. The open state stays legible either way:
+   the content below it is the signal, the rotation is the flourish. */
+.kc-prose details[open] > summary::after,
+.kc-disclosure[open] > summary > .kc-disclosure__caret {
+  transform: rotate(var(--kc-chevron-open-turn));
+}
+
+.kc-prose details > *:not(summary),
+.kc-disclosure > *:not(summary) {
+  padding-inline: var(--kc-space-4);
+}
+
+.kc-prose details > *:last-child,
+.kc-disclosure > *:last-child {
+  margin-block-end: 0;
+}
+
+/* `::details-content` is what lets a native disclosure animate on every open and
+   close rather than only the first expansion. Browsers without it keep the
+   instant native toggle, which is a fine outcome rather than a broken one. The
+   reduced-motion substitution is not written here: the block at the end of this
+   file collapses every transition and animation in the document when the
+   preference is set. */
+@supports selector(details::details-content) {
+  .kc-prose details::details-content,
+  .kc-disclosure::details-content {
+    display: block;
+    block-size: 0;
+    padding-block-start: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition:
+      block-size var(--kc-duration-overlay) var(--kc-ease-overlay),
+      padding-block-start var(--kc-duration-overlay) var(--kc-ease-overlay),
+      opacity var(--kc-duration-overlay) var(--kc-ease-overlay),
+      content-visibility var(--kc-duration-overlay) var(--kc-ease-overlay)
+        allow-discrete;
+  }
+
+  .kc-prose details[open]::details-content,
+  .kc-disclosure[open]::details-content {
+    block-size: auto;
+    padding-block-start: var(--kc-space-3);
+    opacity: 1;
+  }
+}
+
+/* A reader cannot expand paper, so everything prints open and the chevron —
+   which would be pointing at an interaction that is not available — prints not
+   at all. */
+@media print {
+  .kc-prose summary::after,
+  .kc-disclosure > summary > .kc-disclosure__caret {
+    display: none;
+  }
+
+  .kc-prose details > *:not(summary),
+  .kc-disclosure > *:not(summary) {
+    display: block;
+  }
+
+  @supports selector(details::details-content) {
+    .kc-prose details::details-content,
+    .kc-disclosure::details-content {
+      block-size: auto;
+      opacity: 1;
+      overflow: visible;
+    }
+  }
+}
+
+@media (forced-colors: active) {
+  /* A summary is a control, so it takes the control border rather than the one
+     the token layer maps every other bordered surface to. */
+  .kc-prose summary,
+  .kc-disclosure > summary {
+    border-color: ButtonText;
+  }
+
+  /* A masked glyph is painted with `background-color`, which forced colors would
+     otherwise flatten into the surface and erase. The component's chevron is a
+     real `<svg>` painting with `currentColor` and needs no such rescue. */
+  .kc-prose summary::after {
+    forced-color-adjust: none;
+    background-color: CanvasText;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root:not([data-kc-motion="full"]) *,
   :root:not([data-kc-motion="full"]) *::before,

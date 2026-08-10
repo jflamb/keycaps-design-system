@@ -77,9 +77,6 @@
      is visible in every second paragraph. */
   text-wrap: pretty;
   hanging-punctuation: first allow-end last;
-  /* Lets the disclosure animation below interpolate to `auto`. Declared on the
-     container because the property inherits and `details` needs it in scope. */
-  interpolate-size: allow-keywords;
 }
 
 /* ---- Flow -------------------------------------------------------------- */
@@ -580,116 +577,24 @@
 
 /* ---- Disclosure --------------------------------------------------------- */
 
-/* The one element in this file that genuinely is a control, and therefore the
-   one that earns the keycap's bottom edge. Under the Pressable Edge Rule the
-   edge is not decoration — it is a promise, and `summary` keeps it: the key
-   travels on press exactly as a Button does, from the same tokens. */
-.kc-prose summary {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--kc-space-3);
-  padding: var(--kc-space-3) var(--kc-space-4);
-  border: 1px solid var(--kc-color-border);
-  border-block-end: var(--kc-key-edge-width) solid var(--kc-color-border);
-  border-radius: var(--kc-radius-key);
-  background: var(--kc-color-surface-raised);
-  color: var(--kc-color-text);
-  font-weight: var(--kc-font-weight-label);
-  list-style: none;
-  cursor: pointer;
-  transition:
-    transform var(--kc-duration-press) var(--kc-ease-press),
-    border-block-end-width var(--kc-duration-press) var(--kc-ease-press),
-    padding-block-end var(--kc-duration-press) var(--kc-ease-press),
-    background-color var(--kc-duration-press) var(--kc-ease-press);
-}
-
-.kc-prose summary::-webkit-details-marker {
-  display: none;
-}
-
-.kc-prose summary::marker {
-  content: "";
-}
-
-.kc-prose summary:hover {
-  background: var(--kc-color-surface-hover);
-}
-
-/* The press. A Button pins its border box with `min-block-size` and lets the
-   compressing wall redistribute space inside it; a summary wraps to as many
-   lines as its label needs, so it has no fixed height to pin. The padding does
-   the same job instead: the edge gives up exactly what the padding takes, both
-   over the same duration, so the border box is the same height on every frame
-   and nothing below the disclosure reflows while the key is down. */
-.kc-prose summary:active {
-  transform: translateY(var(--kc-press-travel));
-  border-block-end-width: var(--kc-press-edge-width);
-  padding-block-end: calc(
-    var(--kc-space-3) + var(--kc-key-edge-width) - var(--kc-press-edge-width)
-  );
-}
-
-.kc-prose summary:focus-visible {
-  outline: var(--kc-focus-ring);
-  outline-offset: var(--kc-focus-ring-offset);
-}
-
-.kc-prose summary::after {
-  content: "";
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
-  flex: none;
-  margin-inline-start: auto;
-  background-color: currentcolor;
-  mask-image: var(--kc-prose-icon-caret);
-  mask-size: contain;
-  mask-repeat: no-repeat;
-  mask-position: center;
-  transition: transform var(--kc-duration-press) var(--kc-ease-press);
-}
-
-/* `--kc-chevron-open-turn` resolves to `0deg` under reduced motion, which is the
-   same token the Select trigger reads. The open state stays legible either way:
-   the content below it is the signal, the rotation is the flourish. */
-.kc-prose details[open] > summary::after {
-  transform: rotate(var(--kc-chevron-open-turn));
-}
-
-.kc-prose details > *:not(summary) {
-  padding-inline: var(--kc-space-4);
-}
-
-.kc-prose details > *:last-child {
-  margin-block-end: 0;
-}
-
-/* `::details-content` is what lets a native disclosure animate on every open and
-   close rather than only the first expansion. Browsers without it keep the
-   instant native toggle, which is a fine outcome rather than a broken one. The
-   reduced-motion substitution is not written here: `base.css` collapses every
-   transition and animation in the document when the preference is set. */
-@supports selector(details::details-content) {
-  .kc-prose details::details-content {
-    display: block;
-    block-size: 0;
-    padding-block-start: 0;
-    opacity: 0;
-    overflow: hidden;
-    transition:
-      block-size var(--kc-duration-overlay) var(--kc-ease-overlay),
-      padding-block-start var(--kc-duration-overlay) var(--kc-ease-overlay),
-      opacity var(--kc-duration-overlay) var(--kc-ease-overlay),
-      content-visibility var(--kc-duration-overlay) var(--kc-ease-overlay)
-        allow-discrete;
-  }
-
-  .kc-prose details[open]::details-content {
-    block-size: auto;
-    padding-block-start: var(--kc-space-3);
-    opacity: 1;
-  }
-}
+/* The disclosure's treatment is not in this file, and its absence is the
+   decision rather than an oversight.
+ *
+ * A `summary` is the one element here that genuinely is a control, so under the
+ * Pressable Edge Rule it wears the keycap's bottom edge and travels on press.
+ * That treatment now lives in `base.css`, in one rule set whose every selector
+ * names both `.kc-prose summary` and the `Disclosure` component's
+ * `.kc-disclosure > summary`. The two are the same declaration block rather than
+ * two blocks a test compares, so an article's disclosure and a product's cannot
+ * drift apart.
+ *
+ * It could not have stayed here. `prose.css` is opt-in, on the grounds that a
+ * product surface rendering no articles should not pay for it, so a component
+ * whose styling lived here would be unstyled on exactly the surfaces the
+ * component exists for. And it could not move to `styles.css` either, which is
+ * data-attribute-only by ADR 0002 and cannot hold the `:hover` and `:active` a
+ * native `<details>` needs. `base.css` is the file every delivery mode loads,
+ * which is why the skip link and the focus ring are already there. */
 
 /* ---- Rules, media, figures ---------------------------------------------- */
 
@@ -1327,25 +1232,12 @@
     background: none;
   }
 
-  /* Interactive-only furniture, and a disclosure that has to be open because a
-     reader cannot expand paper. */
+  /* Interactive-only furniture. The disclosure's own print rules — open on
+     paper, chevron gone — are in `base.css` with the rest of its treatment. */
   .kc-prose__toc,
   .kc-prose__back-to-top,
-  .kc-prose__copy,
-  .kc-prose summary::after {
+  .kc-prose__copy {
     display: none;
-  }
-
-  .kc-prose details > *:not(summary) {
-    display: block;
-  }
-
-  @supports selector(details::details-content) {
-    .kc-prose details::details-content {
-      block-size: auto;
-      opacity: 1;
-      overflow: visible;
-    }
   }
 }
 
@@ -1372,7 +1264,6 @@
      otherwise flatten to the surface and erase. These are the tone's second
      carrier, so losing them is exactly the failure this mode exists to prevent. */
   .kc-prose__callout::before,
-  .kc-prose summary::after,
   .kc-prose a[target="_blank"]::after,
   .kc-prose__back-to-top a::before {
     forced-color-adjust: none;
@@ -1391,9 +1282,5 @@
   .kc-prose :is(progress, meter) {
     forced-color-adjust: none;
     border: 1px solid ButtonText;
-  }
-
-  .kc-prose summary {
-    border-color: ButtonText;
   }
 }

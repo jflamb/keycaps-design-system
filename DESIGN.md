@@ -428,6 +428,18 @@ This is a considered exception to the general advice against colored side border
 - **The term is muted Label type and the value is body ink**, because the value is the content and the label is the way in.
 - **Numeric values take tabular figures and align to the end edge**, the same reasoning `prose.css` applies to a numeric table column.
 
+### Disclosure
+
+**Character:** a key that happens to be the width of the thing behind it.
+
+- **It is a native `<details>`, and that is the design decision, not an implementation one.** The alternative was React Aria's `Disclosure` — a `<button aria-expanded>` whose open state lives in a client runtime. The platform element brings the press, the keyboard, the announcement, and exclusive grouping with no JavaScript, which is the whole reason this component exists: it is the one interactive thing a statically rendered page can have.
+- **The treatment is one rule shared with `prose.css`, and it lives in `base.css`.** It could live in neither of the two obvious files. `styles.css` is data-attribute-only and may hold no `:hover` or `:active`; `prose.css` is opt-in, so a component styled there would be unstyled on the product surfaces the component is for. The token layer is the file every delivery mode loads, which is where the skip link and the focus ring already are.
+- **The summary is a two-slot key**: a label, and an optional description on the line beneath it. Beneath rather than beside, because a description wraps and a column does not — both repos that invented this shape gave the second slot a column, and both squeeze the label to nothing at 320 pixels.
+- **The chevron is the registry's `caret-down`**, drawn as a real glyph. The same path `prose.css` masks onto its pseudo-element, from one vendoring run. It rotates by `--kc-chevron-open-turn`, which resolves to `0deg` under reduced motion — the open content is the signal and the rotation is the flourish.
+- **Grouping is a prop, not a variant.** `name` makes siblings an exclusive accordion, which is native behavior and therefore free on a page with no runtime.
+- **The body is not quoted from anywhere**, so it wears no leading edge. It is the thing the summary promised, not something attributed to somewhere else — the Leading Edge Rule, read the way it is written.
+- **There is no controlled `open`.** A `<details>` owns its own state, which is exactly what lets it work without JavaScript. `onToggle` is there for an app that needs to know.
+
 ### Code block
 
 **Character:** the inline code treatment, one step larger, in a box you can reach.
@@ -454,9 +466,20 @@ make hand-authored markup work and is the one change this system cannot absorb.
 `Select` and `Popover` appear in neither: a listbox that cannot open is not a
 degraded Select.
 
-Two things need no static counterpart because they already work everywhere: the
-skip link and the focus ring both live in the token layer, since an accessibility
-floor that depends on which stylesheet a page happened to import is not a floor.
+Three things need no static counterpart because they already work everywhere: the
+skip link, the focus ring, and the disclosure all live in the token layer, since
+an accessibility floor that depends on which stylesheet a page happened to import
+is not a floor.
+
+The disclosure is the sharpest of the three, and it is the one case where a state
+rule is *right* to be a pseudo-class. `styles.css` is data-attribute-only so that
+hand-authored markup is visibly inert — but a `<details>` breaks that rule's
+premise rather than the rule itself. Its press belongs to the browser, so
+hand-written disclosure markup genuinely opens, genuinely takes the keyboard, and
+genuinely announces itself. There is nothing to be inert about, and rendering it
+inert would be a lie in the opposite direction: the control works, and the
+treatment would be saying it does not. So the whole treatment sits in `base.css`,
+`styles.css` carries no rule for it, and `static.css` has nothing to restore.
 
 ## Long-form content
 
@@ -471,6 +494,8 @@ Heading sizes live here and only here. The token package ships none — the surf
 **`kbd` does not get the bottom edge.** A keycap design system rendering a keyboard key as an actual keycap is the obvious move, and the rule forbids it: the edge promises travel, and a `kbd` never travels because it is a picture of a key on a different device. This is the same reasoning that denies the Badge an edge. It costs the system its most obvious joke.
 
 **`summary` does.** A disclosure is a real control, so it wears the edge and keeps the promise — 3px down, 4px compressing to 1px, from the same tokens a Button reads. The implementation differs because a Button pins its border box with `min-block-size` and a `summary` wraps to as many lines as its label needs; the padding does that job instead, giving up exactly what the edge takes over the same duration, so the border box is the same height on every frame and nothing below reflows while the key is down.
+
+The rule that says so is not in `prose.css`. It is in `base.css`, and every selector in it names `.kc-prose summary` and the `Disclosure` component's `.kc-disclosure > summary` together — one declaration block for both surfaces rather than two that agree today. See Disclosure under Components for why the treatment could live in neither of the two files it might have.
 
 ### Named Rules
 

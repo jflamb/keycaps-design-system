@@ -13,8 +13,11 @@ export interface SkipLinkProps
 }
 
 /**
- * The first focusable thing in the document, and the only Keycaps component
- * whose styling lives in the tokens package rather than in `styles.css`.
+ * The first focusable thing in the document, and the first of the two Keycaps
+ * components whose styling lives in the tokens package rather than in
+ * `styles.css`. `Disclosure` is the other, for the same reason read from the
+ * other end: its press belongs to the browser, so it works in every delivery
+ * mode too.
  *
  * That placement is not an accident. `.kc-skip-link` is defined in `base.css`
  * because a skip link has to work in *any* consumer, including a page that

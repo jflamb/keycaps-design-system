@@ -446,8 +446,17 @@ result and replaces the ranking derived from the inventory; corrections
 
 | # | Component | Consumers | Mode | Evidence |
 | ---: | --- | ---: | --- | --- |
-| 1 | Disclosure | **3/5** | 2 (progressive) | AW `[approvalRequestId].ts:425`, `index.html:1203`; KN `DetailsDrawer.tsx:242`, `SafeVegaLiteChart.tsx:248`; RD 9 sites, `planner.ts:573`/`:3821`/`:4397-4410`, `assistantChat.ts:140`, `tillerPicker.ts:91` |
+| 1 | Disclosure — **shipped** | **3/5** | **1 and 2** | AW `[approvalRequestId].ts:425`, `index.html:1203`; KN `DetailsDrawer.tsx:242`, `SafeVegaLiteChart.tsx:248`; RD 9 sites, `planner.ts:573`/`:3821`/`:4397-4410`, `assistantChat.ts:140`, `tillerPicker.ts:91` |
 | 2 | Modal dialog | **2/5** | 2 only | AW `index.html:368-387` (live: `openDialog` `:1083`); RD `planHistory.ts:6`, `tillerPicker.ts:17` |
+
+The disclosure shipped as a native `<details>`, so its mode is 1 *and* 2 rather
+than "2, progressive": `renderStatic` renders it and it genuinely works there,
+with the press, the keyboard, and `name`-based exclusive grouping all the
+browser's. Its treatment is one rule set in `base.css` naming both
+`.kc-prose summary` and `.kc-disclosure > summary`, rather than the `prose.css`
+copy the direction below anticipated — see the note there. Corrections
+[28](#corrections-to-the-survey) and [29](#corrections-to-the-survey) record what
+the build turned up about the chevron count and the two-slot layout.
 
 Shipped earlier in this phase, and listed for completeness: **data table**
 (1 real consumer plus Keycaps' own docs — corrections 17 and 18) and **theme
@@ -491,6 +500,18 @@ So the component is that CSS re-scoped to a `kc-disclosure` class rather than a
 second drawing of it. Redefining the same element twice in one package is the
 `.kc-table` failure [correction 18](#corrections-to-the-survey) records, and it
 should not be re-committed one component later.
+
+**What shipped went one step further than "re-scoped".** A second copy of the
+rules, even one a test compares, is still two blocks that a future edit can part;
+and a disclosure could not take the data table's route anyway, because its press
+is real and `styles.css` may hold no `:hover` or `:active`. `prose.css` was not
+available either — it is opt-in, so a component styled there would be unstyled on
+the product surfaces the component exists for. The treatment therefore moved to
+`base.css`, the file every delivery mode loads and where the skip link and the
+focus ring already live, as **one rule set whose every selector names both
+`.kc-prose summary` and `.kc-disclosure > summary`**. There is nothing to compare
+because there is nothing to drift. `styles.css` and `static.css` gain no rule at
+all, which keeps ADR 0002's guarantee exactly where it was.
 
 Four specifics the builder should not re-decide:
 
@@ -1840,3 +1861,56 @@ here rather than silently corrected there.
     so it is worth stating as a method rather than as three findings. **Count
     elements, not selectors.** A pattern is present in a repo when markup renders
     it, and a class name in a stylesheet is not markup.
+
+28. **`retirement-dashboard` draws the chevron three ways, not two — and six of
+    the thirteen disclosures in the program have no chevron at all.** The design
+    direction above says RD "draws it twice, identically, out of two `2px`
+    borders on a 7px square (`styles.css:1312-1323` and `:2770-2782`)". Both of
+    those are real, and they are not quite identical — `.drawer-disclosure`'s
+    carries a `justify-self: center` its twin does not — but the count is the
+    part that matters. There is a third: `.tl-chev`
+    (`src/styles.css:4232-4238`), a `›` character in a
+    `<span aria-hidden="true">` (`src/planner.ts:3826`), set at `--text-3xl` and
+    rotated 90° when the row opens.
+
+    Widening from the chevron to the treatment: RD has **five** disclosure
+    treatments, not the two the direction implies — `.data-source-disclosure`,
+    `.tl-row`/`.tl-summary`, `.drawer-disclosure`, `.assistant-privacy`
+    (`src/styles.css:1034`), and `.tiller-picker-more`/`.tiller-picker-manual`
+    (`:1536`). The last two set no `list-style: none` and ship the browser's own
+    marker. So do both of `assistant-workbench`'s
+    (`apps/web/public/workbench-view.css:1620`,
+    `apps/web/functions/approvals/[approvalRequestId].ts:305`) and one of
+    `knowledge`'s (`.declarative-chart summary`, `src/styles.css:1439`);
+    `knowledge`'s other uses `content: "+"` flipping to `"−"`
+    (`src/styles.css:1977-1985`).
+
+    That is **thirteen elements, nine class names, four different expand
+    affordances, and zero icons from any registry** — with the UA marker on six
+    of the thirteen, which is exactly the thing the other seven spend a
+    `list-style: none` to remove. It strengthens rather than weakens the
+    direction's call: shipping the chevron from the icon set is not replacing two
+    border boxes, it is replacing four different things and *supplying* one to
+    six elements that never had it.
+
+29. **The two-slot summary is the same markup in `knowledge` and
+    `retirement-dashboard` and a different layout in each, and neither layout
+    survives 320 pixels.** The direction is right that both repos independently
+    wrote `<span>` plus `<small>`; that part held up exactly. What it does not
+    say, and what the builder has to decide, is where the second slot goes. KN
+    lays the summary out as `grid-template-columns: minmax(0, 1fr) auto` and then
+    pulls the `<small>` back to `grid-column: 1` (`src/styles.css:1963-1989`),
+    which puts it under the label — and leaves the `+` marker auto-placed into
+    the second row beside it. RD gives it a column of its own,
+    `minmax(0, 1fr) minmax(0, 250px) 16px` (`src/styles.css:2753-2762`), so its
+    description sits beside the label and the two share the width.
+
+    Under the 320 Rule the column form is the one that fails: a 250px second
+    column against a `1fr` first leaves the label nothing at that width, and RD's
+    own narrow-viewport override rewrites the columns for
+    `.data-source-disclosure` but not for `.drawer-disclosure`
+    (`src/styles.css:1841-1848`). The component puts the description beneath the
+    label on its own line, which is nearer KN's placement, and it is the
+    placement rather than either repo's grid that ships. Recorded because "the
+    same two-slot shape" is true of the markup and not of the treatment, and the
+    difference is a decision the direction left open rather than one it made.

@@ -36,6 +36,7 @@ import {
   DescriptionList,
   DescriptionListItem,
   DescriptionTerm,
+  Disclosure,
   EmptyState,
   Field,
   Icon,
@@ -678,6 +679,22 @@ describe("the vendored icon set is the one prose masks", () => {
       for (const [, d] of paths) expect(masked).toContain(d!);
     }
   });
+
+  it("draws the disclosure chevron from the same path prose.css masks", () => {
+    // The disclosure is the one component whose glyph exists twice by
+    // construction — prose masks it onto a pseudo-element because a CMS gives it
+    // no element to reach, and the component renders it. Same vendoring run,
+    // and this is what says so.
+    const prose = readFileSync(resolve(process.cwd(), "../tokens/src/prose.css"), "utf8");
+    const declaration = /--kc-prose-icon-caret: url\("([^"]+)"\)/.exec(prose);
+    expect(declaration, "prose.css declares no caret mask").not.toBeNull();
+    const masked = decodeURIComponent(declaration![1]!).replace(/'/g, '"');
+
+    const { container } = render(<Icon name="caret-down" />);
+    const paths = [...container.querySelector("svg")!.innerHTML.matchAll(/ d="([^"]+)"/g)];
+    expect(paths.length).toBeGreaterThan(0);
+    for (const [, d] of paths) expect(masked).toContain(d!);
+  });
 });
 
 describe("ThemeToggle", () => {
@@ -949,6 +966,267 @@ describe("the data table and the article table are one treatment", () => {
     // is a false affordance anyway, and no consumer had one on a real table.
     const prose = flatten(readFileSync(resolve(process.cwd(), "../tokens/src/prose.css"), "utf8"));
     expect(prose).not.toContain("tbody tr:hover");
+  });
+});
+
+describe("Disclosure", () => {
+  it("is a native details, with no button and no aria-expanded to keep in step", () => {
+    const { container } = render(
+      <Disclosure summary="Technical details">
+        <p>Correlation id req_5308874.</p>
+      </Disclosure>,
+    );
+
+    // The whole Mode 1 claim, in structural form. React Aria's Disclosure would
+    // render a `<button aria-expanded>` whose state lives in a client runtime;
+    // this renders the platform element, whose state lives in the browser.
+    const details = container.querySelector("details.kc-disclosure");
+    expect(details).not.toBeNull();
+    expect(container.querySelector("button")).toBeNull();
+    expect(container.querySelector("[aria-expanded]")).toBeNull();
+    expect(details).not.toHaveAttribute("open");
+  });
+
+  it("opens and closes from the pointer with nothing listening", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<Disclosure summary="Technical details">Body</Disclosure>);
+    const details = container.querySelector("details")!;
+
+    await user.click(screen.getByText("Technical details"));
+    expect(details.open).toBe(true);
+    await user.click(screen.getByText("Technical details"));
+    expect(details.open).toBe(false);
+  });
+
+  it("carries both summary slots, and the description is a small", () => {
+    const { container } = render(
+      <Disclosure summary="Household goals" description="Success, spending, survivor">
+        <p>Four controls.</p>
+      </Disclosure>,
+    );
+
+    const summary = container.querySelector("summary")!;
+    // `<span>` plus `<small>` is the shape `knowledge` and `retirement-dashboard`
+    // arrived at independently, and it is markup rather than a class so an
+    // article writing it by hand takes the same rule.
+    expect(summary.querySelector("span")).toHaveTextContent("Household goals");
+    expect(summary.querySelector("small")).toHaveTextContent(
+      "Success, spending, survivor",
+    );
+  });
+
+  it("renders no description element when there is no description", () => {
+    const { container } = render(<Disclosure summary="Technical details">Body</Disclosure>);
+    expect(container.querySelector("small")).toBeNull();
+  });
+
+  it("draws the chevron as a decorative glyph rather than a rotated border box", () => {
+    const { container } = render(<Disclosure summary="Technical details">Body</Disclosure>);
+
+    const caret = container.querySelector(".kc-disclosure__caret")!;
+    expect(caret.tagName).toBe("svg");
+    // Decoration: the summary's own label already says what pressing it does,
+    // and a second announcement would be noise.
+    expect(caret).toHaveAttribute("aria-hidden", "true");
+    expect(caret.querySelector("path")).not.toBeNull();
+  });
+
+  it("takes an initial open state and a group name, both native", () => {
+    const { container } = render(
+      <>
+        <Disclosure defaultOpen name="assumption-section" summary="Household goals">
+          Body
+        </Disclosure>
+        <Disclosure name="assumption-section" summary="Stress tests">
+          Body
+        </Disclosure>
+      </>,
+    );
+
+    const [first, second] = [...container.querySelectorAll("details")];
+    expect(first).toHaveAttribute("open");
+    expect(second).not.toHaveAttribute("open");
+    // The exclusive accordion is the browser's, not this package's: `name` is a
+    // pass-through, so grouping four sections costs no runtime and survives a
+    // statically rendered page.
+    expect(first).toHaveAttribute("name", "assumption-section");
+    expect(second).toHaveAttribute("name", "assumption-section");
+  });
+
+  it("wraps its body so the inline padding lands on something", () => {
+    // `<Disclosure>Some sentence.</Disclosure>` is a text node, which no
+    // stylesheet can reach. An article emits element siblings and needs no
+    // wrapper; a component takes whatever it is handed.
+    const { container } = render(<Disclosure summary="Technical details">Loose text</Disclosure>);
+    const body = container.querySelector("details > *:not(summary)")!;
+    expect(body).toHaveTextContent("Loose text");
+  });
+
+  it("renders statically, which is the whole reason it is a native details", () => {
+    // The disclosure is the only remaining Tier 2 entry the two Mode 1 repos
+    // could ever use. If this ever starts throwing, or the markup stops carrying
+    // its own glyph, the component has acquired a runtime and the reason it was
+    // built first is gone.
+    const markup = renderStatic(
+      <Disclosure defaultOpen name="group" summary="Technical details" description="Payload">
+        <p>Correlation id req_5308874.</p>
+      </Disclosure>,
+    );
+    expect(markup).toContain("<details ");
+    expect(markup).toContain('class="kc-disclosure"');
+    expect(markup).toContain('name="group"');
+    expect(markup).toContain("<summary>");
+    expect(markup).toContain("<small>Payload</small>");
+    expect(markup).toContain('class="kc-disclosure__caret"');
+    expect(markup).not.toContain("aria-expanded");
+  });
+
+  it("has no axe violations, open or closed", async () => {
+    for (const defaultOpen of [false, true]) {
+      const { container, unmount } = render(
+        <main>
+          <Disclosure
+            defaultOpen={defaultOpen}
+            description="Request payload and routing"
+            summary="Technical details"
+          >
+            <p>Correlation id req_5308874.</p>
+          </Disclosure>
+        </main>,
+      );
+      const result = await axe.run(container, {
+        rules: { "color-contrast": { enabled: false } },
+      });
+      expect(result.violations, String(defaultOpen)).toEqual([]);
+      unmount();
+    }
+  });
+});
+
+/**
+ * The disclosure's treatment is not two blocks kept in agreement — it is one
+ * block, and this is what holds it to that.
+ *
+ * `DataTable` shipped as parallel rules in `styles.css` and `prose.css` with a
+ * test comparing them declaration by declaration. A disclosure cannot take that
+ * route: its press is real and `styles.css` may not contain a `:hover` or an
+ * `:active`. So the treatment lives in `base.css`, which every delivery mode
+ * loads, and every selector in it names both surfaces at once. There is nothing
+ * to compare because there is nothing to drift.
+ */
+describe("the disclosure and the article disclosure are one rule", () => {
+  const readToken = (name: string) =>
+    readFileSync(resolve(process.cwd(), `../tokens/src/${name}`), "utf8");
+
+  const disclosureBlock = () => {
+    const css = readToken("base.css");
+    const start = css.indexOf("/* ---- Disclosure");
+    const end = css.indexOf("@media (prefers-reduced-motion");
+    expect(start, "base.css has no disclosure section").toBeGreaterThan(-1);
+    expect(end, "base.css has no reduced-motion block after it").toBeGreaterThan(start);
+    return css.slice(start, end).replace(/\/\*[\s\S]*?\*\//g, "");
+  };
+
+  const rules = (css: string) => {
+    const found: Array<{ selectors: string[]; body: string }> = [];
+    for (const [, head, body] of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      const selector = head!.trim().replace(/\s+/g, " ");
+      // `@media` and `@supports` heads open a block of their own; the rules
+      // inside them are matched separately on the next pass of the same regex.
+      if (!selector || selector.startsWith("@")) continue;
+      found.push({
+        selectors: selector.split(",").map((part) => part.trim()),
+        body: body!,
+      });
+    }
+    return found;
+  };
+
+  /**
+   * The two rules that legitimately reach one surface and not the other, and
+   * both are about *painting the glyph* rather than about the treatment. Prose
+   * has no element for the chevron, so it masks the shape onto a pseudo-element;
+   * the component renders an `<svg>` that paints itself. The box both sit in is
+   * a shared rule like everything else.
+   */
+  const glyphPaintOnly = new Set([
+    "content",
+    "background-color",
+    "mask-image",
+    "mask-size",
+    "mask-repeat",
+    "mask-position",
+    "forced-color-adjust",
+  ]);
+
+  it("names both surfaces in every rule of the treatment", () => {
+    const parsed = rules(disclosureBlock());
+    expect(parsed.length).toBeGreaterThan(8);
+
+    for (const { selectors, body } of parsed) {
+      const article = selectors.filter((one) => one.startsWith(".kc-prose"));
+      const component = selectors.filter((one) => one.includes(".kc-disclosure"));
+      expect(article.length, selectors.join(", ")).toBeGreaterThan(0);
+
+      if (component.length > 0) {
+        // One rule, both surfaces: the ordinary case, and the point of the file.
+        expect(article.length, selectors.join(", ")).toBe(component.length);
+        continue;
+      }
+
+      // The exception is allowed to paint a glyph and nothing else. This is what
+      // stops it growing back into a second treatment one declaration at a time.
+      const properties = body
+        .split(";")
+        .map((entry) => entry.slice(0, entry.indexOf(":")).trim())
+        .filter(Boolean);
+      expect(properties.length, selectors.join(", ")).toBeGreaterThan(0);
+      for (const property of properties) {
+        expect(glyphPaintOnly, `${selectors.join(", ")} declares ${property}`).toContain(
+          property,
+        );
+      }
+    }
+  });
+
+  it("leaves prose.css with no disclosure rule of its own to drift", () => {
+    const prose = readToken("prose.css").replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const { selectors } of rules(prose)) {
+      for (const selector of selectors) {
+        expect(selector, "prose.css has taken a summary rule back").not.toContain("summary");
+      }
+      // One `details` selector survives here, and it is not part of the
+      // treatment: prose's block-flow margin, which a `details` shares with
+      // every other block in an article. A component sets no outer margin, so
+      // this is the one line that is genuinely prose's alone.
+      if (selectors.some((one) => one.includes("details"))) {
+        expect(selectors, "an unexpected details rule in prose.css").toContain(".kc-prose p");
+      }
+    }
+  });
+
+  it("keeps the component out of styles.css and static.css entirely", () => {
+    // Not "has no pseudo-class here" — has *nothing* here. The treatment is in
+    // the token layer because it works in every delivery mode, so there is no
+    // rest state to declare in one file and no state to restore in the other.
+    // `SkipLink` is the only other component that can say this.
+    //
+    // Comments are stripped first: both files *say* the component is absent, and
+    // saying so is the point. What must not appear is a rule.
+    const rulesOnly = (name: string) => readSource(name).replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(rulesOnly("./styles.css")).not.toContain("kc-disclosure");
+    expect(rulesOnly("./static.css")).not.toContain("kc-disclosure");
+  });
+
+  it("keeps the press in the token layer, where every delivery mode loads it", () => {
+    // The other half of the guarantee above. If someone "tidies" this into
+    // `styles.css`, the data-attribute test fires; if someone deletes it from
+    // here, this one does.
+    const block = disclosureBlock();
+    expect(block).toContain(".kc-disclosure > summary:active");
+    expect(block).toContain(".kc-disclosure > summary:hover");
+    expect(block).toContain("--kc-press-travel");
+    expect(block).toContain("--kc-press-edge-width");
   });
 });
 

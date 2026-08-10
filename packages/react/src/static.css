@@ -34,10 +34,13 @@
  * either is a Mode 2 page, and `renderStatic` throws rather than letting one
  * through.
  *
- * `SkipLink` and the code block's focus ring are also absent, and for the
- * opposite reason — they already work everywhere. `.kc-skip-link` and the
- * zero-specificity `:where(:focus-visible)` ring both live in the tokens
- * package's `base.css`, which every delivery mode loads.
+ * `SkipLink`, `Disclosure`, and the code block's focus ring are also absent, and
+ * for the opposite reason — they already work everywhere. `.kc-skip-link`, the
+ * whole disclosure treatment, and the zero-specificity `:where(:focus-visible)`
+ * ring all live in the tokens package's `base.css`, which every delivery mode
+ * loads. The disclosure is the sharpest case: its press is the browser's rather
+ * than React's, so there is no state here to restore and none in `styles.css` to
+ * mirror. Adding a `.kc-disclosure` rule to either file would be the mistake.
  *
  * A statically rendered Banner dismiss and a code block's copy control are
  * present but inert; neither has a no-JS behavior to degrade to. Do not render

@@ -8,11 +8,17 @@ const meta = {
     docs: {
       description: {
         component: [
-          "A native `<details>` disclosure, and the one element in the prose stylesheet that genuinely is a control.",
+          "A native `<details>` disclosure, and the one element an article can emit that genuinely is a control.",
           "",
           "That matters, because it is what earns the keycap's bottom edge. Under the Pressable Edge Rule the edge is a promise that the object travels when activated, and `summary` keeps it — 3px down, 4px compressing to 1px, from the same tokens a Button reads.",
           "",
           "The press is implemented differently than the Button's, though. A Button pins its border box with `min-block-size` and lets the compressing wall redistribute space inside it; a `summary` wraps to as many lines as its label needs and has no fixed height to pin. So the padding does that job instead: the edge gives up exactly what the padding takes, over the same duration, and the border box is the same height on every frame. Nothing below the disclosure reflows while the key is down.",
+          "",
+          "### It is the same rule the `Disclosure` component uses",
+          "",
+          "Not a matching one — the same one. The treatment lives in `base.css` rather than in `prose.css`, and every selector in it names `.kc-prose summary` and `.kc-disclosure > summary` together, so an article's disclosure and a product's cannot drift apart. `base.css` is the file every delivery mode loads, which is what lets one block serve a stylesheet that ships to consumers with no React and a component that ships to those with it.",
+          "",
+          "One thing an article gains from that arrangement: the two-slot summary. Write `<summary><span>Label</span><small>Description</small></summary>` and the description takes its own line under the label, from the same rule the component reads.",
         ].join("\n"),
       },
     },
@@ -107,5 +113,51 @@ export const QuestionList: Story = {
     expect(
       canvas.getByRole("heading", { level: 2, name: /adopting the token layer/i }),
     ).toBeVisible();
+  },
+};
+
+/**
+ * The two-slot summary, in hand-written markup.
+ *
+ * `<span>` plus `<small>`, which is the shape two consumer repos invented
+ * independently and the shape the `Disclosure` component renders. It works here
+ * because the treatment is one rule set in `base.css` naming both surfaces —
+ * an article is not getting a copy of the component's styling, it is reading the
+ * same declarations.
+ */
+export const WithDescriptions: Story = {
+  render: () => (
+    <Prose>
+      <details>
+        <summary>
+          <span>Where does the disclosure treatment live?</span>
+          <small>Not in this stylesheet, and the absence is the decision</small>
+        </summary>
+        <p>
+          In <code>base.css</code>, which every delivery mode loads. A{" "}
+          <code>summary</code> press is the browser&rsquo;s rather than
+          React&rsquo;s, so it needs real pseudo-classes — and{" "}
+          <code>styles.css</code> may hold none, while <code>prose.css</code> is
+          opt-in and would leave a product surface unstyled.
+        </p>
+      </details>
+      <details>
+        <summary>
+          <span>Does an article have to write both slots?</span>
+          <small>No — a bare summary is still a summary</small>
+        </summary>
+        <p>
+          The <code>small</code> is optional in both places. Without one the key
+          is a single line with the chevron at its end, exactly as before.
+        </p>
+      </details>
+    </Prose>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const description = canvas.getByText(
+      "Not in this stylesheet, and the absence is the decision",
+    );
+    expect(description.tagName).toBe("SMALL");
   },
 };

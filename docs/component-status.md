@@ -20,6 +20,7 @@
 | Icon | Beta | Semantic SVG | Closed name union, decorative-vs-named accessibility contract, every glyph draws a distinct shape, status shapes match the prose masks |
 | CodeBlock | Experimental | Semantic HTML | Keyboard-reachable scroll region, syntax roles carried by attribute |
 | DataTable | Experimental | Semantic HTML | Named keyboard-reachable scroll region, `scope` on both header cells by construction, numeric alignment, `tfoot` totals, declaration-for-declaration parity with `prose.css`, static render, 320px reflow, axe in light and dark |
+| Disclosure | Experimental | Native `details`/`summary` | Toggle from pointer and keyboard with no runtime attached, two-slot summary, chevron drawn from the registry's `caret-down`, native `name` grouping, press geometry and no reflow below the key, one shared rule with `prose.css` asserted selector by selector, works under `styles.css` alone, static render, 320px reflow, forced colors keep the edge and both chevrons, axe in light and dark |
 
 ## Delivery modes
 
@@ -32,6 +33,7 @@ consumers as rendered HTML through `@jflamb/keycaps-react/static`.
 | Icon | Yes | Paints with `currentColor` and needs no stylesheet at all |
 | AppShell, PageHeader, EmptyState, DescriptionList, SkipLink, CodeBlock | Yes | SkipLink needs no `static.css` entry — `base.css` already covers it in every mode |
 | DataTable | Yes | It has no interactive state at all, which is the price of this row. A row hover would have to come from React Aria's collection components, and those need a runtime; the scroll container's focus ring comes from `base.css` |
+| Disclosure | Yes | The only entry here that is fully interactive in Mode 1, because the interaction is the browser's. It needs no `static.css` entry and has no `styles.css` rule either — the whole treatment is in `base.css`, the standing SkipLink already has |
 | Select, Popover, ThemeToggle | **No** | Behavior cannot degrade to CSS. `renderStatic` throws on each |
 
 Two controls render in Mode 1 but do nothing there, and neither has a no-JS

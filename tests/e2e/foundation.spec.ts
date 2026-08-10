@@ -505,6 +505,11 @@ test("the new surfaces reflow at 320 CSS pixels", async ({ page }) => {
     // the table has to overflow *and* the page still must not.
     "components-data-table--wide-and-scrolling",
     "components-data-table--totals-and-rich-cells",
+    // The two-slot summary is the case here. Both repos that invented it put
+    // the description in a column beside the label, and both squeeze the label
+    // to nothing at this width; this one wraps it onto its own line instead.
+    "components-disclosure--with-descriptions",
+    "components-disclosure--rich-body",
   ]) {
     await page.goto(`/iframe.html?id=${id}&viewMode=story&globals=theme:light`);
     const dimensions = await page.evaluate(() => ({
@@ -549,7 +554,215 @@ for (const theme of ["light", "dark"] as const) {
       .analyze();
     expect(accessibility.violations, theme).toEqual([]);
   });
+
+  test(`the disclosure is axe-clean in ${theme}, open and closed`, async ({ page }) => {
+    await page.goto(
+      `/iframe.html?id=components-disclosure--with-descriptions&viewMode=story&globals=theme:${theme}`,
+    );
+    const summary = page.getByText("Household goals");
+    await expect(summary).toBeVisible();
+
+    // Scoped to the component: a component story is a sample rather than a
+    // document, so an unscoped run reports the story's page shape. Closed first,
+    // then open — the open panel is markup the closed run never sees.
+    const run = async () =>
+      (await new AxeBuilder({ page }).include(".kc-disclosure").analyze()).violations;
+    expect(await run(), `${theme} closed`).toEqual([]);
+    await summary.click();
+    await expect(page.locator(".kc-disclosure").first()).toHaveAttribute("open", "");
+    expect(await run(), `${theme} open`).toEqual([]);
+  });
 }
+
+/**
+ * The half of the disclosure only a browser can check.
+ *
+ * The press is the claim `DESIGN.md` makes about this element by name: a summary
+ * takes input, so under the Pressable Edge Rule it owes travel and a wall. A
+ * Button pins its border box with `min-block-size`; a summary wraps to as many
+ * lines as its label needs and has no fixed height to pin, so the padding does
+ * that job — the edge gives up exactly what the padding takes. If that coupling
+ * ever breaks, the box resizes mid-press and everything below the disclosure
+ * jumps while the key is down, which is the failure this measures.
+ */
+test("the summary travels on press without moving anything below it", async ({ page }) => {
+  await page.goto(
+    "/iframe.html?id=components-disclosure--long-body&viewMode=story&globals=theme:light",
+  );
+  // Settled states only. The press transitions over 120ms and the point is the
+  // geometry on each side of it, not the animation.
+  await page.addStyleTag({ content: ".kc-disclosure > summary { transition: none !important; }" });
+
+  const summary = page.locator(".kc-disclosure > summary");
+  const paragraph = page.getByText("This paragraph is the test.");
+  const geometry = async () => ({
+    summary: await summary.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      const computed = getComputedStyle(element);
+      return {
+        top: +rect.top.toFixed(2),
+        height: +rect.height.toFixed(2),
+        edge: computed.borderBlockEndWidth,
+        transform: computed.transform,
+      };
+    }),
+    below: +(await paragraph.boundingBox())!.y.toFixed(2),
+  });
+
+  const rest = await geometry();
+  expect(Number.parseFloat(rest.summary.edge)).toBe(4);
+
+  const box = (await summary.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  const pressed = await geometry();
+  await page.mouse.up();
+
+  // The cap descends exactly as far as its wall shrinks.
+  const travel = Number.parseFloat(pressed.summary.transform.split(",").at(-1)!);
+  const pressedEdge = Number.parseFloat(pressed.summary.edge);
+  expect(travel).toBe(3);
+  expect(pressedEdge).toBe(1);
+  expect(travel + pressedEdge).toBe(Number.parseFloat(rest.summary.edge));
+
+  // The whole key descends, wall included — `getBoundingClientRect` reports the
+  // transformed box, so this is the travel rather than a layout move.
+  expect(pressed.summary.top - rest.summary.top).toBe(3);
+
+  // And the border box never resizes, so nothing below it moves. The paragraph
+  // is the honest witness here: it sits outside the disclosure, so it can only
+  // move if the summary's *layout* height changed.
+  expect(pressed.summary.height).toBe(rest.summary.height);
+  expect(pressed.below).toBe(rest.below);
+});
+
+test("the disclosure opens from the keyboard and rings when it takes focus", async ({
+  page,
+}) => {
+  // The story with no play function: the others open themselves on load, which
+  // would leave this test asserting against a state a play step produced.
+  await page.goto(
+    "/iframe.html?id=components-disclosure--long-body&viewMode=story&globals=theme:light",
+  );
+
+  const details = page.locator(".kc-disclosure");
+  const summary = page.locator(".kc-disclosure > summary");
+
+  // Wait for the story to render before reaching for the tab order: Storybook
+  // mounts asynchronously, and a Tab pressed into an empty document focuses
+  // nothing and stays that way.
+  await expect(summary).toBeVisible();
+  await page.keyboard.press("Tab");
+  await expect(summary).toBeFocused();
+
+  // The ring comes from `base.css`'s zero-specificity `:where(:focus-visible)`,
+  // so it is present in every delivery mode. Same reasoning as the skip link.
+  const outline = await summary.evaluate((element) => {
+    const computed = getComputedStyle(element);
+    return { style: computed.outlineStyle, width: Number.parseFloat(computed.outlineWidth) };
+  });
+  expect(outline.style).not.toBe("none");
+  expect(outline.width).toBeGreaterThanOrEqual(3);
+
+  await expect(details).not.toHaveAttribute("open", "");
+  await page.keyboard.press("Enter");
+  await expect(details).toHaveAttribute("open", "");
+  await page.keyboard.press("Enter");
+  await expect(details).not.toHaveAttribute("open", "");
+});
+
+/**
+ * The chevron is the one place the article and the component genuinely differ,
+ * and forced colors is where that difference has consequences.
+ *
+ * The component draws an `<svg>` filling with `currentColor`, which the OS
+ * recolors rather than erases. Prose has no element to reach, so it masks the
+ * shape onto a pseudo-element — and a masked glyph is painted with
+ * `background-color`, which forced colors flattens into the surface unless the
+ * override in `base.css` opts it out. That override is one declaration, easy to
+ * delete, and its absence is invisible in every other mode.
+ */
+test("forced colors keep the disclosure's edge and both chevrons", async ({ page }) => {
+  await page.emulateMedia({ forcedColors: "active" });
+
+  await page.goto(
+    "/iframe.html?id=components-disclosure--long-body&viewMode=story&globals=theme:light",
+  );
+  const summary = page.locator(".kc-disclosure > summary");
+  await expect(summary).toBeVisible();
+  expect(
+    await summary.evaluate((element) => getComputedStyle(element).borderBlockEndStyle),
+  ).not.toBe("none");
+
+  const caret = page.locator(".kc-disclosure__caret");
+  expect((await caret.boundingBox())?.width).toBeGreaterThan(8);
+  expect(await caret.evaluate((element) => getComputedStyle(element).fill)).not.toBe("none");
+
+  await page.goto(
+    "/iframe.html?id=prose-details--with-descriptions&viewMode=story&globals=theme:light",
+  );
+  const article = page.locator(".kc-prose summary").first();
+  await expect(article).toBeVisible();
+  expect(
+    await article.evaluate((element) => getComputedStyle(element).borderBlockEndStyle),
+  ).not.toBe("none");
+
+  const paint = await article.evaluate((element) => ({
+    adjust: getComputedStyle(element, "::after").forcedColorAdjust,
+    glyph: getComputedStyle(element, "::after").backgroundColor,
+    surface: getComputedStyle(element).backgroundColor,
+  }));
+  expect(paint.adjust).toBe("none");
+  expect(paint.glyph).not.toBe(paint.surface);
+});
+
+/**
+ * The delivery claim, measured rather than asserted in a comment.
+ *
+ * The static-render stories carry hand-authored markup: a set of keys that are
+ * inert under `styles.css` alone, and one disclosure that is not. Its press
+ * belongs to the browser rather than to React, so it works in both stories and
+ * needs an entry in neither stylesheet — the standing the skip link and the
+ * focus ring already have. This is the test that keeps that a fact.
+ */
+test("the disclosure presses under styles.css alone, unlike everything beside it", async ({
+  page,
+}) => {
+  await page.goto(staticStory("hand-authored-markup-is-inert"));
+  await page.addStyleTag({
+    content: ".kc-button, .kc-disclosure > summary { transition: none !important; }",
+  });
+
+  const details = page.locator(".kc-disclosure");
+  const summary = page.locator(".kc-disclosure > summary");
+  const read = () =>
+    summary.evaluate((element) => {
+      const computed = getComputedStyle(element);
+      return { background: computed.backgroundColor, transform: computed.transform };
+    });
+
+  const rest = await read();
+  await summary.hover();
+  expect((await read()).background).not.toBe(rest.background);
+
+  const box = (await summary.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  expect(Number.parseFloat((await read()).transform.split(",").at(-1)!)).toBe(3);
+  await page.mouse.up();
+
+  // And it toggles, with nothing attached to it.
+  await expect(details).toHaveAttribute("open", "");
+
+  // The key beside it, on the same page, still does nothing. Both halves of the
+  // guarantee in one measurement.
+  const key = page.getByRole("button", { name: "Get started" });
+  const keyRest = await key.evaluate((element) => getComputedStyle(element).backgroundColor);
+  await key.hover();
+  expect(
+    await key.evaluate((element) => getComputedStyle(element).backgroundColor),
+  ).toBe(keyRest);
+});
 
 /**
  * The half of the data table that only a browser can check.

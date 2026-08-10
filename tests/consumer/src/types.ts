@@ -36,6 +36,7 @@ import type {
   ButtonProps,
   ButtonVariant,
   DataTableProps,
+  DisclosureProps,
   SelectProps,
   StatusTone,
 } from "@jflamb/keycaps-react";
@@ -81,10 +82,19 @@ const namelessTable: DataTableProps = { children: null };
 
 type _DataTablePropsResolve = Resolved<IsAny<DataTableProps>>;
 
+// @ts-expect-error There is no controlled `open` on a Disclosure — a `<details>`
+// owns its own state, which is what lets it work with no JavaScript. The prop is
+// omitted from the type rather than documented away, so reaching for it is a
+// compile error and not a component that silently fights the DOM.
+const controlledDisclosure: DisclosureProps = { summary: "Details", open: true };
+
+type _DisclosurePropsResolve = Resolved<IsAny<DisclosureProps>>;
+
 // Referenced so the declarations above are not merely parsed but resolved.
 export type Probes = [
   typeof invalidVariant,
   typeof invalidSize,
   typeof invalidBadgeTone,
   typeof namelessTable,
+  typeof controlledDisclosure,
 ];

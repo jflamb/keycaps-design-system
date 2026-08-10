@@ -76,6 +76,7 @@ export {
   type DescriptionListLayout,
   type DescriptionListProps,
 } from "./components/DescriptionList.js";
+export { Disclosure, type DisclosureProps } from "./components/Disclosure.js";
 export { EmptyState, type EmptyStateProps } from "./components/EmptyState.js";
 export { Field, type FieldProps } from "./components/Field.js";
 export { PageHeader, type PageHeaderProps } from "./components/PageHeader.js";

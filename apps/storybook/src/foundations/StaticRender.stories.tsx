@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useEffect } from "react";
+import { Icon } from "@jflamb/keycaps-react";
 import staticCss from "../../../../packages/react/src/static.css?raw";
 
 /**
@@ -20,6 +21,11 @@ import staticCss from "../../../../packages/react/src/static.css?raw";
  * `styles.css`, the first story starts reacting — and the e2e suite fails on it
  * rather than a consumer discovering that hand-authored `.kc-button` markup
  * suddenly looks supported.
+ *
+ * Both stories also carry one thing that is *not* inert, deliberately: a
+ * disclosure. Its press is the browser's rather than React's, so its treatment
+ * lives in `base.css` and it works in both stories and in neither stylesheet.
+ * The exception belongs beside the rule where it can be seen.
  */
 const meta = {
   title: "Foundations/Static render",
@@ -34,6 +40,8 @@ const meta = {
           "Adding them to `styles.css` instead would also make hand-authored markup work — which is the delivery model ADR 0002 rejected, and the one that produced `ledger.css`. Keeping them apart means the guarantee is structural rather than documentary: there is nothing to enforce, because there is nothing to forget.",
           "",
           "`Select` and `Popover` appear in neither file. Their behavior cannot degrade to CSS, and `renderStatic` throws rather than letting one onto a page that ships no JavaScript.",
+          "",
+          "The disclosure at the bottom of both stories appears in neither file for the opposite reason. A `<details>` press belongs to the browser, so hand-authored disclosure markup genuinely works — there is nothing to be inert about, and styling it as though there were would be a lie in the other direction. Its whole treatment lives in `base.css`, alongside the skip link and the focus ring, because an affordance that depends on which stylesheet a page imported is not an affordance.",
         ].join("\n"),
       },
     },
@@ -80,6 +88,26 @@ function StaticMarkupSample({ mode }: { mode: "inert" | "live" }) {
         <span className="kc-field__label">Zone name</span>
         <input className="kc-field__input" defaultValue="jflamb.com" />
       </label>
+      {/* The one thing on this page that is not inert, in either story.
+          A `<details>` press belongs to the browser rather than to React, so its
+          whole treatment lives in `base.css` and it works with no runtime and no
+          `static.css` — the same standing the skip link and the focus ring have.
+          It is here so the exception is visible beside the rule rather than only
+          described in a comment, and the e2e suite asserts it presses under
+          `styles.css` alone. */}
+      <details className="kc-disclosure">
+        <summary>
+          <span>What still works with no runtime?</span>
+          <small>Whatever the browser was already doing</small>
+          <Icon className="kc-disclosure__caret" name="caret-down" />
+        </summary>
+        <div>
+          <p>
+            This one. It opens, it takes the keyboard, it travels on press, and
+            nothing on the page is listening.
+          </p>
+        </div>
+      </details>
     </div>
   );
 }
