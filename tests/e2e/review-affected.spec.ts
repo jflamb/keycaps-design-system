@@ -99,6 +99,7 @@ for (const story of receipt.stories) {
           return (
             (element as HTMLElement).tabIndex >= 0 &&
             element.getAttribute("aria-disabled") !== "true" &&
+            !["listbox", "option"].includes(element.getAttribute("role") || "") &&
             !element.closest('[inert], [aria-hidden="true"]') &&
             !element.closest(
               'details:not([open]) > *:not(summary), details:not([open]) > *:not(summary) *',
