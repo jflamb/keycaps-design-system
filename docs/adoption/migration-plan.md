@@ -1035,14 +1035,27 @@ The real work is its first dark theme and unwinding the token layer.
    components. Record each in the repo's adoption notes as owed upstream, per
    ADR 0002, and confirm neither uses the `kc-` prefix.
 
-   **`KnowledgeNavigation` (365 lines) and `DetailsDrawer` (350) are not on this
-   list any more**, and the earlier draft that put them here contradicted the
-   inventory it was derived from. Both are Tier 2 gaps needed by two repos —
-   sidebar/tree navigation pairs `.knowledge-nav` with `retirement-dashboard`'s
-   `.plan-rail`, and drawer pairs `.details-drawer` with `.assumptions-drawer`.
-   Size is what made them read as novel, and size is not the test; the repo count
-   is. Both are built in Phase 2a and consumed here. See
-   [correction 13](#corrections-to-the-survey).
+   **`KnowledgeNavigation` (365 lines) and `DetailsDrawer` (350) are neither Tier
+   3 nor Phase 2a builds**, and both earlier answers were reached from repo
+   counts rather than from the markup. Correction 13 moved them here on a 2/5
+   count; the Phase 2a survey read both implementations and found each is an
+   existing component's case:
+
+   - `KnowledgeNavigation` is a flat sidebar of grouped filter buttons with no
+     tree affordances of any kind. It becomes `AppShellSidebar` +
+     `AppShellNav` + `AppShellNavLink`, which shipped in Phase 1. Its group
+     headings and its `.knowledge-nav__count` are the two extensions Phase 2a
+     records at 2/5; its collapse control is 1/5 and stays local.
+   - `DetailsDrawer` is not an overlay on the surface it was designed for — it is
+     the shell grid's third column (`src/styles.css:285`), non-modal, going
+     `position: fixed` only under the narrow-viewport block. It becomes
+     `AppShellSidebar` too, on the inline-end side.
+
+   See [correction 20](#corrections-to-the-survey) and
+   [correction 21](#corrections-to-the-survey). `VaultWorkspace` and
+   `SafeVegaLiteChart` remain Tier 3 correctly, and this phase now also carries
+   `.account-avatar` (`src/App.tsx:208`) and the three text loading states as
+   Tier 3 — local, and recorded as owed upstream.
 7. **Normalize the class naming that survives.** The repo currently mixes BEM
    (`search-field__clear`), modifier-BEM (`knowledge-state--attention`), flat
    semantic (`empty-copy`), and state classes (`.is-starred`). Anything that
@@ -1121,14 +1134,31 @@ Tier 2 build is scoped by what this repo needs rather than built up front.
 ### Work, in order
 
 1. **Confirm Phase 2a shipped the components this repo consumes.** The Tier 2
-   build moved out of this phase and into 2a, where it is scoped by the
-   inventory's repo counts rather than by this repo's surface. What this phase
-   needs from it: data table (17 tables plus `.table-scroll`, which already
-   implements the Prose Markup Rule's `tabindex="0"`), segmented control
-   (`.segmented`/`.segment`/`.segment-label`/`.segment-sub`, 28 hits and the
-   primary assumption control), modal dialog (3 native `<dialog>`), drawer,
-   disclosure, timeline, loading/skeleton, sidebar navigation for `.plan-rail`,
-   and the theme toggle.
+   build moved out of this phase and into 2a, where it is scoped by a survey of
+   what each repo's markup actually renders rather than by this repo's surface.
+   What this phase takes from it is shorter than the earlier draft assumed:
+
+   - **Data table** — 17 tables plus `.table-scroll`, which does *not* already
+     carry `tabindex="0"`; see [correction 19](#corrections-to-the-survey) and
+     the two tests it obliges this phase to update.
+   - **Modal dialog** — three `<dialog>` elements, of which
+     `.assumptions-drawer` is the third. It takes the same component with a
+     `placement` prop rather than a Drawer;
+     [correction 20](#corrections-to-the-survey).
+   - **Disclosure** — 9 sites, including the four-way exclusive accordion at
+     `src/planner.ts:4397-4410` that the component's `name` prop covers.
+   - **Theme toggle**, already shipped.
+   - **`AppShellSidebar`/`AppShellNav`/`AppShellNavLink` for `.plan-rail`** —
+     shipped in Phase 1, not built in 2a. Its group label and its
+     `.plan-rail-badge` are the two extensions 2a records;
+     [correction 21](#corrections-to-the-survey).
+
+   Not coming from 2a at all, because each has one consumer and stays local:
+   the segmented control (`src/planner.ts:1256`, 9 call sites — this repo is the
+   only consumer, so it is owed upstream rather than owned by Keycaps), the
+   `.tl-*` year timeline, and loading, which this repo does not implement.
+   See corrections [22](#corrections-to-the-survey) and
+   [24](#corrections-to-the-survey).
 2. **Add React and the plugin.** `react`, `react-dom`, `@vitejs/plugin-react`,
    and a `plugins: [react()]` array. Verify `npm run test:artifact` still passes
    — the `protected-assets/` split is enforced by an AST audit and a new plugin
@@ -1141,8 +1171,8 @@ Tier 2 build is scoped by what this repo needs rather than built up front.
    isolating it makes the screenshot review tractable.
 4. **Then mount islands**, one container at a time, replacing `src/ui/` builders
    with components. Order by leverage: `cards.ts` (23 lines) and `format.ts` are
-   trivial; `controls.ts` is the segmented control and unlocks 28 call sites;
-   `planHistory.ts` and `tillerPicker.ts` are the two dialogs; `holdings.ts`,
+   trivial; `planHistory.ts` and `tillerPicker.ts` are the two dialogs — three
+   with the `assumptionsDrawer` at `planner.ts:4382`; `holdings.ts`,
    `planViews.ts`, and `planInsights.ts` are the tables.
 5. **Keep what should stay.** Chart.js, the canvases, the sparklines and bullet
    charts, the year timeline's `.tl-*` layer, and the worker are Tier 3. They
