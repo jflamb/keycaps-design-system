@@ -636,11 +636,33 @@ on its own.
 
 ---
 
-## Phase 3 — `mcp-dnsimple` (Mode 1)
+## Phase 3 — `mcp-dnsimple` (Mode 1) — **shipped**
 
 **Why first among the consumers:** the smallest surface, one file, already builds
 with `tsc`, and it proves the whole Mode 1 path end to end before a second repo
 depends on it.
+
+**It does prove it.** The page ships no client React, and everything Mode 1
+claims held on contact: `renderStaticDocument` produced the document, the
+inlined `static.css` gave the copy key its hover and its 3px press with the wall
+compressing 4px to 1px, the theme bootstrap and `prefers-color-scheme` both
+resolve, and a nine-test browser suite is axe-clean in light *and* dark with no
+rule switched off, including colour contrast. The rendered markup carries **zero
+class names outside `kc-`** and makes **zero off-origin requests**. Container
+output is byte-identical to the local render.
+
+Two things the phase did not anticipate, both recorded below: the page had a
+second off-origin request nobody had counted ([34](#corrections-to-the-survey)),
+and the exit criterion this phase declared unreachable is reachable
+([35](#corrections-to-the-survey)) — the allowlist is empty.
+
+It was migrated against published `@jflamb/keycaps-react@0.1.3` rather than a
+workspace link, deliberately. This repo sets `skipLibCheck: true`, and a linked
+dependency type-checks against something other than the artifact npm ships —
+which is the precise blind spot that let 0.1.2 resolve every export to `any`. The
+first thing this phase did was assert, with a `@ts-expect-error` on a bad variant
+and an `IsAny` probe, that 0.1.3's published declarations resolve to real types
+under this repo's `Node16` resolution. They do.
 
 ### Inputs
 
@@ -733,6 +755,13 @@ indistinguishable from passing correctly right up until a prop is wrong.
   render time — the second is better, because it is the only version in which the
   OG card follows the palette. Pick one during this phase rather than discovering
   it at the exit gate.
+
+  **Met.** The second option, in `src/keycaps-assets.ts`: the token layer's
+  `:root` block is read out of `node_modules` at module load, `var()` aliases are
+  followed to a literal, and the favicon and OG card interpolate the result. The
+  allowlist is empty and `keycaps-css-lint` reports 36 files clean. The
+  "not reachable as written" verdict was wrong — see
+  [correction 35](#corrections-to-the-survey).
 - The page makes zero off-origin requests. Assert it the way
   `scripts/verify-pages-build.mjs` already does here: fail the test if any
   request leaves the origin.
@@ -2045,3 +2074,42 @@ here rather than silently corrected there.
     where the harness's own keys collide with a running play — the
     `components-search-field--clearing` failure in this PR's first CI run — and
     the broader mis-attribution is left standing rather than papered over.
+
+34. **`mcp-dnsimple`'s page made two kinds of off-origin request, and Phase 3
+    named only one.** The phase's font step is right that the Google Fonts CDN
+    has to go — three faces plus two `preconnect` hints. What it never mentions
+    is `HEALTH_BADGE_URL` (`src/branding.ts:49-51`), an `img.shields.io` badge
+    rendered as an `<img>` in the footer, which is a fourth request to a third
+    party on every page load and the only one that also leaks a visit to an
+    analytics-capable host.
+
+    The phase's own exit criterion — "the page makes zero off-origin requests" —
+    could not have been met by doing the font step alone, so the two were always
+    a pair and only one was written down. The badge is deleted rather than
+    replaced: the footer already links `/health`, which is the same information
+    from this origin, and a shields.io badge on a page that *is* the service is
+    a status light wired to someone else's mains.
+
+    Worth generalising for Phases 4 through 7: the surveys counted stylesheets
+    and components, and an off-origin `<img>` is neither. Grep for `src=`,
+    `<link`, and `url(` against an external host in each repo before its phase
+    claims that criterion.
+
+35. **The exit criterion Phase 3 called unreachable is reachable, and the phase
+    already said how.** Its second exit criterion reads "the Phase 2 rules pass
+    with an empty allowlist. **Not reachable as written**", because
+    `FAVICON_SVG` and `OG_CARD_SVG` carry raw hexes that an SVG cannot read from
+    a custom property, and they share a file with the page.
+
+    Both of the phase's suggested fixes work, and the one it preferred — drive
+    the colours from token values at render time — turned out to need about
+    forty lines: read `tokens.css` out of `node_modules`, take the first `:root`
+    block, follow `var()` aliases to a literal, and interpolate. The allowlist in
+    `.keycaps-lint.json` is now empty and `keycaps-css-lint` reports 36 files
+    clean. Recorded because the criterion is quoted in the phase map as a known
+    exception, and it is no longer one.
+
+    The side effect is the part worth keeping: the favicon and the Open Graph
+    card now change colour when the palette does, which is the only version of
+    this where the brand mark is actually part of the system rather than a
+    picture of it.
