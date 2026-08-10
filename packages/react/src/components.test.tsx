@@ -37,8 +37,12 @@ import {
   Select,
   SkipLink,
   StatusIcon,
-} from "./index";
-import { renderStatic, renderStaticDocument, StaticRenderError } from "./static";
+} from "./index.js";
+import {
+  renderStatic,
+  renderStaticDocument,
+  StaticRenderError,
+} from "./static.js";
 
 const readSource = (name: string) =>
   readFileSync(fileURLToPath(new URL(name, import.meta.url)), "utf8");

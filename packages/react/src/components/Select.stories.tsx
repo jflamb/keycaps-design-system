@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, within } from "storybook/test";
-import { Select, type SelectOption } from "./Select";
+import { Select, type SelectOption } from "./Select.js";
 
 const RELEASE_STATUS_LINK =
   '<a href="./?path=/docs/foundations-release-status--guidance" target="_top">Release status</a>';

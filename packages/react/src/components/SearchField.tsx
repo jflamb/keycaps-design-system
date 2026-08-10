@@ -9,8 +9,8 @@ import {
   type InputProps,
   type SearchFieldProps as AriaSearchFieldProps,
 } from "react-aria-components";
-import { CloseIcon, SearchIcon } from "../icons";
-import { cx } from "../utils";
+import { CloseIcon, SearchIcon } from "../icons.js";
+import { cx } from "../utils.js";
 
 export interface SearchFieldProps
   extends Omit<AriaSearchFieldProps, "children" | "className"> {

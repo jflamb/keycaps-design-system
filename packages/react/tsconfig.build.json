@@ -1,8 +1,45 @@
+/*
+ * The declaration build.
+ *
+ * `module` and `moduleResolution` are `NodeNext` here and nowhere else. The rest
+ * of the package develops under the repository's `Bundler` resolution, because
+ * that is what Vite, Vitest, and Storybook actually run. But `tsc
+ * --emitDeclarationOnly` copies each import specifier into the `.d.ts` verbatim,
+ * so whatever resolver this file names is the one every consumer inherits.
+ *
+ * Under `Bundler` an extensionless relative specifier is legal, and 0.1.2
+ * shipped fifteen of them in `dist/index.d.ts` plus `../icons` in
+ * `dist/components/Badge.d.ts`. Inside a `"type": "module"` package those are
+ * sixteen TS2834 errors for anyone on `Node16` or `NodeNext` — which is every
+ * consumer repo. They all set `skipLibCheck: true`, so the errors never
+ * surfaced; the entire root export silently became `any` instead.
+ *
+ * `NodeNext` makes that unshippable rather than invisible. The extensions in
+ * `src/` are load-bearing, and this setting is what fails the build when one
+ * goes missing, at the moment it goes missing, in this repository — instead of
+ * two majors downstream with type safety already gone.
+ *
+ * The `.js` extensions the emitted declarations need are written in the `.ts`
+ * sources, where TypeScript maps them back to `.ts`/`.tsx` on the way in.
+ * esbuild (tsup) and Vite (Vitest, Storybook) both do the same, so one spelling
+ * satisfies every tool.
+ *
+ * The obvious alternative — drop this file and emit bundled declarations from
+ * the `tsup` run with `--dts`, which would have no relative specifiers to get
+ * wrong — does not work here. tsup's declaration path is `rollup-plugin-dts`,
+ * which is written against the TypeScript 5 compiler API and throws
+ * `Cannot read properties of undefined (reading 'useCaseSensitiveFileNames')`
+ * against the 7.0.2 this package builds with. Taking that route means pinning a
+ * second TypeScript solely to emit declarations, which trades a resolution bug
+ * for a version-skew bug. Revisit if tsup's dts path catches up to TypeScript 7.
+ */
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "declaration": true,
     "emitDeclarationOnly": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "noEmit": false,
     "outDir": "dist",
     "rootDir": "src",

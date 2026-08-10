@@ -10,7 +10,7 @@ import {
   type TextAreaProps,
   type TextFieldProps,
 } from "react-aria-components";
-import { cx } from "../utils";
+import { cx } from "../utils.js";
 
 export interface FieldProps extends Omit<TextFieldProps, "children" | "className"> {
   /** Extra class names appended to `kc-field`. */

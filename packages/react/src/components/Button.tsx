@@ -5,8 +5,8 @@ import {
   type ButtonProps as AriaButtonProps,
   type LinkProps as AriaLinkProps,
 } from "react-aria-components";
-import { DangerIcon } from "../icons";
-import { cx } from "../utils";
+import { DangerIcon } from "../icons.js";
+import { cx } from "../utils.js";
 
 /**
  * Emphasis level.

@@ -4,6 +4,18 @@ All notable changes to the fixed-version Keycaps package train are documented he
 
 ## Unreleased
 
+## 0.1.3 — 2026-08-09
+
+### Fixed
+
+- **`@jflamb/keycaps-react` declarations now resolve under `Node16` and `NodeNext`.** `dist/index.d.ts` was a barrel of fifteen extensionless relative re-exports, plus `../icons` in `dist/components/Badge.d.ts`. Inside a `"type": "module"` package those are sixteen `TS2834` errors for any consumer on `Node16` or `NodeNext` resolution — which is every repo in the adoption program. All sixteen now carry the `.js` extension ESM requires. **The failure mode is why this is worth reading twice: every consumer sets `skipLibCheck: true`, which suppressed all sixteen errors and silently resolved the entire root export to `any`.** `export const bad: 0 = someButtonVariant;` compiled clean against 0.1.2. A migration would have built, deployed, and rendered correctly while carrying no type safety on a single component prop. Runtime is untouched — tsup bundles `dist/index.js`/`.cjs` with no relative specifiers at all, and every runtime artifact in this release is byte-identical to 0.1.2.
+
+  The cause was configuration, not TypeScript's version: `tsconfig.base.json` sets `moduleResolution: Bundler`, `packages/react/tsconfig.build.json` extended it, and `tsc --emitDeclarationOnly` faithfully copied the extensionless specifiers out of `src/index.ts`. So the fix is at the source — the `.js` extensions are written in the `.ts` files, where TypeScript, esbuild, and Vite all map them back to `.ts`/`.tsx` — and `tsconfig.build.json` now compiles under `NodeNext` so a future missing extension is a build error here rather than a silent `any` two repos downstream.
+
+### Changed
+
+- **`tests/consumer/` is now type-checked twice, and the second pass is the one that matters.** The fixture extended `tsconfig.base.json` only, so it validated the packages under `Bundler` resolution — a different resolver from every repo it is the reference implementation *for*. That gap is precisely how 0.1.2 shipped. A second pass now runs it under `module`/`moduleResolution: Node16` with `skipLibCheck: false`, so the published `.d.ts` is a checked artifact rather than an assumed one, and `src/types.ts` asserts that the exports carry real types rather than `any` — a guard that holds even under the `skipLibCheck: true` consumers actually set. Both run in `pnpm check`.
+
 ## 0.1.2 — 2026-08-09
 
 ### Fixed

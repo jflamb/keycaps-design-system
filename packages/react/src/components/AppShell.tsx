@@ -1,7 +1,7 @@
 import type { HTMLAttributes, ReactNode } from "react";
 import { Link as AriaLink, type LinkProps as AriaLinkProps } from "react-aria-components";
-import { SkipLink } from "./SkipLink";
-import { cx } from "../utils";
+import { SkipLink } from "./SkipLink.js";
+import { cx } from "../utils.js";
 
 export interface AppShellProps extends HTMLAttributes<HTMLDivElement> {
   /**

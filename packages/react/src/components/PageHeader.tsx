@@ -1,5 +1,5 @@
 import { createElement, type HTMLAttributes, type ReactNode } from "react";
-import { cx } from "../utils";
+import { cx } from "../utils.js";
 
 export interface PageHeaderProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
   /** Controls sitting opposite the title. Wraps below it under about 34rem. */

@@ -13,14 +13,18 @@ export {
   type AppShellNavProps,
   type AppShellProps,
   type AppShellSidebarProps,
-} from "./components/AppShell";
+} from "./components/AppShell.js";
 export {
   Badge,
   type BadgeProps,
   type BadgeShape,
   type BadgeTone,
-} from "./components/Badge";
-export { Banner, type BannerProps, type BannerTone } from "./components/Banner";
+} from "./components/Badge.js";
+export {
+  Banner,
+  type BannerProps,
+  type BannerTone,
+} from "./components/Banner.js";
 export {
   Button,
   LinkButton,
@@ -28,7 +32,7 @@ export {
   type ButtonSize,
   type ButtonVariant,
   type LinkButtonProps,
-} from "./components/Button";
+} from "./components/Button.js";
 export {
   Card,
   CardBody,
@@ -41,14 +45,14 @@ export {
   type CardLinkProps,
   type CardProps,
   type CardTitleProps,
-} from "./components/Card";
+} from "./components/Card.js";
 export {
   CodeBlock,
   CodeToken,
   type CodeBlockProps,
   type CodeTokenKind,
   type CodeTokenProps,
-} from "./components/CodeBlock";
+} from "./components/CodeBlock.js";
 export {
   DescriptionDetails,
   DescriptionList,
@@ -57,22 +61,25 @@ export {
   type DescriptionDetailsProps,
   type DescriptionListLayout,
   type DescriptionListProps,
-} from "./components/DescriptionList";
-export { EmptyState, type EmptyStateProps } from "./components/EmptyState";
-export { Field, type FieldProps } from "./components/Field";
-export { PageHeader, type PageHeaderProps } from "./components/PageHeader";
+} from "./components/DescriptionList.js";
+export { EmptyState, type EmptyStateProps } from "./components/EmptyState.js";
+export { Field, type FieldProps } from "./components/Field.js";
+export { PageHeader, type PageHeaderProps } from "./components/PageHeader.js";
 export {
   Popover,
   PopoverTrigger,
   type PopoverProps,
-} from "./components/Popover";
-export { SearchField, type SearchFieldProps } from "./components/SearchField";
+} from "./components/Popover.js";
+export {
+  SearchField,
+  type SearchFieldProps,
+} from "./components/SearchField.js";
 export {
   Select,
   type SelectOption,
   type SelectProps,
-} from "./components/Select";
-export { SkipLink, type SkipLinkProps } from "./components/SkipLink";
+} from "./components/Select.js";
+export { SkipLink, type SkipLinkProps } from "./components/SkipLink.js";
 export {
   ChevronDownIcon,
   CloseIcon,
@@ -84,4 +91,4 @@ export {
   WarningIcon,
   type StatusIconProps,
   type StatusTone,
-} from "./icons";
+} from "./icons.js";

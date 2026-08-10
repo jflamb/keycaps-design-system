@@ -16,9 +16,10 @@
     "vite": "8.2.1"
   },
   "scripts": {
-    "build": "tsc --noEmit && vite build && node prerender.mjs",
+    "build": "pnpm typecheck && vite build && node prerender.mjs",
     "build:static": "node prerender.mjs",
     "clean": "rm -rf dist",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && pnpm typecheck:node16",
+    "typecheck:node16": "tsc --noEmit -p tsconfig.node16.json"
   }
 }

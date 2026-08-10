@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor, within } from "storybook/test";
-import { Button } from "./Button";
-import { Popover, PopoverTrigger } from "./Popover";
+import { Button } from "./Button.js";
+import { Popover, PopoverTrigger } from "./Popover.js";
 
 const RELEASE_STATUS_LINK =
   '<a href="./?path=/docs/foundations-release-status--guidance" target="_top">Release status</a>';

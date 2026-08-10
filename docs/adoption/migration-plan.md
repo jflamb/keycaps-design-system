@@ -401,13 +401,16 @@ depends on it.
 
 ### Work, in order
 
-**This phase is blocked before step 1.** The published `@jflamb/keycaps-react`
-root entry does not resolve under `moduleResolution: Node16`, which is what this
-repo compiles with, so `import { Button } from "@jflamb/keycaps-react"` here
-typechecks against `any` rather than failing — the migration would appear to work
-and would carry no type safety at all. The measurement and the fix are recorded
-under [Versioning and release](#versioning-and-release). Nothing below is
-verifiable until a Keycaps release ships a root `.d.ts` this repo can read.
+**This phase was blocked before step 1, and is not any longer — require
+`@jflamb/keycaps-react@^0.1.3`.** The published root entry did not resolve under
+`moduleResolution: Node16`, which is what this repo compiles with, so
+`import { Button } from "@jflamb/keycaps-react"` type-checked against `any`
+rather than failing — the migration would have appeared to work and carried no
+type safety at all. 0.1.3 ships a root `.d.ts` this repo can read; the
+measurement and the fix are recorded under
+[Versioning and release](#versioning-and-release). **Do not start this phase
+against 0.1.2 or earlier** — every step below would pass against `any`, which is
+indistinguishable from passing correctly right up until a prop is wrong.
 
 1. **Enable JSX and add the dependencies.** Set `"jsx": "react-jsx"` and
    `"jsxImportSource": "react"` in `tsconfig.json`. Add `react`, `react-dom`,
@@ -415,9 +418,9 @@ verifiable until a Keycaps release ships a root `.d.ts` this repo can read.
    `@types/react` and `@types/react-dom` are absent today; `react` and
    `react-dom` arrive as auto-installed peers but carry no types of their own.
    Under `moduleResolution: Node16` the *package* `exports` maps resolve
-   correctly, and both Keycaps packages declare one — but that is only the outer
-   half of resolution, and the inner half is where this breaks. See the note
-   above this list.
+   correctly, and both Keycaps packages declare one; from 0.1.3 the inner half —
+   the relative specifiers inside the declarations — resolves too. Pin
+   `^0.1.3`, not `^0.1.2`. See the note above this list.
 2. **Render at module load.** `branding.ts` already computes its page from a
    `HomePageModel`; keep that contract. Replace the body of `renderHomePage`
    with a `renderStaticDocument` call whose children are Keycaps components. The
@@ -1090,6 +1093,40 @@ in the inventory:
   consumer-side setting is a legitimate way around it: switching an MCP server to
   `moduleResolution: Bundler` would be describing the wrong runtime to make an
   error disappear.
+
+  **Shipped in 0.1.3. Phases 3 and 4 are unblocked.** Of the two candidate
+  fixes above, the second is the one that landed. The first is not available:
+  `tsup`'s declaration path is `rollup-plugin-dts`, which is written against the
+  TypeScript 5 compiler API and dies against this repo's 7.0.2 with `Cannot read
+  properties of undefined (reading 'useCaseSensitiveFileNames')`. Bundling
+  declarations would mean pinning a second TypeScript purely to emit them, which
+  trades a resolution bug for a version-skew bug.
+
+  So the `.js` extensions are written in `packages/react/src/` — all sixteen,
+  and every other relative specifier in the package besides — where TypeScript,
+  esbuild, and Vite all map them back to `.ts`/`.tsx`, so one spelling satisfies
+  the build, the tests, and Storybook alike. `packages/react/tsconfig.build.json`
+  now sets `module` and `moduleResolution` to `NodeNext`, which turns a missing
+  extension into a TS2835 build failure in this repository rather than a silent
+  `any` two repos downstream. The runtime is untouched: every artifact `tsup`
+  emits for 0.1.3 is byte-identical to 0.1.2's.
+
+  Confirmed against the packed 0.1.3 tarball under **TypeScript 5.9.3** — the
+  version both MCP repos resolve — with `Node16` and `skipLibCheck: false`: no
+  resolution errors, and `ButtonVariant` arrives as its real union. The probe
+  that compiled clean against 0.1.2, `export const bad: 0 = someButtonVariant`,
+  is now the only error in the file. It fails the same way under
+  `skipLibCheck: true`, which is what the MCP repos actually set.
+
+  The fixture gap called out above is closed too: `tests/consumer/` now
+  type-checks a second time under `module`/`moduleResolution: Node16` with
+  `skipLibCheck: false`, wired into `pnpm check`, alongside assertions that the
+  exports carry real types rather than `any` — a guard that still fires under
+  `skipLibCheck: true`. Proven by reverting the fix before release: the build
+  fails at TS2835, and with the old build config restored the packages build
+  clean while the new consumer pass fails with the original fifteen TS2834s.
+  Treat that second pass as the standing guarantee behind the Phase 3 and
+  Phase 4 exit criteria. The Vite-major gap recorded below is still open.
 - **Vite ^7 in `retirement-dashboard` against 8.1.5 in `knowledge`.** Only
   matters for the Storybook/consumer fixture parity, but it means
   `tests/consumer/` proves the package against one major and not the other.
