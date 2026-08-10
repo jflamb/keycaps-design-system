@@ -81,14 +81,11 @@ export {
 } from "./components/Select.js";
 export { SkipLink, type SkipLinkProps } from "./components/SkipLink.js";
 export {
-  ChevronDownIcon,
-  CloseIcon,
-  DangerIcon,
-  InfoIcon,
-  SearchIcon,
+  Icon,
   StatusIcon,
-  SuccessIcon,
-  WarningIcon,
+  iconNames,
+  type IconProps,
+  type KeycapsIconName,
   type StatusIconProps,
   type StatusTone,
 } from "./icons.js";

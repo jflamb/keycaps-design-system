@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -29,6 +30,7 @@ import {
   DescriptionTerm,
   EmptyState,
   Field,
+  Icon,
   LinkButton,
   PageHeader,
   Popover,
@@ -37,6 +39,7 @@ import {
   Select,
   SkipLink,
   StatusIcon,
+  iconNames,
 } from "./index.js";
 import {
   renderStatic,
@@ -304,9 +307,11 @@ describe("the destructive key's second carrier", () => {
   it("paints the shape itself, so it survives markup the stylesheet never reaches", () => {
     render(<Button variant="danger">Delete zone</Button>);
     // A carrier that needs a second file to become visible is not a carrier:
-    // Mode 1 pages render this markup with only the token layer in scope.
+    // Mode 1 pages render this markup with only the token layer in scope. The
+    // glyph is a filled Phosphor shape now rather than an outline, so the paint
+    // it carries is a fill — but the guarantee is the one this always asserted.
     expect(toneMark(screen.getByRole("button", { name: "Delete zone" }))).toHaveAttribute(
-      "stroke",
+      "fill",
       "currentColor",
     );
   });
@@ -593,6 +598,79 @@ describe("the static-render path", () => {
  * tests are the cheap tripwire that fires the moment someone edits the wrong
  * file, without waiting for Playwright.
  */
+describe("Icon", () => {
+  const glyph = (container: HTMLElement) => container.querySelector("svg")!;
+
+  it("hides an unnamed glyph from assistive technology", () => {
+    // An icon beside its own label is decoration. Naming it repeats the label
+    // to a screen reader, which is worse than leaving it unnamed.
+    const { container } = render(<Icon name="magnifying-glass" />);
+    expect(glyph(container)).toHaveAttribute("aria-hidden", "true");
+    expect(glyph(container)).not.toHaveAttribute("role");
+  });
+
+  it("names a labelled glyph as an image", () => {
+    const { container } = render(<Icon label="Search" name="magnifying-glass" />);
+    expect(glyph(container)).toHaveAttribute("role", "img");
+    expect(glyph(container)).toHaveAttribute("aria-label", "Search");
+    expect(glyph(container)).not.toHaveAttribute("aria-hidden");
+  });
+
+  it("carries its own paint, so it renders without this package's stylesheet", () => {
+    const { container } = render(<Icon name="x" />);
+    expect(glyph(container)).toHaveAttribute("fill", "currentColor");
+    expect(glyph(container)).toHaveAttribute("viewBox", "0 0 256 256");
+  });
+
+  it("draws every vendored glyph, and draws a different shape for each", () => {
+    const shapes = new Set<string>();
+    for (const name of iconNames) {
+      const { container } = render(<Icon name={name} />);
+      const drawn = glyph(container).innerHTML;
+      expect(drawn, `${name} rendered nothing`).not.toBe("");
+      shapes.add(drawn);
+    }
+    expect(shapes.size, "two glyph names resolve to the same drawing").toBe(iconNames.length);
+  });
+
+  it("gives each status tone its own shape rather than a recolor", () => {
+    // The Tone Trio Rule's second carrier. Four tones, four distinct drawings —
+    // asserted here rather than trusted, because a recolor would look correct.
+    const drawings = (["info", "success", "warning", "danger"] as const).map((tone) => {
+      const { container } = render(<StatusIcon tone={tone} />);
+      return glyph(container).innerHTML;
+    });
+    expect(new Set(drawings).size).toBe(4);
+  });
+});
+
+describe("the vendored icon set is the one prose masks", () => {
+  it("draws each status shape from the same path prose.css masks", () => {
+    // The two used to be drawn separately and kept in step by review. This is
+    // the assertion that replaces the review: one vendoring run feeds both, so
+    // a warning in an article and a warning on a Badge are one shape.
+    // Resolved from the package root rather than from `import.meta.url`: this
+    // reaches outside the Vite root, where that URL is no longer a file: one.
+    const prose = readFileSync(resolve(process.cwd(), "../tokens/src/prose.css"), "utf8");
+    for (const [tone, name] of [
+      ["info", "info"],
+      ["success", "check-circle"],
+      ["warning", "warning"],
+      ["danger", "warning-octagon"],
+    ] as const) {
+      const declaration = new RegExp(`--kc-prose-icon-${tone}: url\\("([^"]+)"\\)`).exec(prose);
+      expect(declaration, `prose.css declares no ${tone} mask`).not.toBeNull();
+      const masked = decodeURIComponent(declaration![1]!).replace(/'/g, '"');
+      const { container } = render(<Icon name={name} />);
+      // The mask is a standalone document and the component is a fragment, so
+      // compare the geometry both carry rather than the markup around it.
+      const paths = [...container.querySelector("svg")!.innerHTML.matchAll(/ d="([^"]+)"/g)];
+      expect(paths.length).toBeGreaterThan(0);
+      for (const [, d] of paths) expect(masked).toContain(d!);
+    }
+  });
+});
+
 describe("styles.css stays data-attribute-only", () => {
   const stripComments = (css: string) => css.replace(/\/\*[\s\S]*?\*\//g, "");
 

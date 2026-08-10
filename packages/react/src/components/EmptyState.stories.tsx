@@ -3,7 +3,7 @@ import { expect, within } from "storybook/test";
 import { Button } from "./Button.js";
 import { Card, CardBody, CardHeader, CardTitle } from "./Card.js";
 import { EmptyState } from "./EmptyState.js";
-import { SearchIcon, SuccessIcon } from "../icons.js";
+import { Icon } from "../icons.js";
 
 const RELEASE_STATUS_LINK =
   '<a href="./?path=/docs/foundations-release-status--guidance" target="_top">Release status</a>';
@@ -53,7 +53,7 @@ export const Default: Story = {};
  */
 export const WithIcon: Story = {
   args: {
-    icon: <SuccessIcon />,
+    icon: <Icon name="check-circle" />,
     title: "Inbox clear",
     description: "Every message has been triaged. The next sweep runs at 06:00.",
   },
@@ -90,7 +90,7 @@ export const WithAction: Story = {
  */
 export const NoResults: Story = {
   args: {
-    icon: <SearchIcon style={{ stroke: "currentColor", strokeWidth: 2, fill: "none" }} />,
+    icon: <Icon name="magnifying-glass" />,
     title: 'No matches for "provenance ledger"',
     description: "Try fewer words, or search titles only.",
     actions: <Button variant="secondary">Clear filters</Button>,

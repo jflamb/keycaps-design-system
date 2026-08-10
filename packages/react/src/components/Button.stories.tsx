@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { Button, LinkButton } from "./Button.js";
-import { CloseIcon } from "../icons.js";
+import { Icon } from "../icons.js";
 
 const RELEASE_STATUS_LINK =
   '<a href="./?path=/docs/foundations-release-status--guidance" target="_top">Release status</a>';
@@ -153,7 +153,7 @@ export const IconOnly: Story = {
     iconOnly: true,
     variant: "secondary",
     "aria-label": "Dismiss notification",
-    children: <CloseIcon />,
+    children: <Icon name="x" />,
   },
   play: async ({ canvasElement }) => {
     const button = within(canvasElement).getByRole("button", {

@@ -1,6 +1,6 @@
 import type { HTMLAttributes, ReactNode } from "react";
 import { Button } from "./Button.js";
-import { CloseIcon } from "../icons.js";
+import { Icon } from "../icons.js";
 import { cx } from "../utils.js";
 
 /** Status tone. Also selects the ARIA live role — see {@link BannerProps.tone}. */
@@ -67,7 +67,7 @@ export function Banner({
           size="small"
           variant="quiet"
         >
-          <CloseIcon />
+          <Icon name="x" />
         </Button>
       ) : null}
     </div>

@@ -5,7 +5,7 @@ import {
   type ButtonProps as AriaButtonProps,
   type LinkProps as AriaLinkProps,
 } from "react-aria-components";
-import { DangerIcon } from "../icons.js";
+import { Icon } from "../icons.js";
 import { cx } from "../utils.js";
 
 /**
@@ -115,7 +115,7 @@ function toneMarked<Children>(
   children: Children,
 ): Children {
   if (variant !== "danger" || iconOnly) return children;
-  const mark = <DangerIcon className="kc-button__tone-icon" key="kc-tone" />;
+  const mark = <Icon className="kc-button__tone-icon" key="kc-tone" name="warning-octagon" />;
   if (typeof children === "function") {
     return ((...values: unknown[]) => (
       <>

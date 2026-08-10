@@ -89,15 +89,16 @@
   color: var(--kc-color-on-key-danger-pressed);
 }
 
-/* A square key. The glyph is the whole label, so the accessible name has to come
-   from `aria-label` — which the component's types require rather than suggest.
-   `:not([stroke])` leaves the status icons alone: they carry their own paint so
-   they survive in markup this stylesheet never reaches. */
+/* Every glyph is a filled Phosphor shape painting with `currentColor`, so this
+   stylesheet sizes icons and never paints them. That is why there is no longer a
+   rule stroking an icon-only glyph: an outline glyph needed CSS to become
+   visible, and one that carries its own fill does not. It renders in markup this
+   stylesheet never reaches, which is the whole point — a status carrier that
+   depends on a second file to appear is not a carrier. */
+
 /* The destructive key's shape carrier. Sized a step under the icon-only glyph so
    it reads as a mark on the label rather than as a second label, and `flex: none`
-   so a long label cannot squeeze it toward nothing. It paints itself — the icon
-   bakes in its own stroke — so it survives statically rendered markup and forced
-   colors alike, which is the only reason it is worth putting here. */
+   so a long label cannot squeeze it toward nothing. */
 .kc-button__tone-icon {
   inline-size: 1.125rem;
   block-size: 1.125rem;
@@ -118,13 +119,6 @@
   inline-size: 1.25rem;
   block-size: 1.25rem;
   flex: none;
-}
-
-.kc-button[data-icon-only] > svg:not([stroke]) {
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
 }
 
 /* An action that reads as a word inside a sentence.
@@ -310,10 +304,6 @@
   inline-size: 1.25rem;
   block-size: 1.25rem;
   flex: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
   transition: transform var(--kc-duration-press) var(--kc-ease-press);
 }
 
@@ -457,9 +447,6 @@
 .kc-banner__dismiss svg {
   inline-size: 1.125rem;
   block-size: 1.125rem;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
 }
 
 .kc-badge {
@@ -649,9 +636,6 @@
   inline-size: 1.25rem;
   block-size: 1.25rem;
   color: var(--kc-color-text-muted);
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
   pointer-events: none;
 }
 
@@ -669,9 +653,6 @@
 .kc-search-field__clear-glyph {
   inline-size: 1.125rem;
   block-size: 1.125rem;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
 }
 
 /* ---- Description list --------------------------------------------------- */

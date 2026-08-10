@@ -1,116 +1,88 @@
-import type { ReactElement, SVGProps } from "react";
+import type { SVGProps } from "react";
+import { ICON_VIEW_BOX, iconData, type KeycapsIconName } from "./icons/icon-data.js";
 
-export function ChevronDownIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" {...props}>
-      <path d="m5.5 7.5 4.5 4.5 4.5-4.5" />
-    </svg>
-  );
-}
+export type { KeycapsIconName };
 
-export function CloseIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" {...props}>
-      <path d="m5.5 5.5 9 9m0-9-9 9" />
-    </svg>
-  );
-}
+/**
+ * Every glyph the package ships, in manifest order. Exported for stories and
+ * tests rather than for callers — a caller naming an icon gets the union.
+ */
+export const iconNames = Object.keys(iconData) as KeycapsIconName[];
 
-export function SearchIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" {...props}>
-      <circle cx="8.75" cy="8.75" r="5.25" />
-      <path d="m12.7 12.7 3.8 3.8" />
-    </svg>
-  );
+/**
+ * The registry is closed, and that is a decision rather than an omission.
+ *
+ * The reference implementation this pattern comes from exposes a `register()`
+ * so an application can add its own glyphs. Keycaps does not, because a
+ * consumer registering its own vocabulary is the divergence the adoption
+ * program exists to remove — it would move the seam rather than close it. A
+ * glyph Keycaps lacks is one line in `scripts/icons/vendor-icons.mjs` and a
+ * release, and Phase 2 wired the dependency updates that make that cheap.
+ *
+ * Two things follow from the set being closed. An unknown name is a compile
+ * error rather than a render-time miss, because the union is generated from the
+ * same data. And the geometry is checked when it is vendored rather than when
+ * it is registered, so nothing ships a sanitizer or an XML parser to a browser.
+ */
+export interface IconProps
+  extends Omit<SVGProps<SVGSVGElement>, "children" | "dangerouslySetInnerHTML"> {
+  /** Which glyph to draw. Unknown names do not compile. */
+  name: KeycapsIconName;
+  /**
+   * The accessible name. Omit it for decoration — an icon beside its own label
+   * is decoration, and naming it twice is worse than not naming it at all.
+   */
+  label?: string;
 }
 
 /**
- * The status shapes, and the reason they exist.
+ * A vendored Phosphor glyph, drawn inline.
  *
- * The Tone Trio Rule says a status expressed by color alone is a defect, and
- * that each tone needs a distinct icon *shape* — not the same shape in a
- * different color — so the distinction survives forced colors, monochrome
- * printing, and color vision deficiency. Until now that obligation had no
- * implementation on the component side: the package shipped two icons, neither
- * of them a status.
+ * `dangerouslySetInnerHTML` carries build-time data, not caller input: the
+ * shapes come from `icon-data.ts`, which only `pnpm icons:vendor` writes, and
+ * every one is checked against an element and attribute allowlist before it is
+ * written. `pnpm icons:verify` fails the build if that file stops matching what
+ * the manifest produces, so hand-edited geometry cannot reach a render either.
  *
- * These are the same four paths `prose.css` already masks for its callouts, at
- * the same 20×20 grid and the same stroke weights. A reader should not have to
- * learn that a warning in an article and a warning on a badge are the same
- * thing, so they are one glyph rather than two drawings of one idea.
- *
- * Stroke and fill are baked in rather than left to CSS. These are painted at
- * whatever size their container gives them, including inside statically
- * rendered markup with no component stylesheet in scope, and a status carrier
- * that depends on a second file to become visible is not a carrier.
+ * The glyph paints with `currentColor` and takes its size from the box the
+ * caller gives it, so it inherits ink from the component it sits in and needs
+ * no stylesheet to become visible. That is what lets it survive statically
+ * rendered markup and forced colors alike.
  */
-function statusIconProps(props: SVGProps<SVGSVGElement>) {
-  return {
-    viewBox: "0 0 20 20",
-    fill: "none",
-    stroke: "currentColor",
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-    "aria-hidden": true,
-    ...props,
-  };
-}
-
-/** A circle carrying an i. Information. */
-export function InfoIcon(props: SVGProps<SVGSVGElement>) {
+export function Icon({ name, label, ...props }: IconProps) {
   return (
-    <svg {...statusIconProps(props)}>
-      <circle cx="10" cy="10" r="8.2" strokeWidth="1.6" />
-      <path d="M10 9.1v5.1" strokeWidth="1.8" />
-      <circle cx="10" cy="5.9" r="1.05" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
-/** A circle carrying a check. Affirmation. */
-export function SuccessIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg {...statusIconProps(props)}>
-      <circle cx="10" cy="10" r="8.2" strokeWidth="1.6" />
-      <path d="m6.1 10.3 2.7 2.7 5.1-5.6" strokeWidth="1.8" />
-    </svg>
-  );
-}
-
-/** A triangle carrying a bang. Caution. */
-export function WarningIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg {...statusIconProps(props)}>
-      <path d="M10 2.4 19 17.6H1z" strokeWidth="1.6" />
-      <path d="M10 8v3.9" strokeWidth="1.8" />
-      <circle cx="10" cy="14.7" r="1.05" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
-/** An octagon carrying a bang. Stop. */
-export function DangerIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg {...statusIconProps(props)}>
-      <path d="M6.9 1.7h6.2l4.2 4.2v6.2l-4.2 4.2H6.9l-4.2-4.2V5.9z" strokeWidth="1.6" />
-      <path d="M10 5.9v4.6" strokeWidth="1.8" />
-      <circle cx="10" cy="13.6" r="1.05" fill="currentColor" stroke="none" />
-    </svg>
+    <svg
+      {...props}
+      viewBox={ICON_VIEW_BOX}
+      fill="currentColor"
+      {...(label ? { role: "img", "aria-label": label } : { "aria-hidden": true })}
+      dangerouslySetInnerHTML={{ __html: iconData[name] }}
+    />
   );
 }
 
 /** The four status tones that have an icon. `neutral` deliberately has none. */
 export type StatusTone = "info" | "success" | "warning" | "danger";
 
-const statusIcons = {
-  info: InfoIcon,
-  success: SuccessIcon,
-  warning: WarningIcon,
-  danger: DangerIcon,
-} satisfies Record<StatusTone, (props: SVGProps<SVGSVGElement>) => ReactElement>;
+/**
+ * The Tone Trio Rule says a status expressed by color alone is a defect, and
+ * that each tone needs a distinct icon *shape* — not the same shape in a
+ * different color — so the distinction survives forced colors, monochrome
+ * printing, and color vision deficiency.
+ *
+ * A circle carrying an i, a circle carrying a check, a triangle, an octagon.
+ * These are the same four glyphs `prose.css` masks for its callouts, from the
+ * same vendoring run, so a warning in an article and a warning on a `Badge` are
+ * one shape by construction rather than by review.
+ */
+const statusShapes = {
+  info: "info",
+  success: "check-circle",
+  warning: "warning",
+  danger: "warning-octagon",
+} satisfies Record<StatusTone, KeycapsIconName>;
 
-export interface StatusIconProps extends SVGProps<SVGSVGElement> {
+export interface StatusIconProps extends Omit<IconProps, "name"> {
   /** Which shape to draw. Each tone is a different shape, never a recolor. */
   tone: StatusTone;
 }
@@ -121,6 +93,5 @@ export interface StatusIconProps extends SVGProps<SVGSVGElement> {
  * while appearing to follow it, so the component does not offer the option.
  */
 export function StatusIcon({ tone, ...props }: StatusIconProps) {
-  const Icon = statusIcons[tone];
-  return <Icon {...props} />;
+  return <Icon {...props} name={statusShapes[tone]} />;
 }

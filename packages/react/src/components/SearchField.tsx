@@ -9,7 +9,7 @@ import {
   type InputProps,
   type SearchFieldProps as AriaSearchFieldProps,
 } from "react-aria-components";
-import { CloseIcon, SearchIcon } from "../icons.js";
+import { Icon } from "../icons.js";
 import { cx } from "../utils.js";
 
 export interface SearchFieldProps
@@ -93,7 +93,7 @@ export function SearchField({
             </Text>
           ) : null}
           <div className="kc-search-field__control">
-            <SearchIcon className="kc-search-field__icon" />
+            <Icon className="kc-search-field__icon" name="magnifying-glass" />
             <Input
               {...restInputProps}
               className={cx("kc-field__input", inputClassName)}
@@ -106,7 +106,7 @@ export function SearchField({
                 data-variant="quiet"
                 aria-label={clearLabel}
               >
-                <CloseIcon className="kc-search-field__clear-glyph" />
+                <Icon className="kc-search-field__clear-glyph" name="x" />
               </AriaButton>
             )}
           </div>

@@ -16,6 +16,7 @@
 | EmptyState | Experimental | Semantic HTML | Heading level, axe |
 | DescriptionList | Experimental | Semantic HTML | `dl > div > dt/dd` grouping preserved, three layouts, 320px reflow |
 | SkipLink | Experimental | Semantic HTML | Clipped at rest, 44px key when focused, jumps to the shell's main region |
+| Icon | Beta | Semantic SVG | Closed name union, decorative-vs-named accessibility contract, every glyph draws a distinct shape, status shapes match the prose masks |
 | CodeBlock | Experimental | Semantic HTML | Keyboard-reachable scroll region, syntax roles carried by attribute |
 
 ## Delivery modes
@@ -26,6 +27,7 @@ consumers as rendered HTML through `@jflamb/keycaps-react/static`.
 | Component | Mode 1 (static render) | Note |
 | --- | --- | --- |
 | Button, LinkButton, Badge, Card, Field, Banner | Yes | States come from `static.css` |
+| Icon | Yes | Paints with `currentColor` and needs no stylesheet at all |
 | AppShell, PageHeader, EmptyState, DescriptionList, SkipLink, CodeBlock | Yes | SkipLink needs no `static.css` entry — `base.css` already covers it in every mode |
 | Select, Popover | **No** | Behavior cannot degrade to CSS. `renderStatic` throws on either |
 

@@ -11,7 +11,7 @@ import {
   Text,
   type SelectProps as AriaSelectProps,
 } from "react-aria-components";
-import { ChevronDownIcon } from "../icons.js";
+import { Icon } from "../icons.js";
 import { cx } from "../utils.js";
 
 /** One entry in a Select. Options are data, not children — Keycaps owns the markup. */
@@ -72,7 +72,7 @@ export function Select({
       ) : null}
       <AriaButton className="kc-select__trigger">
         <SelectValue className="kc-select__value" />
-        <ChevronDownIcon className="kc-select__chevron" />
+        <Icon className="kc-select__chevron" name="caret-down" />
       </AriaButton>
       <FieldError className="kc-field__error">{errorMessage}</FieldError>
       <AriaPopover className="kc-select__popover">

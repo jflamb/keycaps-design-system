@@ -62,11 +62,28 @@ must produce no diff.
 output emits stale masks whenever the build has not run, silently. FDIC's design
 doc calls this out explicitly and the shared `.mjs` module is how it avoids it.
 
-**5. Registration sanitizes.** The registry renders raw SVG inline, so it
-enforces an element and attribute allowlist — no scripts, event handlers, URL
-references, `data:` URLs, embedded HTML, or external images. Filters, gradients,
-masks, symbols, and animation are unsupported by construction. Registered icons
-are simple glyphs or they are rejected.
+**5. The geometry is checked against an allowlist.** No scripts, event handlers,
+URL references, `data:` URLs, embedded HTML, or external images; filters,
+gradients, masks, symbols, and animation are unsupported by construction. A glyph
+is a simple shape or it is rejected.
+
+> **Amended during implementation — the check runs at vendor time, not at
+> registration.** This clause originally put the allowlist on a registry
+> `register()` method, following the reference implementation. That method exists
+> there because consumers can add their own glyphs at runtime; Keycaps' set is
+> closed, so the only path untrusted geometry can take into the package is
+> `scripts/icons/vendor-icons.mjs`. Checking it there is the same guarantee
+> earlier and strictly stronger: bad data never reaches a published artifact, a
+> violation is a failed build rather than a silent render, and nothing ships a
+> sanitizer or an XML parser to a browser — the reference pays about 200KB of
+> `@xmldom/xmldom` for the runtime version.
+>
+> The closed set is the load-bearing choice underneath that, and it is worth
+> stating outright: **there is no runtime registration API.** A consumer
+> registering its own vocabulary would move the seam rather than close it, which
+> is the failure this whole program is about. A glyph Keycaps lacks is one line
+> in the manifest and a release, and Phase 2 already wired the dependency updates
+> that make that cheap.
 
 **6. The accessibility contract is the component's, not the caller's.** An icon
 with no label renders `aria-hidden="true"`; an icon with a label renders

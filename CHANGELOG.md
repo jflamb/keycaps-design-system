@@ -4,6 +4,15 @@ All notable changes to the fixed-version Keycaps package train are documented he
 
 ## Unreleased
 
+### Changed
+
+- **Phosphor is the icon set, and `prose.css` now draws from it.** Per [ADR 0003](docs/decisions/0003-icons.md), path data is vendored from `@phosphor-icons/core` — a devDependency that never ships — into `packages/react/src/icons/icon-data.ts`, and the same run rewrites the `--kc-prose-icon-*` masks in `prose.css`. The four status shapes were previously drawn twice, as JSX in `icons.tsx` and as hand-encoded data URIs in `prose.css`, kept in step by review. They are now one path by construction, and a test asserts it rather than a reviewer. `pnpm icons:verify` runs first in `pnpm check` and fails when either artifact stops matching the manifest.
+
+- **The seven individual icon exports are replaced by `Icon` and `StatusIcon`.** `ChevronDownIcon`, `CloseIcon`, `SearchIcon`, `InfoIcon`, `SuccessIcon`, `WarningIcon`, and `DangerIcon` are gone; `<Icon name="caret-down" />` takes their place, with `KeycapsIconName` generated from the vendored data so an unknown name is a compile error. `StatusIcon` keeps its contract unchanged — the tone selects the shape, the caller never does. There is deliberately no runtime `register()`: a consumer adding its own glyphs would rebuild the local icon vocabulary this program exists to remove.
+
+- **`styles.css` no longer paints icons.** Every glyph fills with `currentColor`, so the four rules that stroked outline glyphs — and the `:not([stroke])` carve-out that excluded the self-painting status icons from them — are deleted. One fewer way for an icon to be invisible until a second file loads.
+
+
 ## 0.1.3 — 2026-08-09
 
 ### Fixed
