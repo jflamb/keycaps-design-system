@@ -429,7 +429,7 @@ any one repo's surface. Each gets stories, tests, an axe run, and a
 | Component | Repos | Note |
 | --- | ---: | --- |
 | Data table | 3/5 | RD 17 tables, KN 2, AW `.data-table` |
-| Theme toggle | 2/5 → **5/5** | See below |
+| Theme toggle | 3/5 | AW and RD have divergent ones; KN needs one. Mode 1 gets no control — see below |
 | Modal dialog | 2/5 | RD 3 native `<dialog>`, AW `.dialog*` |
 | Drawer / side panel | 2/5 | KN `DetailsDrawer`, RD `.assumptions-drawer` |
 | Segmented control | 2/5 | RD `.segmented` (28 hits), KN `.browse-filter` |
@@ -439,16 +439,20 @@ any one repo's surface. Each gets stories, tests, an axe run, and a
 | Timeline / activity feed | 2/5 | AW `.feed-entry`, RD `.timeline-list` |
 | Avatar | 1/5 | KN `.account-avatar`; below the bar on its own, built only if the app shell needs one |
 
-**The theme toggle is the one to build first, and the inventory's 2/5 understates
-it.** Phases 3, 4, and 6 each author a dark theme for a repo that has none, so
-the count becomes 5/5 as a direct result of this program. Keycaps already defines
-the `data-theme` contract and ships no control, which means three phases would
-each hand-roll one before Phase 7 noticed. Note the two existing implementations
-differ in storage — `assistant-workbench` uses a `jflamb-theme` cookie on
-`Domain=.jflamb.com` shared with `enter.jflamb.com`, `retirement-dashboard` uses
-`retirement-dashboard-theme` in `localStorage` — so persistence is injected
-rather than assumed by the component. That is a functional difference, so it is a
-prop.
+**The theme toggle is the one to build first — shipped.** Keycaps has defined the
+`data-theme` contract since ADR 0001 and shipped no control, so `assistant-workbench`
+and `retirement-dashboard` each wrote one and `knowledge` was about to. That is
+3/5, not the 5/5 an earlier draft of this section claimed: `mcp-dnsimple` and
+`mcp-unifi` are Mode 1, and Phase 4 says Mode 1 theming is the inline bootstrap
+and `prefers-color-scheme` with no runtime. See [correction 14](#corrections-to-the-survey).
+
+Two things it settles for the phases that consume it. Persistence is a prop —
+`assistant-workbench` shares a `jflamb-theme` cookie on `Domain=.jflamb.com` with
+`enter.jflamb.com` while `retirement-dashboard` stores locally, which is a
+functional difference rather than a visual one. And it carries three states
+rather than two, because the token layer resolves an unset `data-theme` through
+`prefers-color-scheme`: a two-state toggle writes an override on first press and
+never lets the reader back to the system default.
 
 ### Exit criteria
 
@@ -1398,13 +1402,26 @@ here rather than silently corrected there.
     right, and both move to Phase 2a. `VaultWorkspace` and `SafeVegaLiteChart`
     remain Tier 3 correctly.
 
-14. **The theme toggle's 2/5 is an undercount created by this program.** The
+14. **The theme toggle is 3/5, not the 5/5 this list first claimed.** The
     inventory records `assistant-workbench` and `retirement-dashboard` as the two
     repos with a theme control, and notes that Keycaps defines the CSS contract
-    but ships none. Phases 3, 4, and 6 each author a dark theme for a repo that
-    has none — so on completion all five need the control, and without it three
-    separate phases would each hand-roll one. It is first in the Phase 2a queue
-    for that reason rather than for its repo count.
+    but ships none. This entry originally read that Phases 3, 4 and 6 each author
+    a dark theme for a repo that has none, so all five would need the control.
+    Two of those three are Mode 1, and Phase 4 says outright what Mode 1 theming
+    is: "keep it to the inline bootstrap only — `prefers-color-scheme` handles
+    the rest with no runtime." A control needs a runtime, so `mcp-dnsimple` and
+    `mcp-unifi` get none. `knowledge` is the third repo, and it is Mode 2.
+
+    Three of five still clears the bar comfortably, and the toggle stays first in
+    the Phase 2a queue — it is a prerequisite for Phase 5 rather than Phase 7,
+    and two divergent implementations already exist to reconcile. The shipped
+    component enforces the Mode 1 half mechanically: `renderStatic` throws on it,
+    the way it does on Select and Popover.
+
+    The general lesson, since it is the second time in this list: a repo count
+    read off the inventory is a count of repos that have the *pattern*, not of
+    repos that can *use the component*. Delivery mode is the filter, and it has
+    to be applied before the number means anything.
 
 15. **The Tier 2 build was scoped to one repo in a program about convergence.**
     Phase 7 step 1 read "build the Tier 2 components *this repo* needs," and its

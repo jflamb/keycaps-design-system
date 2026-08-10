@@ -39,6 +39,7 @@ import {
   Select,
   SkipLink,
   StatusIcon,
+  ThemeToggle,
   iconNames,
 } from "./index.js";
 import {
@@ -668,6 +669,104 @@ describe("the vendored icon set is the one prose masks", () => {
       expect(paths.length).toBeGreaterThan(0);
       for (const [, d] of paths) expect(masked).toContain(d!);
     }
+  });
+});
+
+describe("ThemeToggle", () => {
+  const setup = () => {
+    document.documentElement.removeAttribute("data-theme");
+    window.localStorage.clear();
+    return userEvent.setup();
+  };
+
+  it("starts from the system preference and hands the attribute back to it", async () => {
+    const user = setup();
+    render(<ThemeToggle />);
+    const key = screen.getByRole("button");
+
+    // No attribute is the system state, and the control must be able to return
+    // to it — the token layer resolves an unset data-theme through the media
+    // query, so a two-state toggle would strand the reader on an override.
+    expect(document.documentElement.hasAttribute("data-theme")).toBe(false);
+    await user.click(key);
+    expect(document.documentElement.dataset.theme).toBe("light");
+    await user.click(key);
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    await user.click(key);
+    expect(document.documentElement.hasAttribute("data-theme")).toBe(false);
+  });
+
+  it("names both where the reader is and what the next press does", async () => {
+    const user = setup();
+    render(<ThemeToggle />);
+
+    // A cycling control cannot be predicted from its glyph, so the name carries
+    // both halves rather than leaving the reader to press and find out.
+    expect(screen.getByRole("button").getAttribute("aria-label")).toBe(
+      "Theme: following the system. Switch to light.",
+    );
+    await user.click(screen.getByRole("button"));
+    expect(screen.getByRole("button").getAttribute("aria-label")).toBe(
+      "Theme: light. Switch to dark.",
+    );
+  });
+
+  it("draws a different glyph for each of the three states", async () => {
+    const user = setup();
+    const { container } = render(<ThemeToggle />);
+    const drawn = () => container.querySelector("svg")!.innerHTML;
+
+    const shapes = new Set([drawn()]);
+    await user.click(screen.getByRole("button"));
+    shapes.add(drawn());
+    await user.click(screen.getByRole("button"));
+    shapes.add(drawn());
+    expect(shapes.size).toBe(3);
+  });
+
+  it("persists to localStorage under the key the bootstrap reads", async () => {
+    const user = setup();
+    render(<ThemeToggle storageKey="retirement-dashboard-theme" />);
+
+    await user.click(screen.getByRole("button"));
+    expect(window.localStorage.getItem("retirement-dashboard-theme")).toBe("light");
+    // Returning to system clears the value rather than storing "system": the
+    // bootstrap only recognizes light and dark, and anything else it reads is
+    // an override it would apply forever.
+    await user.click(screen.getByRole("button"));
+    await user.click(screen.getByRole("button"));
+    expect(window.localStorage.getItem("retirement-dashboard-theme")).toBeNull();
+  });
+
+  it("writes a domain cookie instead when one is asked for, and never by default", async () => {
+    const user = setup();
+    const { unmount } = render(<ThemeToggle />);
+    await user.click(screen.getByRole("button"));
+    // A default that wrote a domain cookie would leak one surface's preference
+    // onto every sibling that never agreed to share it.
+    expect(document.cookie).not.toContain("jflamb-theme");
+    unmount();
+
+    window.localStorage.clear();
+    render(<ThemeToggle cookieDomain=".jflamb.com" />);
+    await user.click(screen.getByRole("button"));
+    expect(window.localStorage.getItem("jflamb-theme")).toBeNull();
+  });
+
+  it("adopts a stored preference on mount", async () => {
+    setup();
+    window.localStorage.setItem("jflamb-theme", "dark");
+    render(<ThemeToggle />);
+
+    await waitFor(() =>
+      expect(screen.getByRole("button")).toHaveAttribute("data-theme-preference", "dark"),
+    );
+  });
+
+  it("is refused by the static-render path, since it is the interaction", () => {
+    // Unlike a Banner whose dismiss is dead but whose message still reads, a
+    // theme key on a page with no runtime has nothing left of it at all.
+    expect(() => renderStatic(<ThemeToggle />)).toThrow(StaticRenderError);
   });
 });
 

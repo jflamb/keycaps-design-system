@@ -62,10 +62,12 @@ const MANIFEST = [
   { name: "x" },
   { name: "magnifying-glass" },
 
-  // The theme toggle, which Phase 2a builds and all five consumers will need
-  // once Phases 3, 4 and 6 give three of them a dark theme.
+  // The theme toggle's three states. `circle-half` is the conventional mark for
+  // following the system, and the toggle needs it because "no preference
+  // stored" is a real state rather than the absence of one.
   { name: "sun" },
   { name: "moon" },
+  { name: "circle-half" },
 ];
 
 const WEIGHT = "regular";

@@ -81,6 +81,11 @@ export {
 } from "./components/Select.js";
 export { SkipLink, type SkipLinkProps } from "./components/SkipLink.js";
 export {
+  ThemeToggle,
+  type ThemePreference,
+  type ThemeToggleProps,
+} from "./components/ThemeToggle.js";
+export {
   Icon,
   StatusIcon,
   iconNames,

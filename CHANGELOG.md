@@ -4,6 +4,10 @@ All notable changes to the fixed-version Keycaps package train are documented he
 
 ## Unreleased
 
+### Added
+
+- **`ThemeToggle`, the control Keycaps has owed its own `data-theme` contract since ADR 0001.** Two consumers wrote their own and a third was about to. It cycles three states rather than two, because the token layer resolves an unset `data-theme` through `prefers-color-scheme` and the no-flash bootstrap writes nothing when nothing is stored — the system preference is the default, and a two-state toggle strands the reader on an override the first time they press it. Storage is a prop: `cookieDomain` writes the shared `.jflamb.com` cookie `assistant-workbench` needs, and its absence stores locally the way `retirement-dashboard` does. It never writes a domain cookie by default, which would leak one surface's preference onto siblings that never agreed to share it. `renderStatic` refuses it — a theme key with no client runtime cannot do the one thing it is for.
+
 ### Changed
 
 - **Phosphor is the icon set, and `prose.css` now draws from it.** Per [ADR 0003](docs/decisions/0003-icons.md), path data is vendored from `@phosphor-icons/core` — a devDependency that never ships — into `packages/react/src/icons/icon-data.ts`, and the same run rewrites the `--kc-prose-icon-*` masks in `prose.css`. The four status shapes were previously drawn twice, as JSX in `icons.tsx` and as hand-encoded data URIs in `prose.css`, kept in step by review. They are now one path by construction, and a test asserts it rather than a reviewer. `pnpm icons:verify` runs first in `pnpm check` and fails when either artifact stops matching the manifest.
