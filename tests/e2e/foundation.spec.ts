@@ -501,6 +501,10 @@ test("the new surfaces reflow at 320 CSS pixels", async ({ page }) => {
     "components-empty-state--with-action",
     "components-code-block--syntax-tokens",
     "components-search-field--default",
+    // A six-column table at 320px is the case the scroll container exists for:
+    // the table has to overflow *and* the page still must not.
+    "components-data-table--wide-and-scrolling",
+    "components-data-table--totals-and-rich-cells",
   ]) {
     await page.goto(`/iframe.html?id=${id}&viewMode=story&globals=theme:light`);
     const dimensions = await page.evaluate(() => ({
@@ -527,4 +531,82 @@ for (const theme of ["light", "dark"] as const) {
     const accessibility = await new AxeBuilder({ page }).analyze();
     expect(accessibility.violations, theme).toEqual([]);
   });
+
+  test(`the data table is axe-clean in ${theme}`, async ({ page }) => {
+    await page.goto(
+      `/iframe.html?id=components-data-table--totals-and-rich-cells&viewMode=story&globals=theme:${theme}`,
+    );
+    await expect(page.getByRole("table")).toBeVisible();
+    // Scoped to the component rather than the page, and no rule is switched off.
+    // A component story is a sample rather than a document — it has no `h1` and
+    // no landmark around it — so an unscoped run reports the *story's* page
+    // shape, which is neither the component's fault nor something the component
+    // could fix. The showcase and app shell stories are shaped as real documents
+    // and keep their whole-page runs above. The unit suite additionally runs axe
+    // over this table inside a `main`, so the composed case is covered too.
+    const accessibility = await new AxeBuilder({ page })
+      .include(".kc-table-scroll")
+      .analyze();
+    expect(accessibility.violations, theme).toEqual([]);
+  });
 }
+
+/**
+ * The half of the data table that only a browser can check.
+ *
+ * A region that scrolls and cannot be reached from the keyboard is a 2.1.1
+ * failure, and one without a name is a 4.1.2 failure — so the two have to hold
+ * together, not one or the other. `retirement-dashboard` reached the same place
+ * from the other direction and its own e2e suite asserts the same thing, which
+ * is why the component owns it rather than leaving it to each consumer.
+ */
+test("the table's scroll region is a named keyboard stop that actually scrolls", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.goto(
+    "/iframe.html?id=components-data-table--wide-and-scrolling&viewMode=story&globals=theme:light",
+  );
+
+  const region = page.getByRole("region", {
+    name: "All positions, sorted by current value",
+  });
+  await expect(region).toBeVisible();
+
+  // The container has to be genuinely overflowing, or the rest of this test is
+  // asserting that an unnecessary tab stop takes focus.
+  const overflow = await region.evaluate((element) => ({
+    scrollWidth: element.scrollWidth,
+    clientWidth: element.clientWidth,
+  }));
+  expect(overflow.scrollWidth).toBeGreaterThan(overflow.clientWidth);
+
+  await region.focus();
+  await expect(region).toBeFocused();
+
+  // The ring comes from `base.css`'s zero-specificity `:where(:focus-visible)`,
+  // so it is present in every delivery mode rather than only where `styles.css`
+  // is loaded — the same reasoning that keeps the skip link there.
+  const outline = await region.evaluate((element) => {
+    const computed = getComputedStyle(element);
+    return {
+      style: computed.outlineStyle,
+      width: Number.parseFloat(computed.outlineWidth),
+    };
+  });
+  expect(outline.style).not.toBe("none");
+  expect(outline.width).toBeGreaterThanOrEqual(3);
+
+  // And the keyboard can move it, which is the entire point of the tab stop.
+  await page.keyboard.press("ArrowRight");
+  await expect
+    .poll(async () => region.evaluate((element) => element.scrollLeft))
+    .toBeGreaterThan(0);
+
+  // The page itself never scrolls sideways, at any width. The 320 Rule.
+  const dimensions = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+  }));
+  expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
+});

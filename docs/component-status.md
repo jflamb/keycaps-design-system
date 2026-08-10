@@ -19,6 +19,7 @@
 | ThemeToggle | Beta | React Aria Button | Three states including system, name announces current and next, storage arrangement as a prop, refused by `renderStatic` |
 | Icon | Beta | Semantic SVG | Closed name union, decorative-vs-named accessibility contract, every glyph draws a distinct shape, status shapes match the prose masks |
 | CodeBlock | Experimental | Semantic HTML | Keyboard-reachable scroll region, syntax roles carried by attribute |
+| DataTable | Experimental | Semantic HTML | Named keyboard-reachable scroll region, `scope` on both header cells by construction, numeric alignment, `tfoot` totals, declaration-for-declaration parity with `prose.css`, static render, 320px reflow, axe in light and dark |
 
 ## Delivery modes
 
@@ -30,6 +31,7 @@ consumers as rendered HTML through `@jflamb/keycaps-react/static`.
 | Button, LinkButton, Badge, Card, Field, Banner | Yes | States come from `static.css` |
 | Icon | Yes | Paints with `currentColor` and needs no stylesheet at all |
 | AppShell, PageHeader, EmptyState, DescriptionList, SkipLink, CodeBlock | Yes | SkipLink needs no `static.css` entry — `base.css` already covers it in every mode |
+| DataTable | Yes | It has no interactive state at all, which is the price of this row. A row hover would have to come from React Aria's collection components, and those need a runtime; the scroll container's focus ring comes from `base.css` |
 | Select, Popover, ThemeToggle | **No** | Behavior cannot degrade to CSS. `renderStatic` throws on each |
 
 Two controls render in Mode 1 but do nothing there, and neither has a no-JS

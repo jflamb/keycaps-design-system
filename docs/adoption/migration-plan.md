@@ -1441,3 +1441,70 @@ here rather than silently corrected there.
     a fixture silently re-pinned to a published version would have gone on
     looking green while proving the opposite of its purpose. Phase 2 added the
     assertion; the ADR's requirement needed a check, not a change.
+
+17. **`assistant-workbench` renders no tables at all.** The inventory's Tier 2
+    data table row and Phase 2a's queue both count it as one of the three repos,
+    on the strength of `.data-table` and `.quiet-table`. Correction 4 already
+    moved `.quiet-table` off `retirement-dashboard`; this goes further. `git grep
+    "<table"` across `origin/main` returns nothing outside
+    `apps/web/public/vendor/lucide.min.js` — no `<thead>`, no `<tbody>`, no
+    `<caption>`, anywhere. The dashboards render `.health-item` CSS-grid rows
+    instead. And the two classes are one rule block of four declarations listing
+    both selectors on every line: there is not a single declaration that applies
+    to one and not the other, so `.quiet-table` is a name with an implied
+    semantic that never received a distinguishing property.
+
+    `knowledge`'s two are real but are both *article* tables — one emitted by
+    `react-markdown` inside `.markdown-article`, one a chart's data-table
+    fallback inside the same container — which is `prose.css`'s case rather than
+    the component's, and `prose.css` is what Phase 6 gives that repo anyway. Its
+    third table, `UsersPage`, is unmounted dead code whose three class names have
+    no CSS anywhere in the repo.
+
+    So the rendered count behind this component is 1 clear consumer, not 3, and
+    the honest reading is that the inventory counted class names rather than
+    markup. It still gets built — see 17 — but the reason is now stated
+    accurately, and `assistant-workbench` is a green field rather than a
+    migration.
+
+18. **Keycaps' own Storybook was the sixth surface, and it hand-authored `.kc-`.**
+    Eleven tables across five files in `apps/storybook/src/foundations/`, every
+    one of them `<div class="kc-table-scroll sb-unstyled"><table
+    class="kc-table">`, with the treatment declared in `foundations.css` under
+    `:root .kc-table` — a different padding, font size, and header treatment from
+    the one `prose.css` ships. That is precisely the failure ADR 0002 forbids
+    consumers, inside the repo that forbids it, against a class this package did
+    not publish. It was also a live defect: none of the eleven scroll containers
+    carried `tabindex="0"`, so the design system's own documentation held eleven
+    WCAG 2.1.1 failures while `prose.css` documented the rule.
+
+    The `:root` prefix made it worse than a duplicate. `foundations.css` loads
+    after `styles.css` in the preview, so the docs' rules would have outranked
+    the shipped component's on every page. All eleven are `DataTable` now, and
+    `foundations.css` keeps two rules: `code` inside a cell, and a `.kc-docs-table`
+    of its own for the flow margin — a class of the app's rather than an override
+    of `.kc-table-scroll`, since redefining a `.kc-` selector is a build failure
+    in every consumer and should not be tolerated here either.
+
+19. **`retirement-dashboard`'s `.table-scroll` does not carry `tabindex="0"`.**
+    The inventory's Tier 2 row says its scroll container "already implements the
+    Prose Markup Rule's `tabindex="0"`", and Phase 7 step 1 repeats it. The
+    markup helper emits `role="region"` and `aria-label` only
+    (`src/planner.ts:643-652`). The attribute is added at runtime by
+    `syncScrollableTableFocus()` (`:654-670`), and only while the container
+    actually overflows — called on every render and on `resize`.
+
+    Two tests lock that behavior in: `test/layout.test.ts:164-175` asserts the
+    static markup does *not* contain
+    `class="table-scroll" role="region" tabindex="0"`, and
+    `e2e/auth-and-planner.spec.ts:1212-1220` asserts the attribute is present
+    under `mobile-chromium` and absent under `desktop-chromium`.
+
+    The shipped `DataTable` is always focusable. RD's version is the better tab
+    order and the worse floor: it needs a client runtime, so on a Mode 1 page the
+    region would scroll with no way to reach it — and an accessibility floor that
+    depends on which delivery mode a page happened to use is not a floor.
+    `CodeBlock` already made the same call for its `pre`. **Phase 7 therefore has
+    to update both of those tests**, which is work the plan did not know about
+    because it believed the attribute was already static. RD's third assertion,
+    that no `.table-scroll` nests inside another, holds unchanged.

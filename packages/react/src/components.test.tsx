@@ -24,6 +24,14 @@ import {
   CardTitle,
   CodeBlock,
   CodeToken,
+  DataTable,
+  DataTableBody,
+  DataTableCell,
+  DataTableColumnHeader,
+  DataTableFoot,
+  DataTableHead,
+  DataTableRow,
+  DataTableRowHeader,
   DescriptionDetails,
   DescriptionList,
   DescriptionListItem,
@@ -767,6 +775,180 @@ describe("ThemeToggle", () => {
     // Unlike a Banner whose dismiss is dead but whose message still reads, a
     // theme key on a page with no runtime has nothing left of it at all.
     expect(() => renderStatic(<ThemeToggle />)).toThrow(StaticRenderError);
+  });
+});
+
+function BalanceTable() {
+  return (
+    <DataTable caption="Balance by account group">
+      <DataTableHead>
+        <DataTableRow>
+          <DataTableColumnHeader>Group</DataTableColumnHeader>
+          <DataTableColumnHeader numeric>Balance</DataTableColumnHeader>
+        </DataTableRow>
+      </DataTableHead>
+      <DataTableBody>
+        <DataTableRow>
+          <DataTableRowHeader>Taxable brokerage</DataTableRowHeader>
+          <DataTableCell numeric>$412,880</DataTableCell>
+        </DataTableRow>
+      </DataTableBody>
+      <DataTableFoot>
+        <DataTableRow>
+          <DataTableRowHeader>Total</DataTableRowHeader>
+          <DataTableCell numeric>$412,880</DataTableCell>
+        </DataTableRow>
+      </DataTableFoot>
+    </DataTable>
+  );
+}
+
+describe("DataTable", () => {
+  it("names its scroll region from the caption, and makes it reachable", () => {
+    const { container } = render(<BalanceTable />);
+
+    // The two halves a stylesheet cannot supply. A region that scrolls and
+    // cannot be focused is a 2.1.1 failure; one without a name is a 4.1.2 one,
+    // so making it focusable without naming it only trades one for the other.
+    const region = screen.getByRole("region", { name: "Balance by account group" });
+    expect(region).toHaveAttribute("tabindex", "0");
+
+    // The caption *is* the name rather than a second copy of it, which is what
+    // `retirement-dashboard` passes to its wrapper today.
+    const caption = container.querySelector("caption")!;
+    expect(region.getAttribute("aria-labelledby")).toBe(caption.id);
+  });
+
+  it("names the table itself when there is no caption to do it", () => {
+    render(
+      <DataTable aria-label="Survivor income">
+        <DataTableBody>
+          <DataTableRow>
+            <DataTableCell>$96,400/yr</DataTableCell>
+          </DataTableRow>
+        </DataTableBody>
+      </DataTable>,
+    );
+
+    // Both, deliberately: the region for a reader who tabs in, the table for one
+    // who jumps straight to it with a table shortcut.
+    expect(screen.getByRole("region", { name: "Survivor income" })).toBeInTheDocument();
+    expect(screen.getByRole("table", { name: "Survivor income" })).toBeInTheDocument();
+  });
+
+  it("supplies scope on both header cells rather than trusting the caller", () => {
+    render(<BalanceTable />);
+
+    // Forgetting `scope` is the most common table accessibility defect there is,
+    // and the survey found it already happening in two consumer tables. It is
+    // not a prop here, so it cannot be forgotten.
+    expect(screen.getByRole("columnheader", { name: "Group" })).toHaveAttribute("scope", "col");
+    expect(screen.getByRole("rowheader", { name: "Taxable brokerage" })).toHaveAttribute(
+      "scope",
+      "row",
+    );
+  });
+
+  it("marks numeric cells on both the header and the body", () => {
+    const { container } = render(<BalanceTable />);
+
+    // Per-cell, because CSS has no per-column hook: `text-align` does not
+    // inherit through a `<col>` and `:nth-child()` breaks on a spanning cell.
+    expect(container.querySelectorAll("[data-numeric]")).toHaveLength(3);
+    expect(container.querySelector("thead th[data-numeric]")).not.toBeNull();
+  });
+
+  it("puts a totals row in tfoot, where it is a summary rather than more data", () => {
+    const { container } = render(<BalanceTable />);
+    expect(container.querySelector("tfoot th[scope='row']")?.textContent).toBe("Total");
+  });
+
+  it("renders statically, which is the whole reason it has no hover", () => {
+    // Mode 1 eligibility is the trade the missing row hover buys. If this ever
+    // starts throwing, something interactive was added and the component owes
+    // `static.css` an entry — or owes the exclusion list a line.
+    const markup = renderStatic(<BalanceTable />);
+    expect(markup).toContain('tabindex="0"');
+    expect(markup).toContain('role="region"');
+    expect(markup).toContain('scope="col"');
+    expect(markup).toContain("<tfoot>");
+  });
+
+  it("has no axe violations", async () => {
+    const { container } = render(
+      <main>
+        <BalanceTable />
+      </main>,
+    );
+    const result = await axe.run(container, {
+      rules: { "color-contrast": { enabled: false } },
+    });
+    expect(result.violations).toEqual([]);
+  });
+});
+
+describe("the data table and the article table are one treatment", () => {
+  const flatten = (css: string) => css.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\s+/g, " ");
+
+  const declarations = (css: string, selector: string): Record<string, string> => {
+    const start = css.indexOf(`${selector} {`);
+    expect(start, `no rule for \`${selector}\``).toBeGreaterThan(-1);
+    const open = css.indexOf("{", start) + 1;
+    return Object.fromEntries(
+      css
+        .slice(open, css.indexOf("}", open))
+        .split(";")
+        .map((entry) => entry.trim())
+        .filter(Boolean)
+        .map((entry) => {
+          const colon = entry.indexOf(":");
+          return [entry.slice(0, colon).trim(), entry.slice(colon + 1).trim()] as const;
+        }),
+    );
+  };
+
+  // The claim this file makes about itself, checked rather than reviewed. A
+  // table of numbers in a dashboard and a table of numbers in an article are the
+  // same object, and `retirement-dashboard`'s eight table classes — four of them
+  // copies, one of which lost a `text-align` on the way — are what happens when
+  // that is left to whoever edits one of the two files next.
+  it("declares the same values in styles.css and prose.css", () => {
+    const styles = flatten(readSource("./styles.css"));
+    const prose = flatten(readFileSync(resolve(process.cwd(), "../tokens/src/prose.css"), "utf8"));
+
+    for (const [component, article] of [
+      [".kc-table caption", ".kc-prose caption"],
+      [".kc-table thead th", ".kc-prose thead th"],
+      [".kc-table tbody td, .kc-table tbody th", ".kc-prose tbody td, .kc-prose tbody th"],
+      [".kc-table tbody th", ".kc-prose tbody th"],
+      [".kc-table tbody tr:last-child > *", ".kc-prose tbody tr:last-child > *"],
+      [".kc-table tfoot th, .kc-table tfoot td", ".kc-prose tfoot th, .kc-prose tfoot td"],
+      [
+        ".kc-table[data-zebra] tbody tr:nth-child(even)",
+        ".kc-prose table[data-zebra] tbody tr:nth-child(even)",
+      ],
+      [".kc-table [data-numeric]", ".kc-prose .kc-prose__numeric"],
+    ] as const) {
+      expect(declarations(styles, component), component).toEqual(
+        declarations(prose, article),
+      );
+    }
+
+    // The root rule is the one honest exception: a product surface has to state
+    // the ink and the face that `.kc-prose` already sets on its container.
+    const table = declarations(styles, ".kc-table");
+    const proseTable = declarations(prose, ".kc-prose table");
+    for (const property of Object.keys(proseTable)) {
+      expect(table[property], property).toBe(proseTable[property]);
+    }
+  });
+
+  it("keeps the row hover out of prose, since styles.css cannot have one", () => {
+    // Removing it is what makes the two treatments identical rather than nearly
+    // so. A row that lights up under the pointer and does nothing when clicked
+    // is a false affordance anyway, and no consumer had one on a real table.
+    const prose = flatten(readFileSync(resolve(process.cwd(), "../tokens/src/prose.css"), "utf8"));
+    expect(prose).not.toContain("tbody tr:hover");
   });
 });
 

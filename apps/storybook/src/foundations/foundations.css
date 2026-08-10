@@ -109,76 +109,29 @@
   overflow-wrap: anywhere;
 }
 
-/* Scroll shadows, so a table that is hiding a column says so. macOS overlay
-   scrollbars draw nothing, and on the Color page the hidden column is Dark — on
-   a page whose whole claim is "every token, in both themes". The `local`
-   backgrounds are the covers and the `scroll` ones the shadows underneath, so
-   the hint appears only on the side that actually has more to show. */
-:root .kc-table-scroll {
-  overflow-x: auto;
-  margin-block: var(--kc-space-5);
-  background:
-    linear-gradient(to right, var(--kc-color-surface) 40%, transparent) left center /
-      2rem 100% no-repeat local,
-    linear-gradient(to left, var(--kc-color-surface) 40%, transparent) right center /
-      2rem 100% no-repeat local,
-    radial-gradient(
-        farthest-side at 0 50%,
-        color-mix(in srgb, var(--kc-color-border) 70%, transparent),
-        transparent
-      )
-      left center / 0.75rem 100% no-repeat scroll,
-    radial-gradient(
-        farthest-side at 100% 50%,
-        color-mix(in srgb, var(--kc-color-border) 70%, transparent),
-        transparent
-      )
-      right center / 0.75rem 100% no-repeat scroll;
-}
+/* The eleven tables on these pages used to be hand-authored `.kc-table` markup
+   with its own treatment declared right here — inside the design system, against
+   a class the package did not ship. They are `DataTable` now, so everything that
+   used to live in this block is gone: the component owns the table, the scroll
+   container, and the `tabindex` none of these eleven ever had.
 
-/* A hex that breaks across lines is a hex that gets mis-transcribed. */
+   What stays is the one rule that styles something *inside* a cell rather than
+   redeclaring the table. A hex that breaks across lines is a hex that gets
+   mis-transcribed. */
 :root .kc-table code,
 :root .kc-scale__value,
 :root .kc-scale__name {
   white-space: nowrap;
 }
 
-:root .kc-table {
-  inline-size: 100%;
-  border-collapse: collapse;
-  color: var(--kc-color-text);
-  font-family: var(--kc-font-body);
-  font-size: var(--kc-font-size-sm);
-  text-align: start;
-}
-
-:root .kc-table caption {
-  margin-block-end: var(--kc-space-3);
-  color: var(--kc-color-text-muted);
-  font-size: var(--kc-font-size-sm);
-  line-height: 1.5;
-  text-align: start;
-}
-
-:root .kc-table th,
-:root .kc-table td {
-  padding: var(--kc-space-2) var(--kc-space-3);
-  border-block-end: 1px solid var(--kc-color-divider);
-  text-align: start;
-  vertical-align: top;
-}
-
-:root .kc-table thead th {
-  border-block-end: 1.5px solid var(--kc-color-border);
-  font-size: var(--kc-font-size-caps);
-  font-weight: var(--kc-font-weight-micro);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-:root .kc-table tbody th {
-  font-weight: var(--kc-font-weight-label);
-  white-space: nowrap;
+/* The component sets no outer margin — no Keycaps component does — so the flow
+   between a table and the prose around it belongs to the page. It is a class of
+   this app's own rather than an override of `.kc-table-scroll`, because
+   redefining a `.kc-` selector is the exact drift ADR 0002 makes a build failure
+   in every consumer, and the design system's own site should not be the one
+   place it is tolerated. */
+.kc-docs-table {
+  margin-block: var(--kc-space-5);
 }
 
 :root .kc-swatch {

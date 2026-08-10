@@ -1,5 +1,17 @@
 import { useState } from "react";
-import { Button, Popover, PopoverTrigger, Select } from "@jflamb/keycaps-react";
+import {
+  Button,
+  DataTable,
+  DataTableBody,
+  DataTableCell,
+  DataTableColumnHeader,
+  DataTableHead,
+  DataTableRow,
+  DataTableRowHeader,
+  Popover,
+  PopoverTrigger,
+  Select,
+} from "@jflamb/keycaps-react";
 import { MotionScope, SplitPanes } from "./blocks";
 import { reducedMotionDeclarations } from "./tokens";
 
@@ -78,35 +90,32 @@ export function MotionValues() {
   });
 
   return (
-    <div className="kc-table-scroll sb-unstyled">
-      <table className="kc-table">
-        <caption>
-          Every reduced-motion substitution in the system. There are no others: the
-          tokens package owns the whole switch, so no component can opt out of it.
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">Token</th>
-            <th scope="col">Motion</th>
-            <th scope="col">Reduced motion</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.name}>
-              <th scope="row">
-                <code>{row.name}</code>
-              </th>
-              <td>
-                <code>{row.motion}</code>
-              </td>
-              <td>
-                <code>{row.reduced}</code>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <DataTable
+      caption="Every reduced-motion substitution in the system. There are no others: the tokens package owns the whole switch, so no component can opt out of it."
+      className="kc-docs-table sb-unstyled"
+    >
+      <DataTableHead>
+        <DataTableRow>
+          <DataTableColumnHeader>Token</DataTableColumnHeader>
+          <DataTableColumnHeader>Motion</DataTableColumnHeader>
+          <DataTableColumnHeader>Reduced motion</DataTableColumnHeader>
+        </DataTableRow>
+      </DataTableHead>
+      <DataTableBody>
+        {rows.map((row) => (
+          <DataTableRow key={row.name}>
+            <DataTableRowHeader>
+              <code>{row.name}</code>
+            </DataTableRowHeader>
+            <DataTableCell>
+              <code>{row.motion}</code>
+            </DataTableCell>
+            <DataTableCell>
+              <code>{row.reduced}</code>
+            </DataTableCell>
+          </DataTableRow>
+        ))}
+      </DataTableBody>
+    </DataTable>
   );
 }

@@ -1090,6 +1090,105 @@ h3.kc-page-header__title {
   font-size: var(--kc-font-size-sm);
 }
 
+/* ---- Data table --------------------------------------------------------- */
+
+/* Every declaration below is `prose.css`'s table treatment, and that is the
+   point rather than an accident: a table of numbers in a dashboard and a table
+   of numbers in an article are the same object. Shipping a second, nearly-equal
+   look is how `retirement-dashboard` ended up with eight table classes, four of
+   them copies, one of which silently lost a `text-align` on the way. A unit test
+   compares the two files rather than trusting this comment.
+
+   One consequence worth naming: because the two treatments are identical, a
+   `.kc-table` dropped inside a `.kc-prose` article needs no specificity guard.
+   `.kc-dl` doubles its class to beat `.kc-prose dt`; there is nothing to beat
+   here, whichever stylesheet loads second.
+
+   Nothing in this section is a pseudo-class, and there is no `static.css`
+   counterpart, because the component has no interactive state at all — see the
+   component's doc comment for why a row hover would cost Mode 1. The scroll
+   container's focus ring comes from `base.css` in every delivery mode. */
+.kc-table-scroll {
+  overflow-x: auto;
+  scrollbar-gutter: stable;
+}
+
+.kc-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-body);
+  font-size: var(--kc-font-size-sm);
+}
+
+.kc-table caption {
+  padding-block-end: var(--kc-space-2);
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-sm);
+  font-weight: var(--kc-font-weight-label);
+  text-align: start;
+  caption-side: top;
+}
+
+/* A raised surface with a weighted rule beneath it, not a band of brand color.
+   Coral marks a commitment and a table header commits to nothing; the raised
+   tone is the device a Card already uses to sit above the plate, and it inverts
+   correctly in dark without a second declaration. */
+.kc-table thead th {
+  padding: var(--kc-space-3) var(--kc-space-4);
+  border-block-end: 2px solid var(--kc-color-border);
+  background: var(--kc-color-surface-raised);
+  color: var(--kc-color-text);
+  font-weight: var(--kc-font-weight-label);
+  text-align: start;
+  vertical-align: bottom;
+}
+
+.kc-table tbody td,
+.kc-table tbody th {
+  padding: var(--kc-space-3) var(--kc-space-4);
+  border-block-end: 1px solid var(--kc-color-divider);
+  vertical-align: top;
+}
+
+.kc-table tbody th {
+  color: var(--kc-color-text);
+  font-weight: var(--kc-font-weight-label);
+  text-align: start;
+}
+
+.kc-table tbody tr:last-child > * {
+  border-block-end: 0;
+}
+
+/* Opt-in. The row rules already separate the rows, and a second separator on top
+   of the first is noise on a table short enough to scan. */
+.kc-table[data-zebra] tbody tr:nth-child(even) {
+  background: var(--kc-color-surface-hover);
+}
+
+/* `text-align: start` rather than the UA's centered `th`. A totals row reads as
+   a continuation of the column above it, and a centered label in a table of
+   start-aligned ones is the kind of thing nobody names but everybody sees. */
+.kc-table tfoot th,
+.kc-table tfoot td {
+  padding: var(--kc-space-3) var(--kc-space-4);
+  border-block-start: 2px solid var(--kc-color-border);
+  background: var(--kc-color-surface-raised);
+  font-weight: var(--kc-font-weight-label);
+  text-align: start;
+}
+
+/* Figures compare by digit position, so they align on their end edge and take
+   lining, fixed-width numerals. `nowrap` because a figure broken across two
+   lines is a figure that gets misread — the reason `retirement-dashboard` sets
+   it on its own numeric cells. */
+.kc-table [data-numeric] {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-align: end;
+}
+
 @keyframes kc-popover-in {
   from {
     opacity: 0;
@@ -1169,6 +1268,19 @@ h3.kc-page-header__title {
     border-color: ButtonText;
   }
 
+  /* The header and totals bands are carried by a background the OS flattens, so
+     the rule that separates them from the body has to survive on its own. Same
+     treatment `prose.css` gives an article's table. */
+  .kc-table thead th,
+  .kc-table tfoot th,
+  .kc-table tfoot td {
+    border-color: ButtonText;
+  }
+
+  .kc-table[data-zebra] tbody tr:nth-child(even) {
+    background: none;
+  }
+
   .kc-app-shell__nav-link[aria-current="page"] {
     color: HighlightText;
     background: Highlight;
@@ -1196,6 +1308,27 @@ h3.kc-page-header__title {
   .kc-select__option[data-disabled] {
     color: GrayText;
     opacity: 1;
+  }
+}
+
+/* The only print rules in this file, and they are corrections rather than
+   polish. A scroll container prints what fits and silently loses the rest, which
+   is data loss the component itself introduced; a header that does not repeat
+   leaves every page after the first unlabelled; and a row split across a page
+   break is a row nobody can read. `retirement-dashboard` reached all three
+   conclusions independently and regression-tests them, which is what a
+   dashboard people print looks like. */
+@media print {
+  .kc-table-scroll {
+    overflow: visible;
+  }
+
+  .kc-table thead {
+    display: table-header-group;
+  }
+
+  .kc-table tr {
+    break-inside: avoid;
   }
 }
 

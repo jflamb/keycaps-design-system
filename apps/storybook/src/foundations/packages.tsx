@@ -1,4 +1,13 @@
 import { useState } from "react";
+import {
+  DataTable,
+  DataTableBody,
+  DataTableCell,
+  DataTableColumnHeader,
+  DataTableHead,
+  DataTableRow,
+  DataTableRowHeader,
+} from "@jflamb/keycaps-react";
 import reactPackage from "../../../../packages/react/package.json";
 import tokensPackage from "../../../../packages/tokens/package.json";
 
@@ -44,29 +53,31 @@ export function PackageExports() {
   ]);
 
   return (
-    <div className="kc-table-scroll sb-unstyled">
-      <table className="kc-table">
-        <caption>
+    <DataTable
+      caption={
+        <>
           Read from the two <code>package.json</code> <code>exports</code> fields.
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">Import</th>
-            <th scope="col">What it gives you</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.specifier}>
-              <th scope="row">
-                <code>{row.specifier}</code>
-              </th>
-              <td>{row.purpose}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+        </>
+      }
+      className="kc-docs-table sb-unstyled"
+    >
+      <DataTableHead>
+        <DataTableRow>
+          <DataTableColumnHeader>Import</DataTableColumnHeader>
+          <DataTableColumnHeader>What it gives you</DataTableColumnHeader>
+        </DataTableRow>
+      </DataTableHead>
+      <DataTableBody>
+        {rows.map((row) => (
+          <DataTableRow key={row.specifier}>
+            <DataTableRowHeader>
+              <code>{row.specifier}</code>
+            </DataTableRowHeader>
+            <DataTableCell>{row.purpose}</DataTableCell>
+          </DataTableRow>
+        ))}
+      </DataTableBody>
+    </DataTable>
   );
 }
 
@@ -87,34 +98,36 @@ export function PackageLicenses() {
   );
 
   return (
-    <div className="kc-table-scroll sb-unstyled">
-      <table className="kc-table">
-        <caption>
-          Read from the two <code>package.json</code> <code>license</code>{" "}
-          fields, so this page cannot disagree with what npm publishes.
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">Package</th>
-            <th scope="col">Declared license</th>
-            <th scope="col">What it redistributes</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.name}>
-              <th scope="row">
-                <code>{row.name}</code>
-              </th>
-              <td>
-                <code>{row.license}</code>
-              </td>
-              <td>{row.ships}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <DataTable
+      caption={
+        <>
+          Read from the two <code>package.json</code> <code>license</code> fields,
+          so this page cannot disagree with what npm publishes.
+        </>
+      }
+      className="kc-docs-table sb-unstyled"
+    >
+      <DataTableHead>
+        <DataTableRow>
+          <DataTableColumnHeader>Package</DataTableColumnHeader>
+          <DataTableColumnHeader>Declared license</DataTableColumnHeader>
+          <DataTableColumnHeader>What it redistributes</DataTableColumnHeader>
+        </DataTableRow>
+      </DataTableHead>
+      <DataTableBody>
+        {rows.map((row) => (
+          <DataTableRow key={row.name}>
+            <DataTableRowHeader>
+              <code>{row.name}</code>
+            </DataTableRowHeader>
+            <DataTableCell>
+              <code>{row.license}</code>
+            </DataTableCell>
+            <DataTableCell>{row.ships}</DataTableCell>
+          </DataTableRow>
+        ))}
+      </DataTableBody>
+    </DataTable>
   );
 }
 
@@ -138,56 +151,58 @@ export function ProjectLinks() {
   });
 
   return (
-    <div className="kc-table-scroll sb-unstyled">
-      <table className="kc-table">
-        <caption>
+    <DataTable
+      caption={
+        <>
           Read from <code>{reactPackage.name}</code>'s manifest. Both packages
           share a version, and Storybook documents whatever that version is.
-        </caption>
-        <tbody>
-          <tr>
-            <th scope="row">Version</th>
-            <td>
-              <code>{meta.version}</code> — pre-1.0, so the API can still change.
-            </td>
-          </tr>
-          <tr>
-            <th scope="row">Source</th>
-            <td>
-              <a href={meta.repo} rel="noreferrer" target="_blank">
-                {meta.repo.replace("https://", "")}
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <th scope="row">Issues</th>
-            <td>
-              <a href={meta.issues} rel="noreferrer" target="_blank">
-                Report a problem or ask a question
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <th scope="row">Changelog</th>
-            <td>
-              <a href={meta.changelog} rel="noreferrer" target="_blank">
-                CHANGELOG.md
-              </a>
-            </td>
-          </tr>
-          <tr>
-            <th scope="row">Contributing</th>
-            <td>
-              <a href={meta.contributing} rel="noreferrer" target="_blank">
-                The component contract
-              </a>{" "}
-              — including the manual assistive-technology verification that{" "}
-              <code>stable</code> is waiting on.
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+        </>
+      }
+      className="kc-docs-table sb-unstyled"
+    >
+      <DataTableBody>
+        <DataTableRow>
+          <DataTableRowHeader>Version</DataTableRowHeader>
+          <DataTableCell>
+            <code>{meta.version}</code> — pre-1.0, so the API can still change.
+          </DataTableCell>
+        </DataTableRow>
+        <DataTableRow>
+          <DataTableRowHeader>Source</DataTableRowHeader>
+          <DataTableCell>
+            <a href={meta.repo} rel="noreferrer" target="_blank">
+              {meta.repo.replace("https://", "")}
+            </a>
+          </DataTableCell>
+        </DataTableRow>
+        <DataTableRow>
+          <DataTableRowHeader>Issues</DataTableRowHeader>
+          <DataTableCell>
+            <a href={meta.issues} rel="noreferrer" target="_blank">
+              Report a problem or ask a question
+            </a>
+          </DataTableCell>
+        </DataTableRow>
+        <DataTableRow>
+          <DataTableRowHeader>Changelog</DataTableRowHeader>
+          <DataTableCell>
+            <a href={meta.changelog} rel="noreferrer" target="_blank">
+              CHANGELOG.md
+            </a>
+          </DataTableCell>
+        </DataTableRow>
+        <DataTableRow>
+          <DataTableRowHeader>Contributing</DataTableRowHeader>
+          <DataTableCell>
+            <a href={meta.contributing} rel="noreferrer" target="_blank">
+              The component contract
+            </a>{" "}
+            — including the manual assistive-technology verification that{" "}
+            <code>stable</code> is waiting on.
+          </DataTableCell>
+        </DataTableRow>
+      </DataTableBody>
+    </DataTable>
   );
 }
 
@@ -198,31 +213,33 @@ export function PeerRange() {
   );
 
   return (
-    <div className="kc-table-scroll sb-unstyled">
-      <table className="kc-table">
-        <caption>
+    <DataTable
+      caption={
+        <>
           Peer dependencies of <code>{reactPackage.name}</code>, version{" "}
           <code>{reactPackage.version}</code>.
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">Package</th>
-            <th scope="col">Accepted range</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map(([name, range]) => (
-            <tr key={name}>
-              <th scope="row">
-                <code>{name}</code>
-              </th>
-              <td>
-                <code>{range}</code>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+        </>
+      }
+      className="kc-docs-table sb-unstyled"
+    >
+      <DataTableHead>
+        <DataTableRow>
+          <DataTableColumnHeader>Package</DataTableColumnHeader>
+          <DataTableColumnHeader>Accepted range</DataTableColumnHeader>
+        </DataTableRow>
+      </DataTableHead>
+      <DataTableBody>
+        {rows.map(([name, range]) => (
+          <DataTableRow key={name}>
+            <DataTableRowHeader>
+              <code>{name}</code>
+            </DataTableRowHeader>
+            <DataTableCell>
+              <code>{range}</code>
+            </DataTableCell>
+          </DataTableRow>
+        ))}
+      </DataTableBody>
+    </DataTable>
   );
 }

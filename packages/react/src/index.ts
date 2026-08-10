@@ -54,6 +54,20 @@ export {
   type CodeTokenProps,
 } from "./components/CodeBlock.js";
 export {
+  DataTable,
+  DataTableBody,
+  DataTableCell,
+  DataTableColumnHeader,
+  DataTableFoot,
+  DataTableHead,
+  DataTableRow,
+  DataTableRowHeader,
+  type DataTableCellProps,
+  type DataTableColumnHeaderProps,
+  type DataTableProps,
+  type DataTableRowHeaderProps,
+} from "./components/DataTable.js";
+export {
   DescriptionDetails,
   DescriptionList,
   DescriptionListItem,

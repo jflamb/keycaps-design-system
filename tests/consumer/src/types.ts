@@ -35,6 +35,7 @@ import type {
   BannerTone,
   ButtonProps,
   ButtonVariant,
+  DataTableProps,
   SelectProps,
   StatusTone,
 } from "@jflamb/keycaps-react";
@@ -72,9 +73,18 @@ const invalidSize: ButtonProps["size"] = 12;
 // StatusTone from ../icons. That second hop had its own TS2834 in 0.1.2.
 const invalidBadgeTone: BadgeTone = "critical";
 
+// @ts-expect-error A DataTable with neither a caption nor a label leaves its
+// scroll region nameless. That contract is a three-branch union, which is the
+// shape most worth probing here: a union that stops resolving degrades to `any`
+// silently, and the component's only accessibility guarantee goes with it.
+const namelessTable: DataTableProps = { children: null };
+
+type _DataTablePropsResolve = Resolved<IsAny<DataTableProps>>;
+
 // Referenced so the declarations above are not merely parsed but resolved.
 export type Probes = [
   typeof invalidVariant,
   typeof invalidSize,
   typeof invalidBadgeTone,
+  typeof namelessTable,
 ];

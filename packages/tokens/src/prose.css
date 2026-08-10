@@ -823,9 +823,13 @@
   border-block-end: 0;
 }
 
-.kc-prose tbody tr:hover {
-  background: var(--kc-color-surface-hover);
-}
+/* There is deliberately no row hover here. It used to warm a row one step, and
+   it went for two reasons. A row that lights up under the pointer and does
+   nothing when clicked is a false affordance — the same argument that denies
+   `kbd` the keycap's bottom edge. And `styles.css` cannot express a hover at
+   all, so keeping this one would have left the `DataTable` and the article table
+   agreeing on every declaration but one, which is precisely how a second table
+   look gets started. No consumer had a hover on a real table. */
 
 /* Zebra striping is opt-in. Row rules already separate the rows, and a second
    separator on top of the first is noise on a table short enough to scan. */
@@ -846,9 +850,12 @@
 }
 
 /* Figures compare by digit position, so they align on their end edge and take
-   lining, fixed-width numerals. */
+   lining, fixed-width numerals. `nowrap` because a figure broken across two
+   lines is a figure that gets misread; the table already scrolls inside its
+   wrapper rather than forcing the page sideways, so the width costs nothing. */
 .kc-prose .kc-prose__numeric {
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
   text-align: end;
 }
 

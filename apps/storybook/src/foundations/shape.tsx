@@ -1,4 +1,13 @@
 import { useState } from "react";
+import {
+  DataTable,
+  DataTableBody,
+  DataTableCell,
+  DataTableColumnHeader,
+  DataTableHead,
+  DataTableRow,
+  DataTableRowHeader,
+} from "@jflamb/keycaps-react";
 import { lightDeclarations, ruleValue } from "./tokens";
 
 function scaleRows(prefix: string) {
@@ -99,35 +108,32 @@ export function IntrinsicMaximums() {
   );
 
   return (
-    <div className="kc-table-scroll sb-unstyled">
-      <table className="kc-table">
-        <caption>
-          Components declare their own comfortable width. Do not constrain one from
-          the outside when it already knows.
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">Component</th>
-            <th scope="col">Declaration</th>
-            <th scope="col">Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.selector + row.property}>
-              <th scope="row">{row.label}</th>
-              <td>
-                <code>
-                  {row.selector} · {row.property}
-                </code>
-              </td>
-              <td>
-                <code>{row.value ?? "—"}</code>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <DataTable
+      caption="Components declare their own comfortable width. Do not constrain one from the outside when it already knows."
+      className="kc-docs-table sb-unstyled"
+    >
+      <DataTableHead>
+        <DataTableRow>
+          <DataTableColumnHeader>Component</DataTableColumnHeader>
+          <DataTableColumnHeader>Declaration</DataTableColumnHeader>
+          <DataTableColumnHeader>Value</DataTableColumnHeader>
+        </DataTableRow>
+      </DataTableHead>
+      <DataTableBody>
+        {rows.map((row) => (
+          <DataTableRow key={row.selector + row.property}>
+            <DataTableRowHeader>{row.label}</DataTableRowHeader>
+            <DataTableCell>
+              <code>
+                {row.selector} · {row.property}
+              </code>
+            </DataTableCell>
+            <DataTableCell>
+              <code>{row.value ?? "—"}</code>
+            </DataTableCell>
+          </DataTableRow>
+        ))}
+      </DataTableBody>
+    </DataTable>
   );
 }

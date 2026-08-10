@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { Badge } from "@jflamb/keycaps-react";
+import {
+  Badge,
+  DataTable,
+  DataTableBody,
+  DataTableCell,
+  DataTableColumnHeader,
+  DataTableHead,
+  DataTableRow,
+  DataTableRowHeader,
+} from "@jflamb/keycaps-react";
 import componentStatusDoc from "../../../../docs/component-status.md?raw";
 import contributingDoc from "../../../../docs/contributing/components.md?raw";
 
@@ -11,11 +20,22 @@ function cells(line: string): string[] {
     .map((cell) => cell.trim());
 }
 
+/**
+ * The *first* table in the document, and only it.
+ *
+ * This used to filter for every line starting with `|` across the whole file,
+ * which silently concatenated the status matrix with the delivery-modes table
+ * below it — one table on screen holding the rows of two, under headings that
+ * belong to only one of them. It showed up as a duplicate-key warning wherever a
+ * name appeared in both, which by then was the second symptom rather than the
+ * first. Reading one contiguous run of rows is the fix, and it means adding a
+ * component to either table no longer disturbs the other.
+ */
 function parseTable(markdown: string): { headers: string[]; rows: string[][] } {
-  const lines = markdown
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.startsWith("|"));
+  const all = markdown.split("\n").map((line) => line.trim());
+  const start = all.findIndex((line) => line.startsWith("|"));
+  const end = all.findIndex((line, index) => index > start && !line.startsWith("|"));
+  const lines = all.slice(start, end === -1 ? undefined : end);
   const [headerLine, , ...bodyLines] = lines;
   return {
     headers: headerLine ? cells(headerLine) : [],
@@ -50,42 +70,42 @@ export function ComponentStatusMatrix() {
   const [table] = useState(() => parseTable(componentStatusDoc));
 
   return (
-    <div className="kc-table-scroll sb-unstyled">
-      <table className="kc-table">
-        <caption>
+    <DataTable
+      caption={
+        <>
           Source: <code>docs/component-status.md</code>. No component has reached
           stable.
-        </caption>
-        <thead>
-          <tr>
-            {table.headers.map((header) => (
-              <th key={header} scope="col">
-                {header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {table.rows.map((row) => (
-            <tr key={row[0]}>
-              <th scope="row">{row[0]}</th>
-              {row.slice(1).map((cell, index) => (
-                // eslint-disable-next-line react/no-array-index-key -- cells have no identity
-                <td key={index}>
-                  {/^(experimental|beta|stable|deprecated)$/i.test(cell) ? (
-                    <Badge tone={cell.toLowerCase() === "stable" ? "success" : "warning"}>
-                      {cell}
-                    </Badge>
-                  ) : (
-                    cell
-                  )}
-                </td>
-              ))}
-            </tr>
+        </>
+      }
+      className="kc-docs-table sb-unstyled"
+    >
+      <DataTableHead>
+        <DataTableRow>
+          {table.headers.map((header) => (
+            <DataTableColumnHeader key={header}>{header}</DataTableColumnHeader>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </DataTableRow>
+      </DataTableHead>
+      <DataTableBody>
+        {table.rows.map((row) => (
+          <DataTableRow key={row[0]}>
+            <DataTableRowHeader>{row[0]}</DataTableRowHeader>
+            {row.slice(1).map((cell, index) => (
+              // eslint-disable-next-line react/no-array-index-key -- cells have no identity
+              <DataTableCell key={index}>
+                {/^(experimental|beta|stable|deprecated)$/i.test(cell) ? (
+                  <Badge tone={cell.toLowerCase() === "stable" ? "success" : "warning"}>
+                    {cell}
+                  </Badge>
+                ) : (
+                  cell
+                )}
+              </DataTableCell>
+            ))}
+          </DataTableRow>
+        ))}
+      </DataTableBody>
+    </DataTable>
   );
 }
 

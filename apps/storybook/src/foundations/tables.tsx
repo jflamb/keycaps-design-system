@@ -1,5 +1,14 @@
 import { useState, type ReactNode } from "react";
 import {
+  DataTable,
+  DataTableBody,
+  DataTableCell,
+  DataTableColumnHeader,
+  DataTableHead,
+  DataTableRow,
+  DataTableRowHeader,
+} from "@jflamb/keycaps-react";
+import {
   darkDeclarations,
   lightDeclarations,
   referencedPrimitive,
@@ -58,33 +67,30 @@ function ColorCell({ authored, value }: { authored: string; value: string }) {
 function TokenGrid({ caption, rows }: { caption: ReactNode; rows: TokenRow[] }) {
   if (rows.length === 0) return null;
   return (
-    <div className="kc-table-scroll sb-unstyled">
-      <table className="kc-table">
-        <caption>{caption}</caption>
-        <thead>
-          <tr>
-            <th scope="col">Token</th>
-            <th scope="col">Light</th>
-            <th scope="col">Dark</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.name}>
-              <th scope="row">
-                <code>{row.name}</code>
-              </th>
-              <td>
-                <ColorCell authored={row.lightAuthored} value={row.light} />
-              </td>
-              <td>
-                <ColorCell authored={row.darkAuthored} value={row.dark} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <DataTable caption={caption} className="kc-docs-table sb-unstyled">
+      <DataTableHead>
+        <DataTableRow>
+          <DataTableColumnHeader>Token</DataTableColumnHeader>
+          <DataTableColumnHeader>Light</DataTableColumnHeader>
+          <DataTableColumnHeader>Dark</DataTableColumnHeader>
+        </DataTableRow>
+      </DataTableHead>
+      <DataTableBody>
+        {rows.map((row) => (
+          <DataTableRow key={row.name}>
+            <DataTableRowHeader>
+              <code>{row.name}</code>
+            </DataTableRowHeader>
+            <DataTableCell>
+              <ColorCell authored={row.lightAuthored} value={row.light} />
+            </DataTableCell>
+            <DataTableCell>
+              <ColorCell authored={row.darkAuthored} value={row.dark} />
+            </DataTableCell>
+          </DataTableRow>
+        ))}
+      </DataTableBody>
+    </DataTable>
   );
 }
 
@@ -151,36 +157,33 @@ export function ValueTable({
   const identical = rows.every((row) => row.light === row.dark);
 
   return (
-    <div className="kc-table-scroll sb-unstyled">
-      <table className="kc-table">
-        <caption>{caption}</caption>
-        <thead>
-          <tr>
-            <th scope="col">Token</th>
-            <th scope="col">{identical ? "Value" : "Light"}</th>
-            {identical ? null : <th scope="col">Dark</th>}
-            {sample ? <th scope="col">Sample</th> : null}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.name}>
-              <th scope="row">
-                <code>{row.name}</code>
-              </th>
-              <td>
-                <code>{row.light}</code>
-              </td>
-              {identical ? null : (
-                <td>
-                  <code>{row.dark}</code>
-                </td>
-              )}
-              {sample ? <td>{sample(row)}</td> : null}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <DataTable caption={caption} className="kc-docs-table sb-unstyled">
+      <DataTableHead>
+        <DataTableRow>
+          <DataTableColumnHeader>Token</DataTableColumnHeader>
+          <DataTableColumnHeader>{identical ? "Value" : "Light"}</DataTableColumnHeader>
+          {identical ? null : <DataTableColumnHeader>Dark</DataTableColumnHeader>}
+          {sample ? <DataTableColumnHeader>Sample</DataTableColumnHeader> : null}
+        </DataTableRow>
+      </DataTableHead>
+      <DataTableBody>
+        {rows.map((row) => (
+          <DataTableRow key={row.name}>
+            <DataTableRowHeader>
+              <code>{row.name}</code>
+            </DataTableRowHeader>
+            <DataTableCell>
+              <code>{row.light}</code>
+            </DataTableCell>
+            {identical ? null : (
+              <DataTableCell>
+                <code>{row.dark}</code>
+              </DataTableCell>
+            )}
+            {sample ? <DataTableCell>{sample(row)}</DataTableCell> : null}
+          </DataTableRow>
+        ))}
+      </DataTableBody>
+    </DataTable>
   );
 }
