@@ -753,7 +753,7 @@ The real work is its first dark theme and unwinding the token layer.
 
 ### Inputs
 
-- React 19.2.8, Vite 8.1.5, Tailwind v4.3.3 via `@tailwindcss/vite`,
+- React 19.2.8, Vite 8.2.1, Tailwind v4.3.3 via `@tailwindcss/vite`,
   TypeScript 7.0.2, `lucide-react` 1.25.0 as a runtime dependency.
 - **One CSS file:** `src/styles.css`, 3,712 lines.
 - The Tailwind `@theme` block (`src/styles.css:3-9`) declares exactly three
@@ -855,8 +855,10 @@ Tier 2 build is scoped by what this repo needs rather than built up front.
 ### Inputs
 
 - Vanilla TypeScript, no React and no `@vitejs/plugin-react`; `vite.config.ts`
-  has **no `plugins` array at all**. Vite is `^7.0.0`, against `knowledge`'s
-  pinned 8.1.5.
+  has **no `plugins` array at all**. Vite is `^8.2.1`, matching `knowledge` and
+  the consumer fixture — it was `^7.0.0` when this plan was written, and the
+  major gap that created is closed. See [Versioning and
+  release](#versioning-and-release).
 - `src/ui/` is 27 files and 4,635 lines of pure `string`-returning template
   builders, all escaped through one shared `escapeHtml` in `src/ui/escape.ts`.
   `src/planner.ts` is another **5,439 lines** holding the bulk of the markup and
@@ -1126,13 +1128,42 @@ in the inventory:
   fails at TS2835, and with the old build config restored the packages build
   clean while the new consumer pass fails with the original fifteen TS2834s.
   Treat that second pass as the standing guarantee behind the Phase 3 and
-  Phase 4 exit criteria. The Vite-major gap recorded below is still open.
+  Phase 4 exit criteria. The Vite-major gap recorded below is closed too.
 - **Vite ^7 in `retirement-dashboard` against 8.1.5 in `knowledge`.** Only
   matters for the Storybook/consumer fixture parity, but it means
   `tests/consumer/` proves the package against one major and not the other.
 
-`tests/consumer/` should be extended to build under both, or the plan should
-accept that Phase 7 carries an unproven combination.
+  **Closed by moving forward rather than by testing both.** The choice this
+  bullet posed — extend the fixture to build under both majors, or accept an
+  unproven combination in Phase 7 — had a third answer: remove the second major.
+  `retirement-dashboard` is on `^8.2.1` and `knowledge` is on `8.2.1`, the
+  version `tests/consumer/` already built with, so the fixture now proves the
+  package against the exact version every consumer runs. Phase 7 carries no
+  unproven Vite combination.
+
+  Two things worth carrying into Phase 7, both found by doing it:
+
+  - **Vite 8 replaces Rollup with Rolldown, and `retirement-dashboard`'s
+    `protected-assets/` split survived it unchanged.** That split is a security
+    boundary, not a packaging preference — `build.rollupOptions.output` still
+    drives `chunkFileNames` and `assetFileNames`, and `_routes.json` still
+    routes the planner and worker bundles behind authentication. This was the
+    single largest risk in the upgrade and it did not materialize.
+  - **Vite 8 minifies colors Vite 7 passed through**, folding
+    `rgba(107, 114, 128, 0)` into `#6b728000`. That broke the private bundle
+    audit, which matched numeric fingerprints as plain substrings and read four
+    hex characters as a household figure. Nothing leaked; the audit now requires
+    non-alphanumeric boundaries on numeric matches. Relevant to Phase 7 because
+    the CSS work in that phase runs through the same minifier — expect
+    `rgba()` and `color-mix()` in the token layer to come out as hex, and do not
+    let any check downstream assume otherwise.
+
+  Vite 8 also forwards browser console errors to the terminal where Vite 7
+  forwarded none. That surfaced a pre-existing caught `TypeError` in
+  `retirement-dashboard`'s saved-plan path, filed separately. Phase 7 should
+  expect the same effect: latent client-side errors in that repo become visible
+  for the first time, and they are pre-existing rather than migration damage —
+  confirm before attributing any of them to Keycaps.
 
 ### The two-scale press question
 
