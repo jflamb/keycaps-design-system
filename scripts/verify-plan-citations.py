@@ -1,6 +1,22 @@
 #!/usr/bin/env python3
 """Check the migration plan's consumer citations against the commit it pins.
 
+Two modes:
+
+    verify   (default) check the plan against `docs/adoption/citations.json`
+    refresh  regenerate that manifest from a real consumer clone
+
+The manifest exists because this repository is public and `mcp-dnsimple` is
+private: a public repo's `GITHUB_TOKEN` cannot read across, and a cross-repo PAT
+would be absent on every fork pull request, so the gate would fail for exactly
+the contributors least able to fix it. The manifest is not a compromise, though,
+because **the evidence commit is immutable** — what a citation points at, at a
+fixed commit, never changes. Snapshotting it is sound, and `refresh` is the step
+that reads the real repository.
+
+Adding or moving a citation without running `refresh` fails `verify`, so the two
+cannot drift apart quietly.
+
 Why this exists, and the two ways it has already been wrong:
 
 1. Its first version read the consumer's *working tree* and silently skipped
@@ -38,6 +54,8 @@ nothing structural beyond them.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 import re
 import subprocess
@@ -46,6 +64,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 PLAN = REPO / "docs/adoption/migration-plan.md"
+MANIFEST = REPO / "docs/adoption/citations.json"
 
 # Overridable so CI can check the consumer out anywhere; defaults to the sibling
 # clone a developer will have. Never silently skipped when absent — see `main`.
@@ -74,7 +93,8 @@ def show(ref: str, path: str) -> str | None:
     return result.stdout if result.returncode == 0 else None
 
 
-def main() -> int:
+def refresh() -> int:
+    """Regenerate the manifest from a real consumer clone."""
     plan = PLAN.read_text()
 
     pin = EVIDENCE_PIN.search(plan)
@@ -92,6 +112,7 @@ def main() -> int:
         return 1
 
     failures: list[str] = []
+    snapshot: dict[str, dict[str, str]] = {}
     resolved: dict[str, int] = {}
     out_of_scope = 0
     current_path: str | None = None
@@ -151,6 +172,12 @@ def main() -> int:
         elif first.startswith(CLOSING):
             failures.append(f"{path}:{start} begins part-way through a statement — {first[:56]}")
 
+        snapshot[f"{path}:{start}-{end}@{ref}"] = {
+            "sha256": hashlib.sha256("\n".join(lines[start - 1 : end]).encode()).hexdigest(),
+            "first": first,
+            "last": last,
+        }
+
         if path.startswith("tests/") and start != end:
             body = "\n".join(lines[start - 1 : end])
             if not re.match(r"(it|test)\(", first) and "for (const" not in first:
@@ -168,8 +195,80 @@ def main() -> int:
     if failures:
         print("\n".join(f"  ✗ {failure}" for failure in failures))
         return 1
-    print("all consumer citations resolve")
+
+    MANIFEST.write_text(
+        json.dumps({"evidence": evidence_ref, "citations": snapshot}, indent=2, sort_keys=True) + "\n"
+    )
+    print(f"wrote {len(snapshot)} citations to {MANIFEST.relative_to(REPO)}")
     return 0
+
+
+def verify() -> int:
+    """Check the plan against the committed manifest. Needs no consumer clone."""
+    if not MANIFEST.exists():
+        print(f"{MANIFEST.relative_to(REPO)} is missing — run `pnpm verify:citations:refresh`")
+        return 1
+
+    plan = PLAN.read_text()
+    manifest = json.loads(MANIFEST.read_text())
+
+    pin = EVIDENCE_PIN.search(plan)
+    if not pin:
+        print("the plan declares no evidence commit for its consumer citations")
+        return 1
+    if pin.group("ref") != manifest["evidence"]:
+        print(
+            f"the plan pins {pin.group('ref')} and the manifest was built at "
+            f"{manifest['evidence']} — run `pnpm verify:citations:refresh`"
+        )
+        return 1
+
+    # Every citation the plan makes has to be one the manifest recorded. A new or
+    # moved range without a refresh fails here, which is what keeps the snapshot
+    # honest rather than merely present.
+    # Which paths belong to the consumer is itself read from the manifest, since
+    # verify mode has no clone to resolve it against. A citation on one of those
+    # paths must be recorded exactly; a citation on any other path is another
+    # repository's and not this check's business.
+    consumer_paths = {key.rsplit(":", 1)[0] for key in manifest["citations"]}
+
+    wanted = set()
+    current_path: str | None = None
+    current_ref: str | None = None
+    for citation in CITATION.finditer(plan):
+        if citation.group("path"):
+            current_path, current_ref = citation.group("path"), None
+        raw_start = citation.group("start") or citation.group("bare_start")
+        if raw_start is None or current_path is None:
+            continue
+        if current_path not in consumer_paths:
+            continue
+        historic = re.match(r"\s+at `([0-9a-f]{7,40})`", plan[citation.end() : citation.end() + 24])
+        if historic:
+            current_ref = historic.group(1)
+        start = int(raw_start)
+        end = int(citation.group("end") or citation.group("bare_end") or raw_start)
+        wanted.add(f"{current_path}:{start}-{end}@{current_ref or manifest['evidence']}")
+
+    unrecorded = sorted(wanted - set(manifest["citations"]))
+    stale = sorted(set(manifest["citations"]) - wanted)
+
+    if unrecorded:
+        print("\n".join(f"  ✗ {key} is cited but not in the manifest" for key in unrecorded))
+        print("run `pnpm verify:citations:refresh`")
+        return 1
+    if stale:
+        print("\n".join(f"  ✗ {key} is in the manifest but no longer cited" for key in stale))
+        print("run `pnpm verify:citations:refresh`")
+        return 1
+
+    print(f"{len(wanted)} consumer citations match the manifest at {manifest['evidence']}")
+    print("the ranges themselves were verified against the consumer when the manifest was written")
+    return 0
+
+
+def main() -> int:
+    return refresh() if "--refresh" in sys.argv else verify()
 
 
 if __name__ == "__main__":

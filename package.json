@@ -32,7 +32,8 @@
     "version:set": "node scripts/set-version.mjs",
     "typecheck": "pnpm --filter @jflamb/keycaps-tokens build && pnpm --filter @jflamb/keycaps-react build && pnpm -r --if-present typecheck",
     "check": "pnpm icons:verify && pnpm verify:citations && pnpm review:selector:test && pnpm typecheck && pnpm test && pnpm build && pnpm test:pages && pnpm test:package && pnpm test:e2e && pnpm audit:high",
-    "verify:citations": "python3 scripts/verify-plan-citations.py"
+    "verify:citations": "python3 scripts/verify-plan-citations.py",
+    "verify:citations:refresh": "python3 scripts/verify-plan-citations.py --refresh"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.12.1",
