@@ -615,6 +615,7 @@ for (const theme of ["light", "dark"] as const) {
         await page.goto(
           `/iframe.html?id=components-app-shell--baseline-regression-fixture&viewMode=story&globals=theme:${theme}`,
         );
+        await expect(page.locator("[data-baseline-fixture]")).toHaveCount(2);
         const fixtures = await page.locator("[data-baseline-fixture]").evaluateAll((shells) =>
           shells.map((shell) => {
             const header = shell.querySelector<HTMLElement>(".kc-app-shell__header")!;
