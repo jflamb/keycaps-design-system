@@ -638,7 +638,7 @@ on its own.
 
 ## Phase 3 — `mcp-dnsimple` (Mode 1) — **shipped**
 
-> **Evidence commit: `jflamb/mcp-dnsimple@0a8bf8d`.** Every consumer citation in
+> **Evidence commit: `jflamb/mcp-dnsimple@d56be82`.** Every consumer citation in
 > this section resolves against that commit, and this section must not merge
 > until it is on `mcp-dnsimple`'s `origin/main`. This document's own rule is to
 > measure a consumer with `git show origin/main:<path>` and never from a working
@@ -694,8 +694,8 @@ where it was observed.
 - **Axe-clean in light and dark with no rule switched off**, colour contrast
   included (`mcp-dnsimple/tests/e2e/home.spec.ts:188-199`), plus 320-pixel reflow
   (`mcp-dnsimple/tests/e2e/home.spec.ts:140-150`, the viewport set at `:141`),
-  keyboard reach to the skip link (`:39-55`), and the press arriving from the
-  inlined `static.css` (`:62-108`) — nine tests, wired into CI
+  keyboard reach to the skip link (`:39-52`), and the press arriving from the
+  inlined `static.css` (`:62-101`) — nine tests, wired into CI
   at `mcp-dnsimple/.github/workflows/e2e.yml`. `quality.yml`'s **check list** is
   untouched as this phase's Validation requires; its trigger is not, because both
   workflows were `pull_request`-only and two commits reached `main` directly
@@ -777,12 +777,23 @@ indistinguishable from passing correctly right up until a prop is wrong.
    correctly, and both Keycaps packages declare one; from 0.1.3 the inner half —
    the relative specifiers inside the declarations — resolves too. Pin
    `^0.1.3`, not `^0.1.2`. See the note above this list.
-2. **Render at module load.** *(Shipped as once per surface per process — see
-   the note at the head of this phase.)* `branding.ts` already computes its page from a
+2. **Render at module load.** `branding.ts` already computes its page from a
    `HomePageModel`; keep that contract. Replace the body of `renderHomePage`
    with a `renderStaticDocument` call whose children are Keycaps components. The
-   render happens once per process at first request, or eagerly at module load —
-   `renderHomePage` is already pure over its model.
+   render happens eagerly during startup — `renderHomePage` is already pure over
+   its model.
+
+   *Amended after shipping.* This step originally read "once per process at
+   first request, or eagerly at module load", and both halves turned out to be
+   loose. The literal module load of `branding.ts` is too early, because the tool
+   and prompt counts come from a metadata server `index.ts` builds during
+   startup, so the render happens in `createApp`. And *at first request* is the
+   wrong half to have offered: rendering inside the request handler is
+   server-side rendering with a cache, not a static render, and it is what the
+   first implementation did. The shipped cardinality is **once per surface per
+   process** — the memo is keyed on the serialized surface — which is narrower
+   than "once per process" and is what the proof at
+   `mcp-dnsimple/tests/home-golden.test.ts:43-67` actually establishes.
 3. **Ship the CSS through the same string.** The `Dockerfile` copies only
    `src/`, so a separate `.css` file in the image would silently vanish. Inline
    the three stylesheets — tokens, `styles.css`, `static.css` — into the
@@ -2233,7 +2244,7 @@ here rather than silently corrected there.
     - widened the ESLint globs (`eslint.config.js:6` and `:66`) and the lint
       script (`package.json:17`) to `.tsx`;
     - and added two CI workflows' worth of gate — the browser job at
-      `.github/workflows/e2e.yml:27-67` and the container job at `:69-95`, plus
+      `.github/workflows/e2e.yml:27-72` and the container job at `:74-95`, plus
       the `push` trigger on `main` at `:14-21` and its counterpart on
       `.github/workflows/quality.yml:3-10`.
 
