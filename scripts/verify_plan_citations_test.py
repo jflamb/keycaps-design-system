@@ -19,22 +19,37 @@ assert SPEC and SPEC.loader
 checker = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(checker)
 
-PIN = "abcdef1"
+DNSIMPLE_PIN = "abcdef1"
+UNIFI_PIN = "bcdefa2"
 HISTORIC = "0123456"
 
 
-def plan_with(phase_citation: str, correction: str = "") -> str:
+def plan_with(
+    phase_3_citation: str = "",
+    correction_34: str = "",
+    phase_4_citation: str = "",
+    correction_38: str = "",
+) -> str:
     return f"""# Plan
 
-Evidence commit: `jflamb/mcp-dnsimple@{PIN}`
+Evidence commit: `jflamb/mcp-dnsimple@{DNSIMPLE_PIN}`
+Evidence commit: `jflamb/mcp-unifi@{UNIFI_PIN}`
 
 ## Phase 3 — `mcp-dnsimple` (Mode 1)
 
-{phase_citation}
+{phase_3_citation}
 
 ## Phase 4 — `mcp-unifi` (Mode 1)
 
-34. **`mcp-dnsimple` correction.** {correction}
+{phase_4_citation}
+
+## Phase 5 — `assistant-workbench` (Mode 2)
+
+## Corrections to the survey
+
+34. **`mcp-dnsimple` correction.** {correction_34}
+
+38. **Phase 4 correction.** {correction_38}
 """
 
 
@@ -46,7 +61,16 @@ class CitationGateTest(unittest.TestCase):
             manifest_path = root / "citations.json"
             plan_path.write_text(plan)
             manifest_path.write_text(
-                json.dumps({"evidence": PIN, "citations": citations}) + "\n"
+                json.dumps(
+                    {
+                        "evidence": {
+                            "mcp-dnsimple": DNSIMPLE_PIN,
+                            "mcp-unifi": UNIFI_PIN,
+                        },
+                        "citations": citations,
+                    }
+                )
+                + "\n"
             )
             output = io.StringIO()
             with (
@@ -65,10 +89,24 @@ class CitationGateTest(unittest.TestCase):
 
     def test_unqualified_correction_citation_fails(self) -> None:
         result, output = self.run_verify(
-            plan_with("", "`src/client.ts:1`"), {}
+            plan_with(correction_34="`src/client.ts:1`"), {}
         )
         self.assertEqual(result, 1)
-        self.assertIn("corrections 34–37 citation", output)
+        self.assertIn("corrections 34-37 citation", output)
+
+    def test_unqualified_phase_4_citation_fails(self) -> None:
+        result, output = self.run_verify(
+            plan_with(phase_4_citation="`site/styles.css:1`"), {}
+        )
+        self.assertEqual(result, 1)
+        self.assertIn("write the full `mcp-unifi/…` path", output)
+
+    def test_unqualified_phase_4_correction_citation_fails(self) -> None:
+        result, output = self.run_verify(
+            plan_with(correction_38="`site/styles.css:1`"), {}
+        )
+        self.assertEqual(result, 1)
+        self.assertIn("corrections 38-40 citation", output)
 
     def test_scoped_unrecorded_citation_fails(self) -> None:
         result, output = self.run_verify(
@@ -78,7 +116,7 @@ class CitationGateTest(unittest.TestCase):
         self.assertIn("is cited but not in the manifest", output)
 
     def test_occurrence_removal_fails(self) -> None:
-        key = f"src/client.ts:1-1@{PIN}"
+        key = f"mcp-dnsimple/src/client.ts:1-1@{DNSIMPLE_PIN}"
         result, output = self.run_verify(
             plan_with("`mcp-dnsimple/src/client.ts:1`"),
             {key: {"occurrences": 2}},
@@ -91,19 +129,26 @@ class CitationGateTest(unittest.TestCase):
             checker.citations(
                 "`mcp-dnsimple/tests/e2e/home.spec.ts:39-52` "
                 "from `static.css` (`:62-101`)",
-                PIN,
+                {"mcp-dnsimple": DNSIMPLE_PIN, "mcp-unifi": UNIFI_PIN},
             )
         )
         self.assertEqual(
             parsed[-1],
-            checker.Citation("tests/e2e/home.spec.ts", True, 62, 101, PIN),
+            checker.Citation(
+                "mcp-dnsimple",
+                "tests/e2e/home.spec.ts",
+                True,
+                62,
+                101,
+                DNSIMPLE_PIN,
+            ),
         )
 
     def test_historic_ref_carries_to_bare_continuation(self) -> None:
         parsed = list(
             checker.citations(
                 f"`mcp-dnsimple/src/client.ts:1` at `{HISTORIC}`, then `:2`",
-                PIN,
+                {"mcp-dnsimple": DNSIMPLE_PIN, "mcp-unifi": UNIFI_PIN},
             )
         )
         self.assertEqual([citation.ref for citation in parsed], [HISTORIC, HISTORIC])
@@ -112,16 +157,20 @@ class CitationGateTest(unittest.TestCase):
         plan = plan_with("`mcp-dnsimple/src/client.ts:1-0`")
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            consumer = root / "consumer"
-            (consumer / ".git").mkdir(parents=True)
+            consumers = {
+                "mcp-dnsimple": root / "mcp-dnsimple",
+                "mcp-unifi": root / "mcp-unifi",
+            }
+            for consumer in consumers.values():
+                (consumer / ".git").mkdir(parents=True)
             plan_path = root / "migration-plan.md"
             manifest_path = root / "citations.json"
             plan_path.write_text(plan)
 
-            def fake_show(ref: str, path: str) -> str | None:
-                if ref == PIN and path == "package.json":
+            def fake_show(repo: str, ref: str, path: str) -> str | None:
+                if path == "package.json" and ref in (DNSIMPLE_PIN, UNIFI_PIN):
                     return "{}\n"
-                if ref == PIN and path == "src/client.ts":
+                if repo == "mcp-dnsimple" and ref == DNSIMPLE_PIN and path == "src/client.ts":
                     return "first\nsecond\n"
                 return None
 
@@ -130,7 +179,7 @@ class CitationGateTest(unittest.TestCase):
                 patch.object(checker, "REPO", root),
                 patch.object(checker, "PLAN", plan_path),
                 patch.object(checker, "MANIFEST", manifest_path),
-                patch.object(checker, "CONSUMER", consumer),
+                patch.object(checker, "CONSUMERS", consumers),
                 patch.object(checker, "show", fake_show),
                 redirect_stdout(output),
             ):

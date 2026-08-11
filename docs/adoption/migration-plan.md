@@ -878,6 +878,11 @@ no data-layer or route changes to unwind.
 
 ## Phase 4 — `mcp-unifi` (Mode 1)
 
+> **Evidence commit: `jflamb/mcp-unifi@9faaa1c`.** Every consumer citation in
+> this section and corrections 38–40 resolves against that commit. It is the
+> freshly fetched `origin/main` parent Phase 4 branches from, not a working-tree
+> snapshot.
+
 **Why second:** the same page shape as Phase 3, so the component mapping is
 mostly proven, but it adds two genuinely new things — a prerender script for a
 site with no build step, and this repo's first dark theme.
@@ -902,7 +907,8 @@ site with no build step, and this repo's first dark theme.
   the landing page has no automated coverage at all.
 - Fonts are self-hosted WOFF2: Fraunces Variable and Nunito Sans 400/600/700 —
   the retired pairing — with one pinned optical axis,
-  `font-variation-settings: "opsz" 18, "SOFT" 55` at `styles.css:174`. The plan
+  `font-variation-settings: "opsz" 18, "SOFT" 55` at
+  `mcp-unifi/site/styles.css:174`. The plan
   previously named a second pin, `"opsz" 14, "SOFT" 45`; on `origin/main` there
   is no such declaration anywhere in the repository. It is the same
   untracked-working-tree reading as the line counts above.
@@ -919,7 +925,7 @@ site with no build step, and this repo's first dark theme.
    Add it to `.prettierignore`-equivalents and state in the file header that it
    is generated — an editable generated file is a drift source.
 3. **Delete the local fonts.** Remove `site/fonts/*.woff2` (four files, ~163 KB)
-   and the four `@font-face` blocks at `styles.css` lines 1–31. The
+   and the four `@font-face` blocks at `mcp-unifi/site/styles.css:1-31`. The
    `font-variation-settings` declaration at line 174 goes with them: Piazzolla's
    `opsz` axis is never pinned, per the Optical Sizing Rule, and `SOFT` does not
    exist on it.
@@ -940,7 +946,8 @@ site with no build step, and this repo's first dark theme.
    second artifact claiming the Keycaps name is exactly the failure ADR 0002
    exists to prevent. Delete it and the repo-local `DESIGN.md`, and replace both
    with a pointer to this repo.
-7. **Fix the one hardcoded hex.** `.confirmation-row dt` at `styles.css:290`
+7. **Fix the one hardcoded hex.** `.confirmation-row dt` at
+   `mcp-unifi/site/styles.css:290-292`
    sets `#6d4e0e` on line 291 — it is `attention-ink` in the design JSON and
    never became a variable. It maps to `--kc-color-warning-text`. (The plan said
    292; that too was read from the untracked working tree.)
@@ -950,7 +957,9 @@ site with no build step, and this repo's first dark theme.
 - `site/styles.css` is deleted or reduced to nothing but `@import`s of the
   Keycaps stylesheets.
 - `site/index.html` is generated, and regenerating it produces no diff.
-- No font files remain under `site/`.
+- No legacy font files remain under `site/fonts/`; the Keycaps faces copied to
+  `site/kc/fonts/` are the linked asset tree and are required. See
+  [correction 38](#corrections-to-the-survey).
 - `.impeccable/design.json` and the repo-local `DESIGN.md` are gone.
 - Zero off-origin requests.
 - The Phase 2 rules pass with an empty allowlist.
@@ -1402,7 +1411,7 @@ Two hazards:
   Keycaps faces is what makes the Optical Weight Rule implementable.
 - **Pinned optical axes must go.** `assistant-workbench` pins `"opsz" 11` on
   panel titles; `mcp-unifi` pins `"opsz" 18, "SOFT" 55` once, at
-  `site/styles.css:174` — one declaration on `origin/main`, not the two this
+  `mcp-unifi/site/styles.css:174` — one declaration on `origin/main`, not the two this
   plan first recorded.
   The Optical Sizing Rule forbids pinning `opsz`, and `SOFT` does not exist on
   Piazzolla at all — a `font-variation-settings` referencing it fails silently,
@@ -2261,3 +2270,35 @@ here rather than silently corrected there.
     changes to unwind. Phases 4 through 7 should state their rollback in commits
     rather than in functions, because all four touch build configuration the same
     way.
+
+38. **Phase 4 cannot both link `fonts.css` and contain no font files anywhere
+    under `site/`.** The old page owns four legacy faces through the four
+    `@font-face` blocks at `mcp-unifi/site/styles.css:1-31`; those files and that
+    directory do have to disappear. But the linked Keycaps `fonts.css` resolves
+    `./fonts/<file>.woff2` relative to its own deployed location, so the required
+    `site/kc/fonts.css` asset necessarily brings `site/kc/fonts/*.woff2` with it.
+
+    The corrected criterion is no legacy font files under `site/fonts/`, with
+    the published Keycaps faces copied under `site/kc/fonts/`. That is not an
+    exception to the local-font rule; it is the rule made deployable for a Pages
+    artifact that is uploaded byte-for-byte.
+
+39. **There is no `.prompt-transcript` surface to migrate.** Phase 4's mapping
+    says it becomes `CodeBlock`, but the complete committed page body runs from
+    the hero through the legal sections without that class or any transcript
+    markup (`mcp-unifi/site/index.html:21-133`). Adding one would invent content
+    and expand the landing page rather than migrate it, so Phase 4 ships no
+    `CodeBlock`. The runtime path remains the only ordered technical sequence.
+
+40. **The Phase 2 recursive CSS ratchet would lint Keycaps' copied package CSS
+    as if it were consumer CSS.** Before migration, `.keycaps-lint.json` scans
+    every stylesheet below `site/` (`mcp-unifi/.keycaps-lint.json:1-8`). After
+    the required build writes `site/kc/styles.css` and `site/kc/static.css`, that
+    glob reaches package-owned `.kc-` selectors and rule 2 correctly rejects
+    them — but they are the implementation the consumer is meant to consume,
+    not an override it authored.
+
+    Phase 4 therefore scans `src/**/*.tsx` and top-level `site/*.css`, leaving
+    `site/kc/` out as a byte-for-byte package asset tree. The top-level CSS glob
+    remains a fail-loud ratchet for any future consumer stylesheet, and the
+    allowlist is empty.
