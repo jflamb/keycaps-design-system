@@ -324,10 +324,28 @@
       "last": "}",
       "occurrences": 1,
       "sha256": "402e5b86e02b6dfd860b39e8a71c699e77feeb6bf6f7b32f7ad46dd7ef90ee1e"
+    },
+    "mcp-unifi/src/site-page.tsx:133-166@fcd3fcb": {
+      "first": "<section aria-labelledby=\"local-title\" style={sectionStack}>",
+      "last": "</section>",
+      "occurrences": 1,
+      "sha256": "4e43a06089862eaad158c73f77b725136f1041efec769c6b9ca95ea2c9fdb4dd"
+    },
+    "mcp-unifi/src/site-page.tsx:201-223@fcd3fcb": {
+      "first": "/**",
+      "last": "title: \"mcp-unifi \u2014 Read-first UniFi network operations\",",
+      "occurrences": 1,
+      "sha256": "91ee2b37858af6acd315d7eedfc41a0bb69c10c630a89aa42f1ad770061c0219"
+    },
+    "mcp-unifi/src/site-page.tsx:94-130@fcd3fcb": {
+      "first": "<PageHeader",
+      "last": "</Card>",
+      "occurrences": 1,
+      "sha256": "50d650e6dd9d38334e869cd07e9fe829ccaabbc50593c8686da46ab08b856b2c"
     }
   },
   "evidence": {
     "mcp-dnsimple": "f24c6ee",
-    "mcp-unifi": "9faaa1c"
+    "mcp-unifi": "fcd3fcb"
   }
 }

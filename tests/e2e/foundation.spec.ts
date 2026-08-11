@@ -530,6 +530,72 @@ test("the new surfaces reflow at 320 CSS pixels", async ({ page }) => {
   }
 });
 
+for (const theme of ["light", "dark"] as const) {
+  for (const width of [320, 1280] as const) {
+    test(`the app shell keeps text on a baseline and actions intact in ${theme} at ${width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(
+        `/iframe.html?id=components-app-shell--default&viewMode=story&globals=theme:${theme}`,
+      );
+
+      const geometry = await page.locator(".kc-app-shell__header").evaluate((header) => {
+        const actions = header.querySelector<HTMLElement>(".kc-app-shell__actions")!;
+        const button = actions.querySelector<HTMLElement>("button")!;
+        const headerRect = header.getBoundingClientRect();
+        const actionsRect = actions.getBoundingClientRect();
+        const buttonRect = button.getBoundingClientRect();
+        const root = document.documentElement;
+        return {
+          actionsAlignSelf: getComputedStyle(actions).alignSelf,
+          actionsInside:
+            actionsRect.top >= headerRect.top - 0.5 && actionsRect.bottom <= headerRect.bottom + 0.5,
+          buttonHeight: buttonRect.height,
+          headerAlignItems: getComputedStyle(header).alignItems,
+          pageFits: root.scrollWidth <= root.clientWidth,
+        };
+      });
+
+      expect(geometry.headerAlignItems).toBe("baseline");
+      expect(geometry.actionsAlignSelf).toBe("center");
+      expect(geometry.actionsInside).toBe(true);
+      expect(geometry.buttonHeight).toBeGreaterThanOrEqual(36);
+      expect(geometry.pageFits).toBe(true);
+    });
+
+    test(`PageHeader keeps its two distinct text gaps in ${theme} at ${width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+
+      for (const story of ["complete", "marketing-hero"] as const) {
+        await page.goto(
+          `/iframe.html?id=components-page-header--${story}&viewMode=story&globals=theme:${theme}`,
+        );
+        const rhythm = await page.locator(".kc-page-header").evaluate((header) => {
+          const eyebrow = header.querySelector<HTMLElement>(".kc-page-header__eyebrow")!;
+          const title = header.querySelector<HTMLElement>(".kc-page-header__title")!;
+          const description = header.querySelector<HTMLElement>(
+            ".kc-page-header__description",
+          )!;
+          const root = document.documentElement;
+          return {
+            descriptionGap:
+              description.getBoundingClientRect().top - title.getBoundingClientRect().bottom,
+            eyebrowGap: title.getBoundingClientRect().top - eyebrow.getBoundingClientRect().bottom,
+            pageFits: root.scrollWidth <= root.clientWidth,
+          };
+        });
+
+        expect(rhythm.eyebrowGap, story).toBeCloseTo(8, 0);
+        expect(rhythm.descriptionGap, story).toBeCloseTo(16, 0);
+        expect(rhythm.pageFits, story).toBe(true);
+      }
+    });
+  }
+}
+
 // One test per theme rather than a loop inside one test, and the reason is not
 // style. AxeBuilder injects axe into every frame and recurses through them; when
 // a second `goto` reuses the same page, a frame can still carry the previous

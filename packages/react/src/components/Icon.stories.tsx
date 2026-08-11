@@ -44,6 +44,19 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const mcpUnifiLandingIcons = [
+  "arrow-right",
+  "cloud-arrow-up",
+  "globe-hemisphere-west",
+  "hard-drives",
+  "laptop",
+  "shield-check",
+  "terminal-window",
+  "tree-structure",
+  "users-three",
+  "wifi-high",
+] as const;
+
 export const Default: Story = {
   render: (args) => <Icon {...args} style={{ inlineSize: "2rem", blockSize: "2rem" }} />,
 };
@@ -81,6 +94,47 @@ export const TheWholeSet: Story = {
           }}
         >
           <Icon name={name} style={{ inlineSize: "1.75rem", blockSize: "1.75rem" }} />
+          <code style={{ fontSize: "var(--kc-font-size-2xs)" }}>{name}</code>
+        </li>
+      ))}
+    </ul>
+  ),
+};
+
+/** The closed subset added for mcp-unifi's reviewed Phase 4 composition. */
+export const McpUnifiLandingPage: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The regular-weight glyphs used by mcp-unifi's semantic runtime path and supported-area tiles. They are vendored here so the consumer can retire its direct Phosphor React imports without replacing them with a runtime dependency.",
+      },
+    },
+  },
+  render: () => (
+    <ul
+      aria-label="mcp-unifi landing-page icons"
+      style={{
+        display: "grid",
+        gap: "var(--kc-space-5)",
+        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 8rem), 1fr))",
+        listStyle: "none",
+        margin: 0,
+        padding: 0,
+      }}
+    >
+      {mcpUnifiLandingIcons.map((name) => (
+        <li
+          key={name}
+          style={{
+            alignItems: "center",
+            display: "flex",
+            flexDirection: "column",
+            gap: "var(--kc-space-2)",
+            textAlign: "center",
+          }}
+        >
+          <Icon name={name} style={{ blockSize: "2rem", inlineSize: "2rem" }} />
           <code style={{ fontSize: "var(--kc-font-size-2xs)" }}>{name}</code>
         </li>
       ))}

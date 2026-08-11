@@ -20,6 +20,8 @@ const meta = {
           "",
           "The heading's own margins are zeroed and the header owns the rhythm instead. That follows the Heading Rhythm Rule rather than breaking it: a heading opening its container has nothing above it to separate from, and the space that matters here belongs to the header as a block rather than to the heading as a line.",
           "",
+          "The eyebrow stays one 8px step from the title. The description starts one 16px composition step below it, so adding body copy does not make the eyebrow and title drift apart.",
+          "",
           "Heading **sizes** are declared by this component and nowhere else, which is the same reason the token package ships none — the surface decides how large a heading is, and a page header is a surface. They clamp with the viewport rather than stepping at a breakpoint.",
         ].join("\n"),
       },

@@ -1003,7 +1003,7 @@
   display: grid;
   flex: 1 1 22rem;
   min-inline-size: 0;
-  gap: var(--kc-space-2);
+  gap: 0;
 }
 
 .kc-page-header__eyebrow {
@@ -1026,6 +1026,14 @@
   overflow-wrap: break-word;
 }
 
+/* The eyebrow qualifies the title, so those two stay close. The description is
+   the first body copy and needs a full composition step instead. Keeping the
+   two relationships separate prevents a PageHeader rhythm fix from widening
+   both, which is what one shared grid gap would do. */
+.kc-page-header__eyebrow + .kc-page-header__title {
+  margin-block-start: var(--kc-space-2);
+}
+
 h1.kc-page-header__title {
   font-size: clamp(1.7rem, 1.2rem + 1.7vw, 2.25rem);
 }
@@ -1039,7 +1047,7 @@ h3.kc-page-header__title {
 }
 
 .kc-page-header__description {
-  margin: 0;
+  margin: var(--kc-space-4) 0 0;
   max-inline-size: 58ch;
   color: var(--kc-color-text-muted);
 }
@@ -1177,7 +1185,7 @@ h3.kc-page-header__title {
 .kc-app-shell__header {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: baseline;
   gap: var(--kc-space-3) var(--kc-space-5);
   min-block-size: 60px;
   padding: var(--kc-space-2) var(--kc-space-5);
@@ -1245,6 +1253,7 @@ h3.kc-page-header__title {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  align-self: center;
   gap: var(--kc-space-2);
   margin-inline-start: auto;
 }

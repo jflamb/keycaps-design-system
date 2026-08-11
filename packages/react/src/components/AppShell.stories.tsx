@@ -43,6 +43,8 @@ const meta = {
           "**The skip link is rendered by default and first in the DOM.** Two of the five consumers have none at all; making it the shell's responsibility is the only way that floor holds across five codebases.",
           "",
           "The sidebar split uses flex wrapping rather than a second media query — the system is single-breakpoint, and a sidebar that reflows on its own content's terms is what the Intrinsic Maximum Rule asks for anyway. Drag the frame narrow to watch it drop.",
+          "",
+          "Textual brand and navigation items share a baseline by default. The action slot stays centered independently, so buttons and badges keep their own control geometry when the bar wraps.",
         ].join("\n"),
       },
     },
