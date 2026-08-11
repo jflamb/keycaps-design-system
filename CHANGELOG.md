@@ -4,6 +4,8 @@ All notable changes to the fixed-version Keycaps package train are documented he
 
 ## Unreleased
 
+## 0.2.0 — 2026-08-11
+
 ### Added
 
 - **`Dialog`, and the drawer is a `placement` prop on it rather than a sibling component.** Two repos, five dialogs, and two entirely different ideas of what a dialog is. `retirement-dashboard` uses a native `<dialog>` opened with `showModal()` in all three of its cases; `assistant-workbench` hand-rolls `<div role="dialog" aria-modal="true">` over a `hidden` backdrop and re-implements a strict subset — Escape and initial focus, with **no inertness and no focus trap at all**. The structural half of this was not a matter of taste, and RD wins it: the platform element is where inertness, the focus trap, Escape, and top-layer stacking come from.
