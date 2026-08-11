@@ -19,8 +19,8 @@ assert SPEC and SPEC.loader
 checker = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(checker)
 
-PIN = "d56be82"
-HISTORIC = "0f84dc6"
+PIN = "abcdef1"
+HISTORIC = "0123456"
 
 
 def plan_with(phase_citation: str, correction: str = "") -> str:

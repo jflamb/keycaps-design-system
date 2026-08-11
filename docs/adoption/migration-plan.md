@@ -638,7 +638,7 @@ on its own.
 
 ## Phase 3 — `mcp-dnsimple` (Mode 1) — **shipped**
 
-> **Evidence commit: `jflamb/mcp-dnsimple@d56be82`.** Every consumer citation in
+> **Evidence commit: `jflamb/mcp-dnsimple@f24c6ee`.** Every consumer citation in
 > this section resolves against that commit, and this section must not merge
 > until it is on `mcp-dnsimple`'s `origin/main`. This document's own rule is to
 > measure a consumer with `git show origin/main:<path>` and never from a working
