@@ -645,35 +645,57 @@ depends on it.
 **It does prove it**, and every claim below cites where it is checked rather than
 where it was observed.
 
-- **No client React, rendered once per process.** `mcp-dnsimple/src/server.ts:442-465`
-  renders on the first request that needs it and serves the same string
-  thereafter, which is step 2 of this phase read strictly.
-  `mcp-dnsimple/tests/server.test.ts:65-81` asserts two requests return identical bytes.
+- **No client React, rendered at startup, once per process.**
+  `mcp-dnsimple/src/server.ts:441-462` renders eagerly in `createApp` rather than
+  in the request handler, through `renderHomePageOnce`
+  (`src/branding.tsx:571-600`), which memoises on the surface so repeated
+  `createApp` calls in a process render once.
+  `mcp-dnsimple/tests/server.test.ts:65-81` asserts two requests return identical
+  bytes. This is the ADR's own carve-out for this repo — "`mcp-dnsimple` already
+  builds with `tsc` and can render at module load"
+  ([ADR 0002](../decisions/0002-consumer-delivery.md), line 136) — rather than the
+  build-time render the ADR's general statement at line 37 describes; the literal
+  module load of `branding.tsx` is too early, because the surface counts come
+  from a metadata server `src/index.ts:18-19` builds during startup.
 - **A committed golden**, `mcp-dnsimple/tests/__golden__/home.html`, compared against a
   pinned model in `tests/home-golden.test.ts:24-42`. The comparison is exact rather than a
   diff with a timestamp normalised out: the page has one value that varies per
   process, and pinning the model removes it.
-- **Zero class names outside `kc-`, and no CSS of the page's own.**
-  `mcp-dnsimple/tests/server.test.ts:83-112` — which does not assert that no `<style>`
-  element exists, because the Keycaps stylesheets are inlined, but that every one
-  of them is byte-identical to a file this repo did not write.
+- **Zero class names outside `kc-`, no page-owned stylesheet, and no page-owned
+  visual treatment** — `mcp-dnsimple/tests/server.test.ts:83-150`. Three separate
+  assertions, and the third is narrower than an earlier draft of this section
+  claimed. The page *does* own CSS: `src/branding.tsx:130-161` sets inline styles
+  for composition — how many cards sit in a row, and how far apart. What it owns
+  none of is treatment, and the test holds it there by requiring every inline
+  declaration to be a layout property, with the only two exceptions pinned to
+  `color:inherit` and `text-decoration:none`. The `<style>` assertion does not
+  claim no such element exists, because the Keycaps stylesheets are inlined; it
+  claims every one of them is byte-identical to a file this repo did not write.
 - **Zero off-origin requests**, at two levels: a response-body tripwire in
-  `mcp-dnsimple/tests/server.test.ts:114-136`, and a request interceptor in
-  `mcp-dnsimple/tests/e2e/home.spec.ts:110-128` that also confirms Piazzolla and Sofia Sans
-  actually load rather than silently falling back.
+  `mcp-dnsimple/tests/server.test.ts:152-174`, and a request interceptor in
+  `mcp-dnsimple/tests/e2e/home.spec.ts:110-140`. The same browser test confirms
+  Piazzolla, Sofia Sans, and Lilex reach `status: "loaded"` after
+  `document.fonts.ready` — the family name alone proves nothing, because a face
+  that 404s is still in `document.fonts` with `status: "error"`.
 - **Axe-clean in light and dark with no rule switched off**, colour contrast
-  included, plus 320-pixel reflow, keyboard reach to the skip link, and the press
-  arriving from the inlined `static.css` — `mcp-dnsimple/tests/e2e/home.spec.ts`, nine tests,
-  wired into CI at `.github/workflows/e2e.yml`. `quality.yml` is untouched, as
-  this phase's Validation section requires; the browser suite is its own workflow
-  so a browser download stays off the fast feedback path.
-- **The container** builds, serves the page and the WOFF2 files, and its markup
-  matches a local render of the same source once the render timestamp is
-  normalised — that one value is the only difference, and it differs because each
-  process renders at its own boot. The exact, un-normalised comparison is the
-  golden above, which pins the model precisely so nothing has to be normalised
-  away. This was verified by hand at the time and is *not* automated; a container
-  smoke test is owed and is the honest gap in this phase's coverage.
+  included (`mcp-dnsimple/tests/e2e/home.spec.ts:188-199`), plus 320-pixel reflow
+  (`:142-151`), keyboard reach to the skip link (`:39-55`), and the press
+  arriving from the inlined `static.css` (`:62-108`) — nine tests, wired into CI
+  at `mcp-dnsimple/.github/workflows/e2e.yml`. `quality.yml`'s **check list** is
+  untouched as this phase's Validation requires; its trigger is not, because both
+  workflows were `pull_request`-only and two commits reached `main` directly
+  without either running. Both now also trigger on `push` to `main`.
+- **The container** builds, serves the page and the WOFF2 faces, and its markup
+  is byte-identical to a local render — `mcp-dnsimple/scripts/verify-container.mjs`,
+  run in CI by the `container` job at `.github/workflows/e2e.yml:69-90`. Nothing
+  is normalised away: the version and surface counts are read back from the
+  container's `/health` and the render timestamp from the served page's own
+  `datetime` attribute, so the local render uses the container's own inputs and
+  the comparison proves the image runs the same pure function of the same model.
+  The same script fails when the committed golden has gone stale against the
+  source. This closes the Validation item that asks for a `docker build`, a
+  `curl`, and a diff against the golden, which an earlier round of this migration
+  had done only by hand and only against a local render.
 
 Two things the phase did not anticipate, and two claims it made that did not
 survive contact, are recorded below: the page had a second off-origin request
@@ -2169,16 +2191,34 @@ here rather than silently corrected there.
     a renamed field and nothing else, and `server.ts` calls it the same way — but
     restoring only that function does not restore the page.
 
-    The migration also moved `@jflamb/keycaps-*`, `react`, and `react-dom` from
-    devDependencies to runtime dependencies, enabled JSX in `tsconfig.json`,
-    added a `/fonts` static route to `server.ts`, added a stylesheet-inlining
-    module, emptied `.keycaps-lint.json`, and widened the ESLint and lint-script
-    globs to `.tsx`. Reverting the commit works and is clean; reverting one
-    function leaves a page that references components nothing installs.
+    The migration also, all in `mcp-dnsimple`:
+
+    - moved `@jflamb/keycaps-react`, `@jflamb/keycaps-tokens`, `react`, and
+      `react-dom` out of devDependencies into runtime dependencies
+      (`package.json:26-31`), which the container needs because the render
+      happens in the running process;
+    - enabled JSX and widened the compiler's inputs to `.tsx`
+      (`tsconfig.json:4-5` and `:20`);
+    - added the `/fonts` static route the inlined `fonts.css` resolves against
+      (`src/server.ts:466-484`);
+    - added the stylesheet-inlining and token-reading module the page cannot
+      render without (`src/keycaps-assets.ts`, 104 lines);
+    - emptied the drift allowlist (`.keycaps-lint.json:7`);
+    - widened the ESLint globs (`eslint.config.js:6` and `:66`) and the lint
+      script (`package.json:17`) to `.tsx`;
+    - and added two CI workflows' worth of gate
+      (`.github/workflows/e2e.yml`, and the trigger on
+      `.github/workflows/quality.yml:6-10`).
+
+    Reverting the commit works and is clean; reverting one function leaves a page
+    that references components nothing installs, compiled by a `tsc` that no
+    longer accepts the file it lives in.
 
     The claim was not harmless — it is the sentence that makes this phase read as
     low-risk. The accurate version is that the *deploy* is the safe part:
-    `deploy.yml` gates prod on dev, which is a free canary, and `git revert` of a
-    single commit restores the previous page with no data-layer or route changes
-    to unwind. Phases 4 through 7 should state their rollback in commits rather
-    than in functions, because all four touch build configuration the same way.
+    `mcp-dnsimple/.github/workflows/deploy.yml` runs `deploy-dev` before
+    `deploy-prod` and gates prod on it, which is a free canary, and `git revert`
+    of a single commit restores the previous page with no data-layer or route
+    changes to unwind. Phases 4 through 7 should state their rollback in commits
+    rather than in functions, because all four touch build configuration the same
+    way.
