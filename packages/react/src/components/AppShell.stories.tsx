@@ -158,7 +158,7 @@ export const WithLogoMark: Story = {
             <Icon
               aria-hidden="true"
               name="wifi-high"
-              style={{ blockSize: "2rem", inlineSize: "2rem" }}
+              style={{ blockSize: "1.5rem", inlineSize: "1.5rem" }}
             />
             Workbench
           </>
@@ -215,7 +215,14 @@ const BaselineFixture = ({ withLogo }: { withLogo?: boolean }) => (
             <Icon
               aria-hidden="true"
               name="wifi-high"
-              style={{ blockSize: "2rem", inlineSize: "2rem" }}
+              style={{
+                blockSize: "2rem",
+                boxSizing: "border-box",
+                inlineSize: "2rem",
+                // Preserve the 32px layout stress while matching the public
+                // mark's 24px ink.
+                padding: "var(--kc-space-1)",
+              }}
             />
           ) : (
             <span aria-hidden="true">◆</span>

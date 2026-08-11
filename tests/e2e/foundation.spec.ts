@@ -577,6 +577,7 @@ for (const theme of ["light", "dark"] as const) {
           const actionsRect = actions.getBoundingClientRect();
           const brandRect = brand.getBoundingClientRect();
           const buttonRect = button.getBoundingClientRect();
+          const logoRect = brand.querySelector("svg")?.getBoundingClientRect();
           const root = document.documentElement;
           return {
             actionsCenter: (actionsRect.top + actionsRect.bottom) / 2,
@@ -586,6 +587,7 @@ for (const theme of ["light", "dark"] as const) {
             brandCenter: (brandRect.top + brandRect.bottom) / 2,
             buttonHeight: buttonRect.height,
             headerHeight: headerRect.height,
+            logoSize: logoRect ? [logoRect.width, logoRect.height] : null,
             pageFits: root.scrollWidth <= root.clientWidth,
           };
         });
@@ -594,6 +596,10 @@ for (const theme of ["light", "dark"] as const) {
         expect(geometry.buttonHeight, story).toBeGreaterThanOrEqual(36);
         expect(geometry.pageFits, story).toBe(true);
         expect(await page.locator("[data-baseline-probe]").count(), story).toBe(0);
+
+        if (story === "with-logo-mark") {
+          expect(geometry.logoSize, story).toEqual([24, 24]);
+        }
 
         if (story === "marketing-page") {
           expect(
@@ -618,17 +624,24 @@ for (const theme of ["light", "dark"] as const) {
             const navProbe = header.querySelector<HTMLElement>(
               '[data-baseline-probe="nav"]',
             )!;
+            const logo = header.querySelector<SVGSVGElement>(".kc-app-shell__brand > svg");
+            const logoRect = logo?.getBoundingClientRect();
+            const logoStyle = logo ? getComputedStyle(logo) : null;
             return {
               baselineDelta: Math.abs(
                 brandProbe.getBoundingClientRect().top - navProbe.getBoundingClientRect().top,
               ),
               headerHeight: header.getBoundingClientRect().height,
+              logoPadding: logoStyle ? Number.parseFloat(logoStyle.paddingInlineStart) : null,
+              logoSize: logoRect ? [logoRect.width, logoRect.height] : null,
               name: shell.getAttribute("data-baseline-fixture"),
             };
           }),
         );
 
         expect(fixtures.map(({ name }) => name)).toEqual(["text", "logo"]);
+        expect(fixtures.map(({ logoSize }) => logoSize)).toEqual([null, [32, 32]]);
+        expect(fixtures.map(({ logoPadding }) => logoPadding)).toEqual([null, 4]);
         await expect(page.locator('[data-baseline-probe="brand"]')).toHaveCount(2);
         await expect(page.locator('[data-baseline-probe="nav"]')).toHaveCount(2);
         for (const fixture of fixtures) {
