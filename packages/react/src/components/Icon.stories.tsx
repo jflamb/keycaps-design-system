@@ -94,7 +94,7 @@ export const TheWholeSet: Story = {
           }}
         >
           <Icon name={name} style={{ inlineSize: "1.75rem", blockSize: "1.75rem" }} />
-          <code style={{ fontSize: "var(--kc-font-size-2xs)" }}>{name}</code>
+          <code style={{ fontSize: "var(--kc-font-size-xs)" }}>{name}</code>
         </li>
       ))}
     </ul>
@@ -135,7 +135,7 @@ export const McpUnifiLandingPage: Story = {
           }}
         >
           <Icon name={name} style={{ blockSize: "2rem", inlineSize: "2rem" }} />
-          <code style={{ fontSize: "var(--kc-font-size-2xs)" }}>{name}</code>
+          <code style={{ fontSize: "var(--kc-font-size-xs)" }}>{name}</code>
         </li>
       ))}
     </ul>

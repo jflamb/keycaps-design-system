@@ -927,8 +927,8 @@ site with no build step, and this repo's first dark theme.
    Add it to `.prettierignore`-equivalents and state in the file header that it
    is generated — an editable generated file is a drift source.
 3. **Delete the local fonts.** Remove `site/fonts/*.woff2` (four files, ~163 KB)
-   and the four `@font-face` blocks at `mcp-unifi/site/styles.css:1-31` at `9faaa1c`.
-   The
+   and the four `@font-face` blocks at
+   `mcp-unifi/site/styles.css:1-31` at `9faaa1c`. The
    `font-variation-settings` declaration at line 174 goes with them: Piazzolla's
    `opsz` axis is never pinned, per the Optical Sizing Rule, and `SOFT` does not
    exist on it.
@@ -2346,9 +2346,9 @@ here rather than silently corrected there.
 
 41. **The Phase 2 recursive CSS ratchet would lint Keycaps' copied package CSS
     as if it were consumer CSS.** Before migration, `.keycaps-lint.json` scans
-    every stylesheet below `site/` (`mcp-unifi/.keycaps-lint.json:1-8` at `9faaa1c`).
-    After
-    the required build writes `site/kc/styles.css` and `site/kc/static.css`, that
+    every stylesheet below `site/`
+    (`mcp-unifi/.keycaps-lint.json:1-8` at `9faaa1c`). After the required build
+    writes `site/kc/styles.css` and `site/kc/static.css`, that
     glob reaches package-owned `.kc-` selectors and rule 2 correctly rejects
     them — but they are the implementation the consumer is meant to consume,
     not an override it authored.

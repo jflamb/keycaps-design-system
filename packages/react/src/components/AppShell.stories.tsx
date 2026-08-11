@@ -20,6 +20,7 @@ import {
   DescriptionTerm,
 } from "./DescriptionList.js";
 import { EmptyState } from "./EmptyState.js";
+import { Icon } from "../icons.js";
 import { PageHeader } from "./PageHeader.js";
 
 const RELEASE_STATUS_LINK =
@@ -44,7 +45,7 @@ const meta = {
           "",
           "The sidebar split uses flex wrapping rather than a second media query — the system is single-breakpoint, and a sidebar that reflows on its own content's terms is what the Intrinsic Maximum Rule asks for anyway. Drag the frame narrow to watch it drop.",
           "",
-          "Textual brand and navigation items share a baseline by default. The action slot stays centered independently, so buttons and badges keep their own control geometry when the bar wraps.",
+          "When both are present, textual brand and navigation items share a baseline by default. The bar and action slot otherwise stay centered, so navigation-free marketing headers, buttons, badges, and logo marks keep their own geometry when the bar wraps.",
         ].join("\n"),
       },
     },
@@ -54,9 +55,27 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const BaselineText = ({
+  children,
+  probe,
+}: {
+  children: string;
+  probe: "brand" | "nav";
+}) => (
+  <span>
+    {children}
+    <span
+      aria-hidden="true"
+      data-baseline-probe={probe}
+      style={{ blockSize: 0, display: "inline-block", inlineSize: 0 }}
+    />
+  </span>
+);
+
 const Wordmark = () => (
   <>
-    <span aria-hidden="true">◆</span> Workbench
+    <span aria-hidden="true">◆</span>
+    <BaselineText probe="brand">Workbench</BaselineText>
   </>
 );
 
@@ -83,7 +102,7 @@ export const Default: Story = {
       >
         <AppShellNav label="Sections">
           <AppShellNavLink href="#overview" isCurrent>
-            Overview
+            <BaselineText probe="nav">Overview</BaselineText>
           </AppShellNavLink>
           <AppShellNavLink href="#approvals">Approvals</AppShellNavLink>
           <AppShellNavLink href="#activity">Activity</AppShellNavLink>
@@ -145,6 +164,43 @@ export const Default: Story = {
       "page",
     );
   },
+};
+
+/** A graphic mark must not change the bar's baseline or cross-size. */
+export const WithLogoMark: Story = {
+  render: () => (
+    <AppShell>
+      <AppShellHeader
+        brand={
+          <>
+            <Icon
+              aria-hidden="true"
+              name="wifi-high"
+              style={{ blockSize: "2rem", inlineSize: "2rem" }}
+            />
+            <BaselineText probe="brand">Workbench</BaselineText>
+          </>
+        }
+        actions={
+          <Button size="small" variant="secondary">
+            Account
+          </Button>
+        }
+      >
+        <AppShellNav label="Sections">
+          <AppShellNavLink href="#overview" isCurrent>
+            <BaselineText probe="nav">Overview</BaselineText>
+          </AppShellNavLink>
+          <AppShellNavLink href="#activity">Activity</AppShellNavLink>
+        </AppShellNav>
+      </AppShellHeader>
+      <AppShellBody>
+        <AppShellMain>
+          <PageHeader title="Overview" description="A logo-mark header." />
+        </AppShellMain>
+      </AppShellBody>
+    </AppShell>
+  ),
 };
 
 /**

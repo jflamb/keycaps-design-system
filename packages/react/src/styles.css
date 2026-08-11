@@ -1185,12 +1185,21 @@ h3.kc-page-header__title {
 .kc-app-shell__header {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: var(--kc-space-3) var(--kc-space-5);
   min-block-size: 60px;
   padding: var(--kc-space-2) var(--kc-space-5);
   border-block-end: 1px solid var(--kc-color-divider);
   background: var(--kc-color-surface-raised);
+}
+
+/* Brand and navigation are the textual baseline group. Keep the bar itself
+   centered so a marketing header with no navigation does not pull its wordmark
+   to the block-start edge, and so unrelated action geometry cannot enlarge the
+   group. */
+.kc-app-shell__header:has(> .kc-app-shell__brand):has(> .kc-app-shell__nav)
+  > :is(.kc-app-shell__brand, .kc-app-shell__nav) {
+  align-self: baseline;
 }
 
 .kc-app-shell__header[data-sticky] {
@@ -1201,12 +1210,17 @@ h3.kc-page-header__title {
 
 .kc-app-shell__brand {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: var(--kc-space-2);
   font-family: var(--kc-font-display);
   font-size: var(--kc-font-size-xl);
   font-weight: var(--kc-font-weight-title);
   line-height: var(--kc-line-height-heading);
+}
+
+/* A logo mark contributes size, not the wordmark's text baseline. */
+.kc-app-shell__brand > :where(svg, img) {
+  align-self: center;
 }
 
 .kc-app-shell__nav {
@@ -1253,7 +1267,6 @@ h3.kc-page-header__title {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  align-self: center;
   gap: var(--kc-space-2);
   margin-inline-start: auto;
 }
