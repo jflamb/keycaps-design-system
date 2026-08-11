@@ -653,31 +653,32 @@ depends on it.
 **It does prove it**, and every claim below cites where it is checked rather than
 where it was observed.
 
-- **No client React, rendered at startup, once per process.**
-  `mcp-dnsimple/src/server.ts:441-466` renders eagerly in `createApp` rather than
+- **No client React, rendered at startup, once per surface per process.**
+  `mcp-dnsimple/src/server.ts:442-466` renders eagerly in `createApp` rather than
   in the request handler and serves the memoised string at `:463-465`, through
-  `renderHomePageOnce` (`src/branding.tsx:578-607`). It is once *per surface* per
-  process rather than once per process — the memo is keyed on the serialized
-  surface — and `mcp-dnsimple/tests/server.test.ts:83-106` is the assertion that
-  needs it: two independently built apps for one surface must return identical
-  bytes, with the render timestamp as the discriminator, and a third app for a
-  different surface must differ. `:73-81` covers the weaker claim that one app
-  serves every request the same bytes. This is the ADR's own carve-out for this repo — "`mcp-dnsimple` already
+  `renderHomePageOnce` (`src/branding.tsx:604-620`). The cardinality is once *per
+  surface* per process, because the memo is keyed on the serialized surface.
+  `mcp-dnsimple/tests/home-golden.test.ts:43-67` is the proof, and it counts an
+  injected clock's calls rather than comparing timestamps — two uncached renders
+  inside one millisecond produce the same ISO string, so a timestamp comparison
+  can pass for the wrong reason. `tests/server.test.ts:83-107` proves the wiring,
+  that `createApp` reaches the memo at all, and `:73-81` the weaker claim that
+  one app serves every request the same bytes. This is the ADR's own carve-out for this repo — "`mcp-dnsimple` already
   builds with `tsc` and can render at module load"
   ([ADR 0002](../decisions/0002-consumer-delivery.md), line 136) — rather than the
   build-time render the ADR's general statement at line 37 describes; the literal
   module load of `branding.tsx` is too early, because the surface counts come
   from a metadata server `src/index.ts:18-19` builds during startup.
 - **A committed golden**, `mcp-dnsimple/tests/__golden__/home.html`, compared
-  against a pinned model in `tests/home-golden.test.ts:23-43`. The model lives in
+  against a pinned model in `tests/home-golden.test.ts:30-41`. The model lives in
   `tests/__golden__/model.json` because the container verifier needs the same
   values and two copies of a fixture drift. The comparison is exact rather than a
   diff with a timestamp normalised out: the page has one value that varies per
   process, and pinning the model removes it.
 - **Zero class names outside `kc-`, no page-owned stylesheet, and no page-owned
-  visual treatment** — `mcp-dnsimple/tests/server.test.ts:83-150`. Three separate
+  visual treatment** — `mcp-dnsimple/tests/server.test.ts:109-176`. Three separate
   assertions, and the third is narrower than an earlier draft of this section
-  claimed. The page *does* own CSS: `src/branding.tsx:130-161` sets inline styles
+  claimed. The page *does* own CSS: `src/branding.tsx:131-161` sets inline styles
   for composition — how many cards sit in a row, and how far apart. What it owns
   none of is treatment, and the test holds it there by requiring every inline
   declaration to be a layout property, with the only two exceptions pinned to
@@ -685,23 +686,28 @@ where it was observed.
   claim no such element exists, because the Keycaps stylesheets are inlined; it
   claims every one of them is byte-identical to a file this repo did not write.
 - **Zero off-origin requests**, at two levels: a response-body tripwire in
-  `mcp-dnsimple/tests/server.test.ts:152-174`, and a request interceptor in
-  `mcp-dnsimple/tests/e2e/home.spec.ts:110-140`. The same browser test confirms
+  `mcp-dnsimple/tests/server.test.ts:178-200`, and a request interceptor in
+  `mcp-dnsimple/tests/e2e/home.spec.ts:110-138`. The same browser test confirms
   Piazzolla, Sofia Sans, and Lilex reach `status: "loaded"` after
   `document.fonts.ready` — the family name alone proves nothing, because a face
   that 404s is still in `document.fonts` with `status: "error"`.
 - **Axe-clean in light and dark with no rule switched off**, colour contrast
   included (`mcp-dnsimple/tests/e2e/home.spec.ts:188-199`), plus 320-pixel reflow
-  (`:140-151`, the viewport set at `:141`), keyboard reach to the skip link
-  (`:39-55`), and the press arriving from the inlined `static.css` (`:62-108`) — nine tests, wired into CI
+  (`mcp-dnsimple/tests/e2e/home.spec.ts:140-150`, the viewport set at `:141`),
+  keyboard reach to the skip link (`:39-55`), and the press arriving from the
+  inlined `static.css` (`:62-108`) — nine tests, wired into CI
   at `mcp-dnsimple/.github/workflows/e2e.yml`. `quality.yml`'s **check list** is
   untouched as this phase's Validation requires; its trigger is not, because both
   workflows were `pull_request`-only and two commits reached `main` directly
   without either running. Both now also trigger on `push` to `main`.
-- **The container** builds, serves the page and all four WOFF2 faces, and its
-  markup is byte-identical to a local render —
-  `mcp-dnsimple/scripts/verify-container.mjs` (203 lines; canonicalisation at
-  `:75-110`),
+- **The container** builds, serves the page and all four WOFF2 faces, and is
+  checked two ways with deliberately different strengths. Byte-identical to a
+  local render, exactly and with nothing normalised, because every input is read
+  back out of the container; and equal to the committed golden once five
+  deployment values are canonicalised, which is the most that can be asked when
+  the golden pins a model no deployment has. Each swap asserts it fired —
+  `mcp-dnsimple/scripts/verify-container.mjs` (206 lines; canonicalisation at
+  `:75-103`),
   run in CI by the `container` job at `.github/workflows/e2e.yml:74-95`, which
   invokes it at `:95`. Nothing
   is normalised away: the version and surface counts are read back from the
@@ -726,8 +732,11 @@ workspace link, deliberately. `mcp-dnsimple/tsconfig.json` sets
 `skipLibCheck: true`, and a linked dependency type-checks against something other
 than the artifact npm ships — which is the precise blind spot that let 0.1.2
 resolve every export to `any`. `mcp-dnsimple/src/keycaps-contract.ts` (64 lines) is the retained proof: `IsAny`
-probes across the root and the `./static` subpath at `:44-52`, plus two
-`@ts-expect-error` directives on invalid prop values at `:55-61`. It is types-only, covered
+probes across the root at `src/keycaps-contract.ts:45-49` and the `./static`
+subpath at `:53`, plus two `@ts-expect-error` directives on invalid prop values
+at `src/keycaps-contract.ts:57` and `:61`. Both are
+covered by `npm run build` and `npm run typecheck` (`package.json:11` and `:14`)
+because `tsconfig.json:20` includes the file. It is types-only, covered
 by `npm run typecheck` and `npm run build`, and it fails loudly in the right
 direction — replacing the invalid variant with a valid one turns the directive
 itself into `TS2578`.
@@ -768,7 +777,8 @@ indistinguishable from passing correctly right up until a prop is wrong.
    correctly, and both Keycaps packages declare one; from 0.1.3 the inner half —
    the relative specifiers inside the declarations — resolves too. Pin
    `^0.1.3`, not `^0.1.2`. See the note above this list.
-2. **Render at module load.** `branding.ts` already computes its page from a
+2. **Render at module load.** *(Shipped as once per surface per process — see
+   the note at the head of this phase.)* `branding.ts` already computes its page from a
    `HomePageModel`; keep that contract. Replace the body of `renderHomePage`
    with a `renderStaticDocument` call whose children are Keycaps components. The
    render happens once per process at first request, or eagerly at module load —
@@ -2191,12 +2201,12 @@ here rather than silently corrected there.
     There is no anchor in any of the four, and nothing to point one at: they are
     example sentences to say to Claude, not destinations.
 
-    They ship as plain Cards (`mcp-dnsimple/src/branding.tsx:408-430`). A
+    They ship as plain Cards (`mcp-dnsimple/src/branding.tsx:409-430`). A
     `CardLink` would have needed a URL invented for it, and a linked Card that
     navigates nowhere is a worse defect than the one this rule exists to prevent.
 
     The endpoint cards, which do navigate, are linked
-    (`mcp-dnsimple/src/branding.tsx:350-369`), so the distinction the step drew
+    (`mcp-dnsimple/src/branding.tsx:351-369`), so the distinction the step drew
     for `.endpoint` is the one that generalises. Phases 5 through 7 should read
     "becomes a linked Card" as conditional on a destination existing, everywhere
     it appears.
@@ -2216,15 +2226,16 @@ here rather than silently corrected there.
     - enabled JSX and widened the compiler's inputs to `.tsx`
       (`tsconfig.json:4-5` and `:20`);
     - added the `/fonts` static route the inlined `fonts.css` resolves against
-      (`src/server.ts:466-484`);
+      (`src/server.ts:467-484`);
     - added the stylesheet-inlining and token-reading module the page cannot
       render without (`src/keycaps-assets.ts`, 104 lines);
     - emptied the drift allowlist (`.keycaps-lint.json:7`);
     - widened the ESLint globs (`eslint.config.js:6` and `:66`) and the lint
       script (`package.json:17`) to `.tsx`;
-    - and added two CI workflows' worth of gate
-      (`.github/workflows/e2e.yml`, and the trigger on
-      `.github/workflows/quality.yml:6-10`).
+    - and added two CI workflows' worth of gate — the browser job at
+      `.github/workflows/e2e.yml:27-67` and the container job at `:69-95`, plus
+      the `push` trigger on `main` at `:14-21` and its counterpart on
+      `.github/workflows/quality.yml:3-10`.
 
     Reverting the commit works and is clean; reverting one function leaves a page
     that references components nothing installs, compiled by a `tsc` that no
