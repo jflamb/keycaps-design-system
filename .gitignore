@@ -7,3 +7,6 @@ test-results/
 coverage/
 *.tsbuildinfo
 .DS_Store
+
+# Consumer checkouts made by CI for citation verification
+.consumers/
