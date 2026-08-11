@@ -642,27 +642,57 @@ on its own.
 with `tsc`, and it proves the whole Mode 1 path end to end before a second repo
 depends on it.
 
-**It does prove it.** The page ships no client React, and everything Mode 1
-claims held on contact: `renderStaticDocument` produced the document, the
-inlined `static.css` gave the copy key its hover and its 3px press with the wall
-compressing 4px to 1px, the theme bootstrap and `prefers-color-scheme` both
-resolve, and a nine-test browser suite is axe-clean in light *and* dark with no
-rule switched off, including colour contrast. The rendered markup carries **zero
-class names outside `kc-`** and makes **zero off-origin requests**. Container
-output is byte-identical to the local render.
+**It does prove it**, and every claim below cites where it is checked rather than
+where it was observed.
 
-Two things the phase did not anticipate, both recorded below: the page had a
-second off-origin request nobody had counted ([34](#corrections-to-the-survey)),
-and the exit criterion this phase declared unreachable is reachable
-([35](#corrections-to-the-survey)) — the allowlist is empty.
+- **No client React, rendered once per process.** `mcp-dnsimple/src/server.ts:442-465`
+  renders on the first request that needs it and serves the same string
+  thereafter, which is step 2 of this phase read strictly.
+  `mcp-dnsimple/tests/server.test.ts:65-81` asserts two requests return identical bytes.
+- **A committed golden**, `mcp-dnsimple/tests/__golden__/home.html`, compared against a
+  pinned model in `tests/home-golden.test.ts:24-42`. The comparison is exact rather than a
+  diff with a timestamp normalised out: the page has one value that varies per
+  process, and pinning the model removes it.
+- **Zero class names outside `kc-`, and no CSS of the page's own.**
+  `mcp-dnsimple/tests/server.test.ts:83-112` — which does not assert that no `<style>`
+  element exists, because the Keycaps stylesheets are inlined, but that every one
+  of them is byte-identical to a file this repo did not write.
+- **Zero off-origin requests**, at two levels: a response-body tripwire in
+  `mcp-dnsimple/tests/server.test.ts:114-136`, and a request interceptor in
+  `mcp-dnsimple/tests/e2e/home.spec.ts:110-128` that also confirms Piazzolla and Sofia Sans
+  actually load rather than silently falling back.
+- **Axe-clean in light and dark with no rule switched off**, colour contrast
+  included, plus 320-pixel reflow, keyboard reach to the skip link, and the press
+  arriving from the inlined `static.css` — `mcp-dnsimple/tests/e2e/home.spec.ts`, nine tests,
+  wired into CI at `.github/workflows/e2e.yml`. `quality.yml` is untouched, as
+  this phase's Validation section requires; the browser suite is its own workflow
+  so a browser download stays off the fast feedback path.
+- **The container** builds, serves the page and the WOFF2 files, and its markup
+  matches a local render of the same source once the render timestamp is
+  normalised — that one value is the only difference, and it differs because each
+  process renders at its own boot. The exact, un-normalised comparison is the
+  golden above, which pins the model precisely so nothing has to be normalised
+  away. This was verified by hand at the time and is *not* automated; a container
+  smoke test is owed and is the honest gap in this phase's coverage.
+
+Two things the phase did not anticipate, and two claims it made that did not
+survive contact, are recorded below: the page had a second off-origin request
+nobody had counted ([34](#corrections-to-the-survey)), the exit criterion this
+phase declared unreachable is reachable ([35](#corrections-to-the-survey)), the
+prompt cards have nowhere to link to ([36](#corrections-to-the-survey)), and the
+rollback unit is the commit rather than one function
+([37](#corrections-to-the-survey)).
 
 It was migrated against published `@jflamb/keycaps-react@0.1.3` rather than a
-workspace link, deliberately. This repo sets `skipLibCheck: true`, and a linked
-dependency type-checks against something other than the artifact npm ships —
-which is the precise blind spot that let 0.1.2 resolve every export to `any`. The
-first thing this phase did was assert, with a `@ts-expect-error` on a bad variant
-and an `IsAny` probe, that 0.1.3's published declarations resolve to real types
-under this repo's `Node16` resolution. They do.
+workspace link, deliberately. `mcp-dnsimple/tsconfig.json` sets
+`skipLibCheck: true`, and a linked dependency type-checks against something other
+than the artifact npm ships — which is the precise blind spot that let 0.1.2
+resolve every export to `any`. `mcp-dnsimple/src/keycaps-contract.ts` is the retained proof:
+`IsAny` probes across the root and the `./static` subpath, plus two
+`@ts-expect-error` directives on invalid prop values. It is types-only, covered
+by `npm run typecheck` and `npm run build`, and it fails loudly in the right
+direction — replacing the invalid variant with a valid one turns the directive
+itself into `TS2578`.
 
 ### Inputs
 
@@ -756,12 +786,9 @@ indistinguishable from passing correctly right up until a prop is wrong.
   OG card follows the palette. Pick one during this phase rather than discovering
   it at the exit gate.
 
-  **Met.** The second option, in `src/keycaps-assets.ts`: the token layer's
-  `:root` block is read out of `node_modules` at module load, `var()` aliases are
-  followed to a literal, and the favicon and OG card interpolate the result. The
-  allowlist is empty and `keycaps-css-lint` reports 36 files clean. The
-  "not reachable as written" verdict was wrong — see
-  [correction 35](#corrections-to-the-survey).
+  **Met**, by the second option, in `mcp-dnsimple/src/keycaps-assets.ts`. The
+  "not reachable as written" verdict was wrong; see
+  [correction 35](#corrections-to-the-survey) for how and what it bought.
 - The page makes zero off-origin requests. Assert it the way
   `scripts/verify-pages-build.mjs` already does here: fail the test if any
   request leaves the origin.
@@ -2078,8 +2105,8 @@ here rather than silently corrected there.
 34. **`mcp-dnsimple`'s page made two kinds of off-origin request, and Phase 3
     named only one.** The phase's font step is right that the Google Fonts CDN
     has to go — three faces plus two `preconnect` hints. What it never mentions
-    is `HEALTH_BADGE_URL` (`src/branding.ts:49-51`), an `img.shields.io` badge
-    rendered as an `<img>` in the footer, which is a fourth request to a third
+    is `HEALTH_BADGE_URL` (`mcp-dnsimple/src/branding.ts:49-51` at `0f84dc6`,
+    rendered at `:1011-1013`), an `img.shields.io` badge in the footer, which is a fourth request to a third
     party on every page load and the only one that also leaks a visit to an
     analytics-capable host.
 
@@ -2104,12 +2131,54 @@ here rather than silently corrected there.
     Both of the phase's suggested fixes work, and the one it preferred — drive
     the colours from token values at render time — turned out to need about
     forty lines: read `tokens.css` out of `node_modules`, take the first `:root`
-    block, follow `var()` aliases to a literal, and interpolate. The allowlist in
-    `.keycaps-lint.json` is now empty and `keycaps-css-lint` reports 36 files
-    clean. Recorded because the criterion is quoted in the phase map as a known
+    block, follow `var()` aliases to a literal, and interpolate
+    (`mcp-dnsimple/src/keycaps-assets.ts:64-104`, consumed at
+    `src/branding.tsx:47-55`). The allowlist in `mcp-dnsimple/.keycaps-lint.json`
+    is now empty and `keycaps-css-lint` reports 37 files clean. Recorded because the criterion is quoted in the phase map as a known
     exception, and it is no longer one.
 
     The side effect is the part worth keeping: the favicon and the Open Graph
     card now change colour when the palette does, which is the only version of
     this where the brand mark is actually part of the system rather than a
     picture of it.
+
+36. **The prompt cards have nowhere to link to, so they are not linked Cards.**
+    Step 5 of this phase says "`.prompt-card` becomes a linked Card", and unlike
+    the `.endpoint` row beside it — which it leaves as a choice, "decide by
+    whether they navigate" — it states this one flatly. The markup does not
+    support it. Each `.prompt-card` is an `<li>` holding a `<span>`, a
+    `<blockquote>`, and a `<p>` of tool names
+    (`mcp-dnsimple/src/branding.ts:975-996` at `0f84dc6`, the four `<li>` at
+    `:976`, `:981`, `:986`, and `:991`).
+    There is no anchor in any of the four, and nothing to point one at: they are
+    example sentences to say to Claude, not destinations.
+
+    They ship as plain Cards (`mcp-dnsimple/src/branding.tsx:408-430`). A
+    `CardLink` would have needed a URL invented for it, and a linked Card that
+    navigates nowhere is a worse defect than the one this rule exists to prevent.
+
+    The endpoint cards, which do navigate, are linked
+    (`mcp-dnsimple/src/branding.tsx:350-369`), so the distinction the step drew
+    for `.endpoint` is the one that generalises. Phases 5 through 7 should read
+    "becomes a linked Card" as conditional on a destination existing, everywhere
+    it appears.
+
+37. **The rollback unit is the commit, not `renderHomePage`.** This phase's
+    Rollback section says "`renderHomePage` keeps its signature throughout, so
+    the rollback unit is one function." The signature was kept — the model gained
+    a renamed field and nothing else, and `server.ts` calls it the same way — but
+    restoring only that function does not restore the page.
+
+    The migration also moved `@jflamb/keycaps-*`, `react`, and `react-dom` from
+    devDependencies to runtime dependencies, enabled JSX in `tsconfig.json`,
+    added a `/fonts` static route to `server.ts`, added a stylesheet-inlining
+    module, emptied `.keycaps-lint.json`, and widened the ESLint and lint-script
+    globs to `.tsx`. Reverting the commit works and is clean; reverting one
+    function leaves a page that references components nothing installs.
+
+    The claim was not harmless — it is the sentence that makes this phase read as
+    low-risk. The accurate version is that the *deploy* is the safe part:
+    `deploy.yml` gates prod on dev, which is a free canary, and `git revert` of a
+    single commit restores the previous page with no data-layer or route changes
+    to unwind. Phases 4 through 7 should state their rollback in commits rather
+    than in functions, because all four touch build configuration the same way.
