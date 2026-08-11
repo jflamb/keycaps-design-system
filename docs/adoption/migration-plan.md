@@ -638,6 +638,14 @@ on its own.
 
 ## Phase 3 — `mcp-dnsimple` (Mode 1) — **shipped**
 
+> **Evidence commit: `jflamb/mcp-dnsimple@0a8bf8d`.** Every consumer citation in
+> this section resolves against that commit, and this section must not merge
+> until it is on `mcp-dnsimple`'s `origin/main`. This document's own rule is to
+> measure a consumer with `git show origin/main:<path>` and never from a working
+> tree or a branch — correction 4 of Phase 4's inputs is the whole cost of
+> breaking it — and a section marked *shipped* against an open pull request
+> breaks it in the same way, one repository over.
+
 **Why first among the consumers:** the smallest surface, one file, already builds
 with `tsc`, and it proves the whole Mode 1 path end to end before a second repo
 depends on it.
@@ -646,19 +654,24 @@ depends on it.
 where it was observed.
 
 - **No client React, rendered at startup, once per process.**
-  `mcp-dnsimple/src/server.ts:441-462` renders eagerly in `createApp` rather than
-  in the request handler, through `renderHomePageOnce`
-  (`src/branding.tsx:571-600`), which memoises on the surface so repeated
-  `createApp` calls in a process render once.
-  `mcp-dnsimple/tests/server.test.ts:65-81` asserts two requests return identical
-  bytes. This is the ADR's own carve-out for this repo — "`mcp-dnsimple` already
+  `mcp-dnsimple/src/server.ts:441-466` renders eagerly in `createApp` rather than
+  in the request handler and serves the memoised string at `:463-465`, through
+  `renderHomePageOnce` (`src/branding.tsx:578-607`). It is once *per surface* per
+  process rather than once per process — the memo is keyed on the serialized
+  surface — and `mcp-dnsimple/tests/server.test.ts:83-106` is the assertion that
+  needs it: two independently built apps for one surface must return identical
+  bytes, with the render timestamp as the discriminator, and a third app for a
+  different surface must differ. `:73-81` covers the weaker claim that one app
+  serves every request the same bytes. This is the ADR's own carve-out for this repo — "`mcp-dnsimple` already
   builds with `tsc` and can render at module load"
   ([ADR 0002](../decisions/0002-consumer-delivery.md), line 136) — rather than the
   build-time render the ADR's general statement at line 37 describes; the literal
   module load of `branding.tsx` is too early, because the surface counts come
   from a metadata server `src/index.ts:18-19` builds during startup.
-- **A committed golden**, `mcp-dnsimple/tests/__golden__/home.html`, compared against a
-  pinned model in `tests/home-golden.test.ts:24-42`. The comparison is exact rather than a
+- **A committed golden**, `mcp-dnsimple/tests/__golden__/home.html`, compared
+  against a pinned model in `tests/home-golden.test.ts:23-43`. The model lives in
+  `tests/__golden__/model.json` because the container verifier needs the same
+  values and two copies of a fixture drift. The comparison is exact rather than a
   diff with a timestamp normalised out: the page has one value that varies per
   process, and pinning the model removes it.
 - **Zero class names outside `kc-`, no page-owned stylesheet, and no page-owned
@@ -679,15 +692,18 @@ where it was observed.
   that 404s is still in `document.fonts` with `status: "error"`.
 - **Axe-clean in light and dark with no rule switched off**, colour contrast
   included (`mcp-dnsimple/tests/e2e/home.spec.ts:188-199`), plus 320-pixel reflow
-  (`:142-151`), keyboard reach to the skip link (`:39-55`), and the press
-  arriving from the inlined `static.css` (`:62-108`) — nine tests, wired into CI
+  (`:140-151`, the viewport set at `:141`), keyboard reach to the skip link
+  (`:39-55`), and the press arriving from the inlined `static.css` (`:62-108`) — nine tests, wired into CI
   at `mcp-dnsimple/.github/workflows/e2e.yml`. `quality.yml`'s **check list** is
   untouched as this phase's Validation requires; its trigger is not, because both
   workflows were `pull_request`-only and two commits reached `main` directly
   without either running. Both now also trigger on `push` to `main`.
-- **The container** builds, serves the page and the WOFF2 faces, and its markup
-  is byte-identical to a local render — `mcp-dnsimple/scripts/verify-container.mjs`,
-  run in CI by the `container` job at `.github/workflows/e2e.yml:69-90`. Nothing
+- **The container** builds, serves the page and all four WOFF2 faces, and its
+  markup is byte-identical to a local render —
+  `mcp-dnsimple/scripts/verify-container.mjs` (203 lines; canonicalisation at
+  `:75-110`),
+  run in CI by the `container` job at `.github/workflows/e2e.yml:74-95`, which
+  invokes it at `:95`. Nothing
   is normalised away: the version and surface counts are read back from the
   container's `/health` and the render timestamp from the served page's own
   `datetime` attribute, so the local render uses the container's own inputs and
@@ -709,9 +725,9 @@ It was migrated against published `@jflamb/keycaps-react@0.1.3` rather than a
 workspace link, deliberately. `mcp-dnsimple/tsconfig.json` sets
 `skipLibCheck: true`, and a linked dependency type-checks against something other
 than the artifact npm ships — which is the precise blind spot that let 0.1.2
-resolve every export to `any`. `mcp-dnsimple/src/keycaps-contract.ts` is the retained proof:
-`IsAny` probes across the root and the `./static` subpath, plus two
-`@ts-expect-error` directives on invalid prop values. It is types-only, covered
+resolve every export to `any`. `mcp-dnsimple/src/keycaps-contract.ts` (64 lines) is the retained proof: `IsAny`
+probes across the root and the `./static` subpath at `:44-52`, plus two
+`@ts-expect-error` directives on invalid prop values at `:55-61`. It is types-only, covered
 by `npm run typecheck` and `npm run build`, and it fails loudly in the right
 direction — replacing the invalid variant with a valid one turns the directive
 itself into `TS2578`.
@@ -2216,8 +2232,8 @@ here rather than silently corrected there.
 
     The claim was not harmless — it is the sentence that makes this phase read as
     low-risk. The accurate version is that the *deploy* is the safe part:
-    `mcp-dnsimple/.github/workflows/deploy.yml` runs `deploy-dev` before
-    `deploy-prod` and gates prod on it, which is a free canary, and `git revert`
+    `mcp-dnsimple/.github/workflows/deploy.yml:19-28` runs `deploy-dev` before
+    `deploy-prod` and gates prod on it with `needs`, which is a free canary, and `git revert`
     of a single commit restores the previous page with no data-layer or route
     changes to unwind. Phases 4 through 7 should state their rollback in commits
     rather than in functions, because all four touch build configuration the same
