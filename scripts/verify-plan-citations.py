@@ -18,7 +18,7 @@ durable; it does not authenticate who produced it.
 
 ## Scope
 
-Phase 3 and corrections 34-37 own `mcp-dnsimple`; Phase 4 and corrections 38-40
+Phase 3 and corrections 34-37 own `mcp-dnsimple`; Phase 4 and corrections 38-41
 own `mcp-unifi`. Ranged consumer citations in those sections must carry their
 repo prefix. Occurrences are counted rather than set-collapsed, so deleting one
 of two uses of the same range fails.
@@ -151,7 +151,7 @@ def consumer_sections(plan: str) -> Iterator[tuple[str, str, str]]:
     )
     yield (
         "mcp-unifi",
-        "corrections 38-40",
+        "corrections 38-41",
         section(plan, "\n38. **", None),
     )
 

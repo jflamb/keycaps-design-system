@@ -62,6 +62,20 @@ const MANIFEST = [
   { name: "x" },
   { name: "magnifying-glass" },
 
+  // mcp-unifi's reviewed Phase 4 landing-page composition. These remain
+  // component-only: the runtime path and supported-area list render real SVG
+  // elements, while prose has no matching pseudo-element to mask.
+  { name: "arrow-right" },
+  { name: "cloud-arrow-up" },
+  { name: "globe-hemisphere-west" },
+  { name: "hard-drives" },
+  { name: "laptop" },
+  { name: "shield-check" },
+  { name: "terminal-window" },
+  { name: "tree-structure" },
+  { name: "users-three" },
+  { name: "wifi-high" },
+
   // The theme toggle's three states. `circle-half` is the conventional mark for
   // following the system, and the toggle needs it because "no preference
   // stored" is a real state rather than the absence of one.

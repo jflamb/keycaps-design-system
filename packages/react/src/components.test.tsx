@@ -613,6 +613,23 @@ describe("the static-render path", () => {
 describe("Icon", () => {
   const glyph = (container: HTMLElement) => container.querySelector("svg")!;
 
+  it("vendors every regular glyph mcp-unifi's reviewed landing page uses", () => {
+    expect(iconNames).toEqual(
+      expect.arrayContaining([
+        "arrow-right",
+        "cloud-arrow-up",
+        "globe-hemisphere-west",
+        "hard-drives",
+        "laptop",
+        "shield-check",
+        "terminal-window",
+        "tree-structure",
+        "users-three",
+        "wifi-high",
+      ]),
+    );
+  });
+
   it("hides an unnamed glyph from assistive technology", () => {
     // An icon beside its own label is decoration. Naming it repeats the label
     // to a screen reader, which is worse than leaving it unnamed.

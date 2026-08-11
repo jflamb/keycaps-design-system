@@ -20,6 +20,7 @@ import {
   DescriptionTerm,
 } from "./DescriptionList.js";
 import { EmptyState } from "./EmptyState.js";
+import { Icon } from "../icons.js";
 import { PageHeader } from "./PageHeader.js";
 
 const RELEASE_STATUS_LINK =
@@ -43,6 +44,8 @@ const meta = {
           "**The skip link is rendered by default and first in the DOM.** Two of the five consumers have none at all; making it the shell's responsibility is the only way that floor holds across five codebases.",
           "",
           "The sidebar split uses flex wrapping rather than a second media query — the system is single-breakpoint, and a sidebar that reflows on its own content's terms is what the Intrinsic Maximum Rule asks for anyway. Drag the frame narrow to watch it drop.",
+          "",
+          "When both are present, textual brand and navigation items share a baseline by default. The bar and action slot otherwise stay centered, so navigation-free marketing headers, buttons, badges, and logo marks keep their own geometry when the bar wraps.",
         ].join("\n"),
       },
     },
@@ -143,6 +146,116 @@ export const Default: Story = {
       "page",
     );
   },
+};
+
+/** A graphic mark must not change the bar's baseline or cross-size. */
+export const WithLogoMark: Story = {
+  render: () => (
+    <AppShell>
+      <AppShellHeader
+        brand={
+          <>
+            <Icon
+              aria-hidden="true"
+              name="wifi-high"
+              style={{ blockSize: "1.5rem", inlineSize: "1.5rem" }}
+            />
+            Workbench
+          </>
+        }
+        actions={
+          <Button size="small" variant="secondary">
+            Account
+          </Button>
+        }
+      >
+        <AppShellNav label="Sections">
+          <AppShellNavLink href="#overview" isCurrent>
+            Overview
+          </AppShellNavLink>
+          <AppShellNavLink href="#activity">Activity</AppShellNavLink>
+        </AppShellNav>
+      </AppShellHeader>
+      <AppShellBody>
+        <AppShellMain>
+          <PageHeader title="Overview" description="A logo-mark header." />
+        </AppShellMain>
+      </AppShellBody>
+    </AppShell>
+  ),
+};
+
+const BaselineText = ({
+  children,
+  probe,
+}: {
+  children: string;
+  probe: "brand" | "nav";
+}) => (
+  <span>
+    {children}
+    <span
+      aria-hidden="true"
+      data-baseline-probe={probe}
+      style={{ blockSize: 0, display: "inline-block", inlineSize: 0 }}
+    />
+  </span>
+);
+
+const BaselineFixture = ({ withLogo }: { withLogo?: boolean }) => (
+  <AppShell
+    data-baseline-fixture={withLogo ? "logo" : "text"}
+    skipLink={false}
+    style={{ minBlockSize: "auto" }}
+  >
+    <AppShellHeader
+      brand={
+        <>
+          {withLogo ? (
+            <Icon
+              aria-hidden="true"
+              name="wifi-high"
+              style={{
+                blockSize: "2rem",
+                boxSizing: "border-box",
+                inlineSize: "2rem",
+                // Preserve the 32px layout stress while matching the public
+                // mark's 24px ink.
+                padding: "var(--kc-space-1)",
+              }}
+            />
+          ) : (
+            <span aria-hidden="true">◆</span>
+          )}
+          <BaselineText probe="brand">Workbench</BaselineText>
+        </>
+      }
+      actions={
+        <Button size="small" variant="secondary">
+          Account
+        </Button>
+      }
+    >
+      <AppShellNav label="Sections">
+        <AppShellNavLink href="#overview" isCurrent>
+          <BaselineText probe="nav">Overview</BaselineText>
+        </AppShellNavLink>
+        <AppShellNavLink href="#activity">Activity</AppShellNavLink>
+      </AppShellNav>
+    </AppShellHeader>
+  </AppShell>
+);
+
+/** Playwright-only baseline probes; hidden from the generated component docs. */
+export const BaselineRegressionFixture: Story = {
+  parameters: { docs: { disable: true } },
+  tags: ["!autodocs"],
+  render: () => (
+    <div style={{ display: "grid", gap: "var(--kc-space-5)" }}>
+      <BaselineFixture />
+      <BaselineFixture withLogo />
+    </div>
+  ),
 };
 
 /**

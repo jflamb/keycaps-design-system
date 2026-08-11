@@ -106,7 +106,36 @@ class CitationGateTest(unittest.TestCase):
             plan_with(correction_38="`site/styles.css:1`"), {}
         )
         self.assertEqual(result, 1)
-        self.assertIn("corrections 38-40 citation", output)
+        self.assertIn("corrections 38-41 citation", output)
+
+    def test_scoped_mcp_unifi_citation_uses_its_own_evidence_pin(self) -> None:
+        parsed = list(
+            checker.citations(
+                "`mcp-unifi/src/site-page.tsx:94-130`",
+                {"mcp-dnsimple": DNSIMPLE_PIN, "mcp-unifi": UNIFI_PIN},
+            )
+        )
+        self.assertEqual(
+            parsed,
+            [
+                checker.Citation(
+                    "mcp-unifi",
+                    "src/site-page.tsx",
+                    True,
+                    94,
+                    130,
+                    UNIFI_PIN,
+                )
+            ],
+        )
+
+    def test_scoped_mcp_unifi_manifest_entry_passes(self) -> None:
+        key = f"mcp-unifi/src/site-page.tsx:94-130@{UNIFI_PIN}"
+        result, output = self.run_verify(
+            plan_with(phase_4_citation="`mcp-unifi/src/site-page.tsx:94-130`"),
+            {key: {"occurrences": 1}},
+        )
+        self.assertEqual(result, 0, output)
 
     def test_scoped_unrecorded_citation_fails(self) -> None:
         result, output = self.run_verify(

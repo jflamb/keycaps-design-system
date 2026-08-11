@@ -530,6 +530,168 @@ test("the new surfaces reflow at 320 CSS pixels", async ({ page }) => {
   }
 });
 
+test("icon-gallery captions resolve the supported extra-small type token", async ({ page }) => {
+  for (const story of ["the-whole-set", "mcp-unifi-landing-page"] as const) {
+    await page.goto(
+      `/iframe.html?id=components-icon--${story}&viewMode=story&globals=theme:light`,
+    );
+    const type = await page.locator("ul code").evaluateAll((captions) => {
+      const rootStyles = getComputedStyle(document.documentElement);
+      const token = rootStyles.getPropertyValue("--kc-font-size-xs").trim();
+      const tokenPixels = token.endsWith("rem")
+        ? Number.parseFloat(token) * Number.parseFloat(rootStyles.fontSize)
+        : Number.parseFloat(token);
+      return {
+        captionPixels: captions.map((caption) =>
+          Number.parseFloat(getComputedStyle(caption).fontSize),
+        ),
+        tokenPixels,
+      };
+    });
+
+    expect(type.captionPixels.length, story).toBeGreaterThan(0);
+    expect(
+      type.captionPixels.every((size) => Math.abs(size - type.tokenPixels) <= 0.01),
+      story,
+    ).toBe(true);
+  }
+});
+
+for (const theme of ["light", "dark"] as const) {
+  for (const width of [320, 1280] as const) {
+    test(`the app shell keeps baselines, centers, and actions intact in ${theme} at ${width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+
+      for (const story of ["default", "with-logo-mark", "marketing-page"] as const) {
+        await page.goto(
+          `/iframe.html?id=components-app-shell--${story}&viewMode=story&globals=theme:${theme}`,
+        );
+
+        const geometry = await page.locator(".kc-app-shell__header").evaluate((header) => {
+          const actions = header.querySelector<HTMLElement>(".kc-app-shell__actions")!;
+          const button = actions.querySelector<HTMLElement>("button, a")!;
+          const brand = header.querySelector<HTMLElement>(".kc-app-shell__brand")!;
+          const headerRect = header.getBoundingClientRect();
+          const actionsRect = actions.getBoundingClientRect();
+          const brandRect = brand.getBoundingClientRect();
+          const buttonRect = button.getBoundingClientRect();
+          const logoRect = brand.querySelector("svg")?.getBoundingClientRect();
+          const root = document.documentElement;
+          return {
+            actionsCenter: (actionsRect.top + actionsRect.bottom) / 2,
+            actionsInside:
+              actionsRect.top >= headerRect.top - 0.5 &&
+              actionsRect.bottom <= headerRect.bottom + 0.5,
+            brandCenter: (brandRect.top + brandRect.bottom) / 2,
+            buttonHeight: buttonRect.height,
+            headerHeight: headerRect.height,
+            logoSize: logoRect ? [logoRect.width, logoRect.height] : null,
+            pageFits: root.scrollWidth <= root.clientWidth,
+          };
+        });
+
+        expect(geometry.actionsInside, story).toBe(true);
+        expect(geometry.buttonHeight, story).toBeGreaterThanOrEqual(36);
+        expect(geometry.pageFits, story).toBe(true);
+        expect(await page.locator("[data-baseline-probe]").count(), story).toBe(0);
+
+        if (story === "with-logo-mark") {
+          expect(geometry.logoSize, story).toEqual([24, 24]);
+        }
+
+        if (story === "marketing-page") {
+          expect(
+            Math.abs(geometry.brandCenter - geometry.actionsCenter),
+            story,
+          ).toBeLessThanOrEqual(0.5);
+        } else if (width === 1280) {
+          expect(geometry.headerHeight, story).toBeLessThanOrEqual(61);
+        }
+      }
+
+      if (width === 1280) {
+        await page.goto(
+          `/iframe.html?id=components-app-shell--baseline-regression-fixture&viewMode=story&globals=theme:${theme}`,
+        );
+        const fixtures = await page.locator("[data-baseline-fixture]").evaluateAll((shells) =>
+          shells.map((shell) => {
+            const header = shell.querySelector<HTMLElement>(".kc-app-shell__header")!;
+            const brandProbe = header.querySelector<HTMLElement>(
+              '[data-baseline-probe="brand"]',
+            )!;
+            const navProbe = header.querySelector<HTMLElement>(
+              '[data-baseline-probe="nav"]',
+            )!;
+            const logo = header.querySelector<SVGSVGElement>(".kc-app-shell__brand > svg");
+            const logoRect = logo?.getBoundingClientRect();
+            const logoStyle = logo ? getComputedStyle(logo) : null;
+            return {
+              baselineDelta: Math.abs(
+                brandProbe.getBoundingClientRect().top - navProbe.getBoundingClientRect().top,
+              ),
+              headerHeight: header.getBoundingClientRect().height,
+              logoPadding: logoStyle ? Number.parseFloat(logoStyle.paddingInlineStart) : null,
+              logoSize: logoRect ? [logoRect.width, logoRect.height] : null,
+              name: shell.getAttribute("data-baseline-fixture"),
+            };
+          }),
+        );
+
+        expect(fixtures.map(({ name }) => name)).toEqual(["text", "logo"]);
+        expect(fixtures.map(({ logoSize }) => logoSize)).toEqual([null, [32, 32]]);
+        expect(fixtures.map(({ logoPadding }) => logoPadding)).toEqual([null, 4]);
+        await expect(page.locator('[data-baseline-probe="brand"]')).toHaveCount(2);
+        await expect(page.locator('[data-baseline-probe="nav"]')).toHaveCount(2);
+        for (const fixture of fixtures) {
+          expect(fixture.baselineDelta, fixture.name ?? "fixture").toBeLessThanOrEqual(0.5);
+          expect(fixture.headerHeight, fixture.name ?? "fixture").toBeLessThanOrEqual(61);
+        }
+      }
+    });
+
+    test(`PageHeader keeps its two distinct text gaps in ${theme} at ${width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+
+      for (const story of ["complete", "marketing-hero"] as const) {
+        await page.goto(
+          `/iframe.html?id=components-page-header--${story}&viewMode=story&globals=theme:${theme}`,
+        );
+        const rhythm = await page.locator(".kc-page-header").evaluate((header) => {
+          const eyebrow = header.querySelector<HTMLElement>(".kc-page-header__eyebrow")!;
+          const title = header.querySelector<HTMLElement>(".kc-page-header__title")!;
+          const description = header.querySelector<HTMLElement>(
+            ".kc-page-header__description",
+          )!;
+          const root = document.documentElement;
+          const styles = getComputedStyle(root);
+          const tokenPixels = (name: string) => {
+            const value = styles.getPropertyValue(name).trim();
+            return value.endsWith("rem")
+              ? Number.parseFloat(value) * Number.parseFloat(styles.fontSize)
+              : Number.parseFloat(value);
+          };
+          return {
+            descriptionGap:
+              description.getBoundingClientRect().top - title.getBoundingClientRect().bottom,
+            descriptionGapToken: tokenPixels("--kc-space-4"),
+            eyebrowGap: title.getBoundingClientRect().top - eyebrow.getBoundingClientRect().bottom,
+            eyebrowGapToken: tokenPixels("--kc-space-2"),
+            pageFits: root.scrollWidth <= root.clientWidth,
+          };
+        });
+
+        expect(rhythm.eyebrowGap, story).toBeCloseTo(rhythm.eyebrowGapToken, 0);
+        expect(rhythm.descriptionGap, story).toBeCloseTo(rhythm.descriptionGapToken, 0);
+        expect(rhythm.pageFits, story).toBe(true);
+      }
+    });
+  }
+}
+
 // One test per theme rather than a loop inside one test, and the reason is not
 // style. AxeBuilder injects axe into every frame and recurses through them; when
 // a second `goto` reuses the same page, a frame can still carry the previous

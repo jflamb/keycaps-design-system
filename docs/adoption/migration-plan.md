@@ -878,10 +878,12 @@ no data-layer or route changes to unwind.
 
 ## Phase 4 — `mcp-unifi` (Mode 1)
 
-> **Evidence commit: `jflamb/mcp-unifi@9faaa1c`.** Every consumer citation in
-> this section and corrections 38–40 resolves against that commit. It is the
-> freshly fetched `origin/main` parent Phase 4 branches from, not a working-tree
-> snapshot.
+> **Evidence commit: `jflamb/mcp-unifi@fcd3fcb`.** This is the durable
+> `origin/main` commit containing the Phase 4 migration. Every current-state
+> consumer citation in this section and corrections 38–41 resolves against it;
+> pre-migration citations say `at 9faaa1c` explicitly. The later design-polish
+> commits are still local-only, so they are review input rather than citation
+> evidence until their branch is published.
 
 **Why second:** the same page shape as Phase 3, so the component mapping is
 mostly proven, but it adds two genuinely new things — a prerender script for a
@@ -908,7 +910,7 @@ site with no build step, and this repo's first dark theme.
 - Fonts are self-hosted WOFF2: Fraunces Variable and Nunito Sans 400/600/700 —
   the retired pairing — with one pinned optical axis,
   `font-variation-settings: "opsz" 18, "SOFT" 55` at
-  `mcp-unifi/site/styles.css:174`. The plan
+  `mcp-unifi/site/styles.css:174` at `9faaa1c`. The plan
   previously named a second pin, `"opsz" 14, "SOFT" 45`; on `origin/main` there
   is no such declaration anywhere in the repository. It is the same
   untracked-working-tree reading as the line counts above.
@@ -925,21 +927,27 @@ site with no build step, and this repo's first dark theme.
    Add it to `.prettierignore`-equivalents and state in the file header that it
    is generated — an editable generated file is a drift source.
 3. **Delete the local fonts.** Remove `site/fonts/*.woff2` (four files, ~163 KB)
-   and the four `@font-face` blocks at `mcp-unifi/site/styles.css:1-31`. The
+   and the four `@font-face` blocks at
+   `mcp-unifi/site/styles.css:1-31` at `9faaa1c`. The
    `font-variation-settings` declaration at line 174 goes with them: Piazzolla's
    `opsz` axis is never pinned, per the Optical Sizing Rule, and `SOFT` does not
    exist on it.
-4. **Map the surfaces.** `.site-header` → AppShellHeader. `.hero` → PageHeader
-   plus a Card. `.primary-key` → LinkButton. The `.diagnostic` block is a `<dl>`
-   of four `.diagnostic-row` — DescriptionList in `rows` layout, `divided`.
-   `.runtime-path` is an `<ol>` — keep the list, use tokens. `.prompt-transcript`
-   → CodeBlock. `.supported` → a plain list under `prose.css`. `.legal` →
-   `.kc-prose`. `.skip-link` → SkipLink.
-5. **Author the dark theme.** Same shape as Phase 3: the token layer supplies the
-   palette, the work is the `data-theme` bootstrap plus `theme-color` variants.
-   Note the page ships no JavaScript today; the no-flash theme script is the
-   first script it will carry. Keep it to the inline bootstrap only —
-   `prefers-color-scheme` handles the rest with no runtime.
+4. **Map the surfaces.** `.site-header` → AppShellHeader. `.hero` → PageHeader,
+   followed by a flat, divided DescriptionList in `rows` layout — no Card around
+   the diagnostic. `.primary-key` → LinkButton. `.runtime-path` stays a semantic
+   `<ol>` and becomes a tokenized runtime diagram; `.supported` stays a semantic
+   list and becomes a tokenized icon-tile grid. The two visual compositions are
+   Tier 3 local patterns owed upstream, not Keycaps components: each still has
+   one consumer, and either is promoted only when a second consumer appears.
+   `.legal` → `.kc-prose`. `.skip-link` → SkipLink. There is no
+   `.prompt-transcript`; see correction 40. Correction 38 records the polish
+   review that changed this mapping.
+5. **Author the dark theme without adding a theme runtime.** The token layer
+   supplies both palettes and `theme-color` media variants. Pass
+   `themeStorageKey: false` to the static document so no bootstrap script is
+   emitted: GitHub Pages serves from `jflamb.github.io`, which cannot read the
+   `jflamb-theme` cookie scoped to `jflamb.com`, so `prefers-color-scheme` is the
+   only preference that can honestly remain authoritative across visits.
 6. **Retire the competing design system.** `.impeccable/design.json` is a
    `schemaVersion: 2` system titled "Design System: mcp-unifi Keycaps", with 24
    colors, 8 typography roles, and five extracted `ds-`-prefixed components. A
@@ -947,7 +955,7 @@ site with no build step, and this repo's first dark theme.
    exists to prevent. Delete it and the repo-local `DESIGN.md`, and replace both
    with a pointer to this repo.
 7. **Fix the one hardcoded hex.** `.confirmation-row dt` at
-   `mcp-unifi/site/styles.css:290-292`
+   `mcp-unifi/site/styles.css:290-292` at `9faaa1c`
    sets `#6d4e0e` on line 291 — it is `attention-ink` in the design JSON and
    never became a variable. It maps to `--kc-color-warning-text`. (The plan said
    292; that too was read from the untracked working tree.)
@@ -959,7 +967,7 @@ site with no build step, and this repo's first dark theme.
 - `site/index.html` is generated, and regenerating it produces no diff.
 - No legacy font files remain under `site/fonts/`; the Keycaps faces copied to
   `site/kc/fonts/` are the linked asset tree and are required. See
-  [correction 38](#corrections-to-the-survey).
+  [correction 39](#corrections-to-the-survey).
 - `.impeccable/design.json` and the repo-local `DESIGN.md` are gone.
 - Zero off-origin requests.
 - The Phase 2 rules pass with an empty allowlist.
@@ -975,6 +983,13 @@ site with no build step, and this repo's first dark theme.
 - Verify the two in-page anchors still resolve: `#privacy` and `#terms` are
   sections, not separate pages, despite what
   `.impeccable/surfaces/site-index-html.md` claims.
+- The design-polish branch currently adds a viewport-wide `max-width: 50rem`
+  query for its two Tier 3 patterns. Do not merge that choice by inertia: before
+  the consumer publishes it, replace the supported-area grid with intrinsic
+  `auto-fit`/`minmax()` sizing, and do the same for the ordered runtime path while
+  removing positional connector arrows if they cannot survive wrapping. The
+  ordered list already carries sequence semantically. Keycaps' general
+  single-breakpoint rule does not need revision for one local pattern.
 
 ### Rollback
 
@@ -1411,7 +1426,8 @@ Two hazards:
   Keycaps faces is what makes the Optical Weight Rule implementable.
 - **Pinned optical axes must go.** `assistant-workbench` pins `"opsz" 11` on
   panel titles; `mcp-unifi` pins `"opsz" 18, "SOFT" 55` once, at
-  `mcp-unifi/site/styles.css:174` — one declaration on `origin/main`, not the two this
+  `mcp-unifi/site/styles.css:174` at `9faaa1c` — one declaration on the
+  pre-migration `origin/main`, not the two this
   plan first recorded.
   The Optical Sizing Rule forbids pinning `opsz`, and `SOFT` does not exist on
   Piazzolla at all — a `font-variation-settings` referencing it fails silently,
@@ -2271,9 +2287,47 @@ here rather than silently corrected there.
     rather than in functions, because all four touch build configuration the same
     way.
 
-38. **Phase 4 cannot both link `fonts.css` and contain no font files anywhere
+38. **Phase 4's polish review changed the composition without creating two new
+    components.** The durable Phase 4 baseline renders a PageHeader beside a
+    diagnostic Card (`mcp-unifi/src/site-page.tsx:94-130`), followed by a plain
+    ordered runtime path and a plain supported-area list
+    (`mcp-unifi/src/site-page.tsx:133-166`). The unpublished design-polish branch
+    instead puts the PageHeader first, follows it with a flat divided-rows
+    DescriptionList, and gives the ordered runtime path and supported-area list
+    their own tokenized icon treatments.
+
+    That reviewed composition is the corrected Phase 4 mapping, with two
+    boundaries. The runtime diagram and icon-tile list are **Tier 3 local
+    patterns owed upstream**, because `mcp-unifi` is still their only consumer;
+    neither becomes a Keycaps component until a second consumer exists. Their
+    ten regular Phosphor glyphs do belong in Keycaps now, because the closed icon
+    registry is already the cross-consumer vocabulary and the consumer's direct
+    runtime imports would reopen the seam ADR 0003 closed.
+
+    The branch's `max-width: 50rem` query is not a new Keycaps breakpoint. The
+    concrete consumer recommendation is to use intrinsic `auto-fit`/`minmax()`
+    grids for both local lists and remove positional arrows when wrapping would
+    make them point at the wrong step; the `<ol>` keeps the runtime sequence
+    available without them. One local pattern is not evidence that the system's
+    single-breakpoint rule needs revision.
+
+    The no-script theme choice is deliberate and already durable:
+    `renderStaticDocument` receives `themeStorageKey: false`
+    (`mcp-unifi/src/site-page.tsx:201-223`). A page on `jflamb.github.io` cannot
+    share the `jflamb-theme` cookie scoped to `jflamb.com`, so a bootstrap would
+    add script without restoring the reader's saved choice. System
+    `prefers-color-scheme` remains authoritative.
+
+    **Publication follow-up.** Commits `38bb894`, `c39b479`, and `3202d11` are
+    local review evidence, not durable citations. Once that consumer branch is
+    published, advance the Phase 4 evidence pin, add the corresponding
+    `mcp-unifi/<path>:<line>` ranges for the reviewed composition, and run
+    `pnpm verify:citations:refresh`. Until then the manifest intentionally
+    snapshots only `fcd3fcb` and the explicitly historic pre-migration ranges.
+
+39. **Phase 4 cannot both link `fonts.css` and contain no font files anywhere
     under `site/`.** The old page owns four legacy faces through the four
-    `@font-face` blocks at `mcp-unifi/site/styles.css:1-31`; those files and that
+    `@font-face` blocks at `mcp-unifi/site/styles.css:1-31` at `9faaa1c`; those files and that
     directory do have to disappear. But the linked Keycaps `fonts.css` resolves
     `./fonts/<file>.woff2` relative to its own deployed location, so the required
     `site/kc/fonts.css` asset necessarily brings `site/kc/fonts/*.woff2` with it.
@@ -2283,17 +2337,18 @@ here rather than silently corrected there.
     exception to the local-font rule; it is the rule made deployable for a Pages
     artifact that is uploaded byte-for-byte.
 
-39. **There is no `.prompt-transcript` surface to migrate.** Phase 4's mapping
+40. **There is no `.prompt-transcript` surface to migrate.** Phase 4's mapping
     says it becomes `CodeBlock`, but the complete committed page body runs from
     the hero through the legal sections without that class or any transcript
-    markup (`mcp-unifi/site/index.html:21-133`). Adding one would invent content
+    markup (`mcp-unifi/site/index.html:21-133` at `9faaa1c`). Adding one would invent content
     and expand the landing page rather than migrate it, so Phase 4 ships no
     `CodeBlock`. The runtime path remains the only ordered technical sequence.
 
-40. **The Phase 2 recursive CSS ratchet would lint Keycaps' copied package CSS
+41. **The Phase 2 recursive CSS ratchet would lint Keycaps' copied package CSS
     as if it were consumer CSS.** Before migration, `.keycaps-lint.json` scans
-    every stylesheet below `site/` (`mcp-unifi/.keycaps-lint.json:1-8`). After
-    the required build writes `site/kc/styles.css` and `site/kc/static.css`, that
+    every stylesheet below `site/`
+    (`mcp-unifi/.keycaps-lint.json:1-8` at `9faaa1c`). After the required build
+    writes `site/kc/styles.css` and `site/kc/static.css`, that
     glob reaches package-owned `.kc-` selectors and rule 2 correctly rejects
     them — but they are the implementation the consumer is meant to consume,
     not an override it authored.
