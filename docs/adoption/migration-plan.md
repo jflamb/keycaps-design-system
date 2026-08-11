@@ -735,8 +735,8 @@ resolve every export to `any`. `mcp-dnsimple/src/keycaps-contract.ts` (64 lines)
 probes across the root at `src/keycaps-contract.ts:45-49` and the `./static`
 subpath at `:53`, plus two `@ts-expect-error` directives on invalid prop values
 at `src/keycaps-contract.ts:57` and `:61`. Both are
-covered by `npm run build` and `npm run typecheck` (`package.json:11` and `:14`)
-because `tsconfig.json:20` includes the file. It is types-only, covered
+covered by `npm run build` and `npm run typecheck` (`mcp-dnsimple/package.json:11` and `:14`)
+because `mcp-dnsimple/tsconfig.json:20` includes the file. It is types-only, covered
 by `npm run typecheck` and `npm run build`, and it fails loudly in the right
 direction — replacing the invalid variant with a valid one turns the directive
 itself into `TS2578`.
@@ -777,17 +777,18 @@ indistinguishable from passing correctly right up until a prop is wrong.
    correctly, and both Keycaps packages declare one; from 0.1.3 the inner half —
    the relative specifiers inside the declarations — resolves too. Pin
    `^0.1.3`, not `^0.1.2`. See the note above this list.
-2. **Render at module load.** `branding.ts` already computes its page from a
+2. **Render at startup.** `branding.ts` already computes its page from a
    `HomePageModel`; keep that contract. Replace the body of `renderHomePage`
    with a `renderStaticDocument` call whose children are Keycaps components. The
    render happens eagerly during startup — `renderHomePage` is already pure over
    its model.
 
-   *Amended after shipping.* This step originally read "once per process at
-   first request, or eagerly at module load", and both halves turned out to be
-   loose. The literal module load of `branding.ts` is too early, because the tool
-   and prompt counts come from a metadata server `index.ts` builds during
-   startup, so the render happens in `createApp`. And *at first request* is the
+   *Amended after shipping.* This step was titled "Render at module load" and
+   read "once per process at first request, or eagerly at module load". The
+   title and both halves of the sentence turned out to be loose. The literal
+   module load of `branding.ts` is too early, because the tool and prompt counts
+   come from a metadata server `index.ts` builds during startup, so the render
+   happens in `createApp`. And *at first request* is the
    wrong half to have offered: rendering inside the request handler is
    server-side rendering with a cache, not a static render, and it is what the
    first implementation did. The shipped cardinality is **once per surface per
@@ -2232,17 +2233,17 @@ here rather than silently corrected there.
 
     - moved `@jflamb/keycaps-react`, `@jflamb/keycaps-tokens`, `react`, and
       `react-dom` out of devDependencies into runtime dependencies
-      (`package.json:26-31`), which the container needs because the render
+      (`mcp-dnsimple/package.json:26-31`), which the container needs because the render
       happens in the running process;
     - enabled JSX and widened the compiler's inputs to `.tsx`
-      (`tsconfig.json:4-5` and `:20`);
+      (`mcp-dnsimple/tsconfig.json:4-5` and `:20`);
     - added the `/fonts` static route the inlined `fonts.css` resolves against
       (`src/server.ts:467-484`);
     - added the stylesheet-inlining and token-reading module the page cannot
       render without (`src/keycaps-assets.ts`, 104 lines);
-    - emptied the drift allowlist (`.keycaps-lint.json:7`);
-    - widened the ESLint globs (`eslint.config.js:6` and `:66`) and the lint
-      script (`package.json:17`) to `.tsx`;
+    - emptied the drift allowlist (`mcp-dnsimple/.keycaps-lint.json:7`);
+    - widened the ESLint globs (`mcp-dnsimple/eslint.config.js:6` and `:66`) and the lint
+      script (`mcp-dnsimple/package.json:17`) to `.tsx`;
     - and added two CI workflows' worth of gate — the browser job at
       `.github/workflows/e2e.yml:27-72` and the container job at `:74-95`, plus
       the `push` trigger on `main` at `:14-21` and its counterpart on
