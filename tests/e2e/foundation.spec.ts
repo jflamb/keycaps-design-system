@@ -573,10 +573,6 @@ for (const theme of ["light", "dark"] as const) {
           const actions = header.querySelector<HTMLElement>(".kc-app-shell__actions")!;
           const button = actions.querySelector<HTMLElement>("button, a")!;
           const brand = header.querySelector<HTMLElement>(".kc-app-shell__brand")!;
-          const brandProbe = header.querySelector<HTMLElement>(
-            '[data-baseline-probe="brand"]',
-          );
-          const navProbe = header.querySelector<HTMLElement>('[data-baseline-probe="nav"]');
           const headerRect = header.getBoundingClientRect();
           const actionsRect = actions.getBoundingClientRect();
           const brandRect = brand.getBoundingClientRect();
@@ -587,12 +583,6 @@ for (const theme of ["light", "dark"] as const) {
             actionsInside:
               actionsRect.top >= headerRect.top - 0.5 &&
               actionsRect.bottom <= headerRect.bottom + 0.5,
-            baselineDelta:
-              brandProbe && navProbe
-                ? Math.abs(
-                    brandProbe.getBoundingClientRect().top - navProbe.getBoundingClientRect().top,
-                  )
-                : null,
             brandCenter: (brandRect.top + brandRect.bottom) / 2,
             buttonHeight: buttonRect.height,
             headerHeight: headerRect.height,
@@ -603,6 +593,7 @@ for (const theme of ["light", "dark"] as const) {
         expect(geometry.actionsInside, story).toBe(true);
         expect(geometry.buttonHeight, story).toBeGreaterThanOrEqual(36);
         expect(geometry.pageFits, story).toBe(true);
+        expect(await page.locator("[data-baseline-probe]").count(), story).toBe(0);
 
         if (story === "marketing-page") {
           expect(
@@ -610,9 +601,39 @@ for (const theme of ["light", "dark"] as const) {
             story,
           ).toBeLessThanOrEqual(0.5);
         } else if (width === 1280) {
-          expect(geometry.baselineDelta, story).not.toBeNull();
-          expect(geometry.baselineDelta!, story).toBeLessThanOrEqual(0.5);
           expect(geometry.headerHeight, story).toBeLessThanOrEqual(61);
+        }
+      }
+
+      if (width === 1280) {
+        await page.goto(
+          `/iframe.html?id=components-app-shell--baseline-regression-fixture&viewMode=story&globals=theme:${theme}`,
+        );
+        const fixtures = await page.locator("[data-baseline-fixture]").evaluateAll((shells) =>
+          shells.map((shell) => {
+            const header = shell.querySelector<HTMLElement>(".kc-app-shell__header")!;
+            const brandProbe = header.querySelector<HTMLElement>(
+              '[data-baseline-probe="brand"]',
+            )!;
+            const navProbe = header.querySelector<HTMLElement>(
+              '[data-baseline-probe="nav"]',
+            )!;
+            return {
+              baselineDelta: Math.abs(
+                brandProbe.getBoundingClientRect().top - navProbe.getBoundingClientRect().top,
+              ),
+              headerHeight: header.getBoundingClientRect().height,
+              name: shell.getAttribute("data-baseline-fixture"),
+            };
+          }),
+        );
+
+        expect(fixtures.map(({ name }) => name)).toEqual(["text", "logo"]);
+        await expect(page.locator('[data-baseline-probe="brand"]')).toHaveCount(2);
+        await expect(page.locator('[data-baseline-probe="nav"]')).toHaveCount(2);
+        for (const fixture of fixtures) {
+          expect(fixture.baselineDelta, fixture.name ?? "fixture").toBeLessThanOrEqual(0.5);
+          expect(fixture.headerHeight, fixture.name ?? "fixture").toBeLessThanOrEqual(61);
         }
       }
     });

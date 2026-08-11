@@ -68,7 +68,12 @@ export function AppShell({
 export interface AppShellHeaderProps extends HTMLAttributes<HTMLElement> {
   /** Controls at the trailing edge — account, theme toggle, primary action. */
   actions?: ReactNode;
-  /** The wordmark. Set in the display face. */
+  /**
+   * The wordmark. Set in the display face. When it combines text with an SVG
+   * or image mark, keep that mark as a direct child of this slot so the header
+   * can center it without letting its box enlarge the brand/navigation baseline
+   * group. A mark nested inside a link or wrapper does not receive that guard.
+   */
   brand?: ReactNode;
   /** Usually an `AppShellNav`. */
   children?: ReactNode;

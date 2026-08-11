@@ -55,27 +55,9 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const BaselineText = ({
-  children,
-  probe,
-}: {
-  children: string;
-  probe: "brand" | "nav";
-}) => (
-  <span>
-    {children}
-    <span
-      aria-hidden="true"
-      data-baseline-probe={probe}
-      style={{ blockSize: 0, display: "inline-block", inlineSize: 0 }}
-    />
-  </span>
-);
-
 const Wordmark = () => (
   <>
-    <span aria-hidden="true">◆</span>
-    <BaselineText probe="brand">Workbench</BaselineText>
+    <span aria-hidden="true">◆</span> Workbench
   </>
 );
 
@@ -102,7 +84,7 @@ export const Default: Story = {
       >
         <AppShellNav label="Sections">
           <AppShellNavLink href="#overview" isCurrent>
-            <BaselineText probe="nav">Overview</BaselineText>
+            Overview
           </AppShellNavLink>
           <AppShellNavLink href="#approvals">Approvals</AppShellNavLink>
           <AppShellNavLink href="#activity">Activity</AppShellNavLink>
@@ -178,7 +160,7 @@ export const WithLogoMark: Story = {
               name="wifi-high"
               style={{ blockSize: "2rem", inlineSize: "2rem" }}
             />
-            <BaselineText probe="brand">Workbench</BaselineText>
+            Workbench
           </>
         }
         actions={
@@ -189,7 +171,7 @@ export const WithLogoMark: Story = {
       >
         <AppShellNav label="Sections">
           <AppShellNavLink href="#overview" isCurrent>
-            <BaselineText probe="nav">Overview</BaselineText>
+            Overview
           </AppShellNavLink>
           <AppShellNavLink href="#activity">Activity</AppShellNavLink>
         </AppShellNav>
@@ -200,6 +182,72 @@ export const WithLogoMark: Story = {
         </AppShellMain>
       </AppShellBody>
     </AppShell>
+  ),
+};
+
+const BaselineText = ({
+  children,
+  probe,
+}: {
+  children: string;
+  probe: "brand" | "nav";
+}) => (
+  <span>
+    {children}
+    <span
+      aria-hidden="true"
+      data-baseline-probe={probe}
+      style={{ blockSize: 0, display: "inline-block", inlineSize: 0 }}
+    />
+  </span>
+);
+
+const BaselineFixture = ({ withLogo }: { withLogo?: boolean }) => (
+  <AppShell
+    data-baseline-fixture={withLogo ? "logo" : "text"}
+    skipLink={false}
+    style={{ minBlockSize: "auto" }}
+  >
+    <AppShellHeader
+      brand={
+        <>
+          {withLogo ? (
+            <Icon
+              aria-hidden="true"
+              name="wifi-high"
+              style={{ blockSize: "2rem", inlineSize: "2rem" }}
+            />
+          ) : (
+            <span aria-hidden="true">◆</span>
+          )}
+          <BaselineText probe="brand">Workbench</BaselineText>
+        </>
+      }
+      actions={
+        <Button size="small" variant="secondary">
+          Account
+        </Button>
+      }
+    >
+      <AppShellNav label="Sections">
+        <AppShellNavLink href="#overview" isCurrent>
+          <BaselineText probe="nav">Overview</BaselineText>
+        </AppShellNavLink>
+        <AppShellNavLink href="#activity">Activity</AppShellNavLink>
+      </AppShellNav>
+    </AppShellHeader>
+  </AppShell>
+);
+
+/** Playwright-only baseline probes; hidden from the generated component docs. */
+export const BaselineRegressionFixture: Story = {
+  parameters: { docs: { disable: true } },
+  tags: ["!autodocs"],
+  render: () => (
+    <div style={{ display: "grid", gap: "var(--kc-space-5)" }}>
+      <BaselineFixture />
+      <BaselineFixture withLogo />
+    </div>
   ),
 };
 
