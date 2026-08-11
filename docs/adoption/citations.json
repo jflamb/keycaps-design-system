@@ -1,243 +1,292 @@
 {
+  "_comment": "A maintainer-refreshed snapshot, not an authenticated one. CI checks that the plan and this file agree; it cannot check that this file came from the consumer, because that repository is private and this one is public. Review the diff. Regenerate with `pnpm verify:citations:refresh`.",
   "citations": {
     ".github/workflows/deploy.yml:19-28@d56be82": {
       "first": "deploy-dev:",
       "last": "- deploy-dev",
+      "occurrences": 1,
       "sha256": "ef825dd1e4d90abc709fadb6088e8eb75224f8e5f2018df710ff6d0c3d839fe6"
     },
     ".github/workflows/e2e.yml:14-21@d56be82": {
       "first": "# `push` on `main` as well as `pull_request`, because a pull-request-only trigger",
       "last": "workflow_dispatch:",
+      "occurrences": 1,
       "sha256": "cc5bfea147254d84295b0a3bb9bb0814e341dba6a2e1bc490ca813d6316c453e"
     },
     ".github/workflows/e2e.yml:27-72@d56be82": {
       "first": "browser:",
       "last": "retention-days: 7",
+      "occurrences": 1,
       "sha256": "cb17dee791159c0a83bbcfd794329470c14944ad86c6622a8383a79f53d2205f"
     },
     ".github/workflows/e2e.yml:74-95@d56be82": {
       "first": "container:",
       "last": "run: npm run verify:container",
+      "occurrences": 2,
       "sha256": "6d740815abd3e02e2e7c7f3a8d16374b1dfe6e5ff7c79e792320cdf3dabac988"
     },
     ".github/workflows/e2e.yml:95-95@d56be82": {
       "first": "run: npm run verify:container",
       "last": "run: npm run verify:container",
+      "occurrences": 1,
       "sha256": "b84deacd57d89513bfd546d35072d928451b85a108004730ef57a2368bdbed16"
     },
     ".github/workflows/quality.yml:3-10@d56be82": {
       "first": "# The check list below is unchanged, which is what Phase 3's Validation asks for.",
       "last": "workflow_dispatch:",
+      "occurrences": 1,
       "sha256": "94f37e18adfb8641dd0d28cfb63a58261dfb49e6a81706eaf05c121c8b0d09cf"
     },
     ".keycaps-lint.json:7-7@d56be82": {
       "first": "\"allowFiles\": [],",
       "last": "\"allowFiles\": [],",
+      "occurrences": 1,
       "sha256": "2aedfd85ecf8edb4b9f34c8a6a188ebdd6cb35998cc39fe1e9b1fc77b1d0c290"
     },
     "eslint.config.js:6-6@d56be82": {
       "first": "const typedFiles = [\"src/**/*.ts\", \"src/**/*.tsx\", \"tests/**/*.ts\", \"scripts/**/*.ts\"];",
       "last": "const typedFiles = [\"src/**/*.ts\", \"src/**/*.tsx\", \"tests/**/*.ts\", \"scripts/**/*.ts\"];",
+      "occurrences": 1,
       "sha256": "73288f3a6d52084e998ba517a65557adeed4c3ae78e5007231971582e71dd009"
     },
     "eslint.config.js:66-66@d56be82": {
       "first": "files: [\"src/**/*.ts\", \"src/**/*.tsx\"],",
       "last": "files: [\"src/**/*.ts\", \"src/**/*.tsx\"],",
+      "occurrences": 1,
       "sha256": "e6127f24efd449c4142ee38271d88dae2e39326ded919d288000a82379d5a4c1"
     },
     "package.json:11-11@d56be82": {
       "first": "\"build\": \"tsc\",",
       "last": "\"build\": \"tsc\",",
+      "occurrences": 1,
       "sha256": "9788aeab9e95f86473a23ceca3ed919686567e6108f22d8032a30fbdb53d25a3"
     },
     "package.json:14-14@d56be82": {
       "first": "\"typecheck\": \"tsc --noEmit\",",
       "last": "\"typecheck\": \"tsc --noEmit\",",
+      "occurrences": 1,
       "sha256": "b5e26dfede9116dab549a74140832379de5ad56ddf30a07e8c6c594185d9d7e4"
     },
     "package.json:17-17@d56be82": {
       "first": "\"lint\": \"eslint --max-warnings 0 eslint.config.js \\\"src/**/*.{ts,tsx}\\\" \\\"tests/**/*.{ts,mjs}\\\" \\\"scripts/**/*.{ts,js,mjs,cjs}\\\" \\\"plugins/**/*.mjs\\\"\",",
       "last": "\"lint\": \"eslint --max-warnings 0 eslint.config.js \\\"src/**/*.{ts,tsx}\\\" \\\"tests/**/*.{ts,mjs}\\\" \\\"scripts/**/*.{ts,js,mjs,cjs}\\\" \\\"plugins/**/*.mjs\\\"\",",
+      "occurrences": 1,
       "sha256": "6229b3e729b2581f6d28e97379259388466fc7982ace5b521bfa4b4ae3e75a7a"
     },
     "package.json:26-31@d56be82": {
       "first": "\"@jflamb/keycaps-react\": \"^0.1.3\",",
       "last": "\"react-dom\": \"^19.2.8\",",
+      "occurrences": 1,
       "sha256": "39a6c96b180fa19b05dee936c622e19fd5c021167c2f46edcae3f3afb7d00cf0"
     },
     "scripts/verify-container.mjs:75-103@d56be82": {
       "first": "function canonicalise(html, from, to) {",
       "last": "}",
+      "occurrences": 1,
       "sha256": "c00270bc5b9790b97a526b4e37cea32f8ecb1bf2bb62c221788f1307e2ff5f84"
     },
     "src/branding.ts:1011-1013@0f84dc6": {
       "first": "<a class=\"badge\" href=\"/health\" aria-label=\"View service health JSON\">",
       "last": "</a>",
+      "occurrences": 1,
       "sha256": "629d1f2e81e05373ce9b6c0a5a3876b30dd5512790f15e8554327af975a63bab"
     },
     "src/branding.ts:49-51@0f84dc6": {
       "first": "const HEALTH_BADGE_URL =",
       "last": "",
+      "occurrences": 1,
       "sha256": "9f15bb433eda4263f2f05d5ddfb9ac756234e5b64271835789795a163c9f8601"
     },
     "src/branding.ts:975-996@0f84dc6": {
       "first": "<ul class=\"prompts-grid\">",
       "last": "</ul>",
+      "occurrences": 1,
       "sha256": "d19ca6f275318b11bcd1c4e17ad82531e1e40136ddf149da6602046df295e46f"
     },
     "src/branding.ts:976-976@0f84dc6": {
       "first": "<li class=\"prompt-card\">",
       "last": "<li class=\"prompt-card\">",
+      "occurrences": 1,
       "sha256": "2bce9d732a040654d7907784372a196feaed7e4f19f88bf791805a5bd1d58306"
     },
     "src/branding.ts:981-981@0f84dc6": {
       "first": "<li class=\"prompt-card\">",
       "last": "<li class=\"prompt-card\">",
+      "occurrences": 1,
       "sha256": "2bce9d732a040654d7907784372a196feaed7e4f19f88bf791805a5bd1d58306"
     },
     "src/branding.ts:986-986@0f84dc6": {
       "first": "<li class=\"prompt-card\">",
       "last": "<li class=\"prompt-card\">",
+      "occurrences": 1,
       "sha256": "2bce9d732a040654d7907784372a196feaed7e4f19f88bf791805a5bd1d58306"
     },
     "src/branding.ts:991-991@0f84dc6": {
       "first": "<li class=\"prompt-card\">",
       "last": "<li class=\"prompt-card\">",
+      "occurrences": 1,
       "sha256": "2bce9d732a040654d7907784372a196feaed7e4f19f88bf791805a5bd1d58306"
     },
     "src/branding.tsx:131-161@d56be82": {
       "first": "/*",
       "last": "/**",
+      "occurrences": 1,
       "sha256": "0bc028a134e939a0629aa629b20670a91cd8b26051ebf419a62e35b5ba61eab5"
     },
     "src/branding.tsx:351-369@d56be82": {
       "first": "<ul style={cardGrid}>",
       "last": "))}",
+      "occurrences": 1,
       "sha256": "e01b2e4b7c11bb8f4ce0bdb5bec887a75202eb74c1d355679916960fc6b1b23f"
     },
     "src/branding.tsx:409-430@d56be82": {
       "first": "<ul style={cardGrid}>",
       "last": "))}",
+      "occurrences": 1,
       "sha256": "b56650fdf060d65042a56d9324879cf46a928311fd6d3d8841d24c66f0cb0f23"
     },
     "src/branding.tsx:47-55@d56be82": {
       "first": "const KEY_FACE = keycapsToken(\"--kc-color-key-face\");",
       "last": "const FONT_MONO = keycapsToken(\"--kc-font-mono\");",
+      "occurrences": 1,
       "sha256": "a093064e31ce689de890b0d0a8ad199444f15a43bb97b9980850f13af008c620"
     },
     "src/branding.tsx:604-620@d56be82": {
       "first": "export function renderHomePageOnce(",
       "last": "}",
+      "occurrences": 1,
       "sha256": "97f0556a22ed2c2bf0a23b4cb4a50e0f67ef297d5f200fb1a6c870b51a31a40a"
     },
     "src/index.ts:18-19@d56be82": {
       "first": "const metadataServer = serverFactory();",
       "last": "const homePageStats = getServerSurfaceCounts(metadataServer);",
+      "occurrences": 1,
       "sha256": "7f02dfae8bfd8ec48e9864cd0f02bbbfc1ea1890a7efb2c1fe2db1b30b3c1a76"
     },
     "src/keycaps-assets.ts:64-104@d56be82": {
       "first": "function readLightPalette(): ReadonlyMap<string, string> {",
       "last": "}",
+      "occurrences": 1,
       "sha256": "3f74bab809449896aeb7f5d791756b311f925f4f244a36ccafde1c550ab07628"
     },
     "src/keycaps-contract.ts:45-49@d56be82": {
       "first": "export type ButtonVariantResolves = Resolved<IsAny<ButtonVariant>>;",
       "last": "export type DescriptionListLayoutResolves = Resolved<IsAny<DescriptionListLayout>>;",
+      "occurrences": 1,
       "sha256": "1a7ec5da3fa13dd46e789c1719249e3dd15814e3b7f6c4fc40c94d88b17718e9"
     },
     "src/keycaps-contract.ts:53-53@d56be82": {
       "first": "export type StaticEntryResolves = Resolved<IsAny<typeof renderStaticDocument>>;",
       "last": "export type StaticEntryResolves = Resolved<IsAny<typeof renderStaticDocument>>;",
+      "occurrences": 1,
       "sha256": "19f19685679a0ea06d451821b0c3f5be873454146421d658d5d4eb8cba4189bc"
     },
     "src/keycaps-contract.ts:57-57@d56be82": {
       "first": "const _invalidVariant: ButtonVariant = \"ghost\";",
       "last": "const _invalidVariant: ButtonVariant = \"ghost\";",
+      "occurrences": 1,
       "sha256": "f17556f82a12d092cc6308e196a7279cd2bd1d92b8523f6623312aec2c6aba12"
     },
     "src/keycaps-contract.ts:61-61@d56be82": {
       "first": "const _invalidLayout: DescriptionListLayout = \"columns\";",
       "last": "const _invalidLayout: DescriptionListLayout = \"columns\";",
+      "occurrences": 1,
       "sha256": "e8dc11a617cd999c45c2aa51cd706be31e6bf0cd47c8b83512d9a4317ec01f4b"
     },
     "src/server.ts:442-466@d56be82": {
       "first": "// Rendered here, at startup, and not in the handler below.",
       "last": "",
+      "occurrences": 1,
       "sha256": "fd433603ff5e7e006843690c49603eae877571d5592fdb97083a33e19c100b4f"
     },
     "src/server.ts:463-465@d56be82": {
       "first": "app.get(\"/\", (_req, res) => {",
       "last": "});",
+      "occurrences": 1,
       "sha256": "d59e41cec334d0305be545e31248ce049c582146f2fc07c09abd414ff5c24769"
     },
     "src/server.ts:467-484@d56be82": {
       "first": "// The three Keycaps faces, served from this origin.",
       "last": ");",
+      "occurrences": 1,
       "sha256": "40458f3b5cae74caba4bfb96da89f0ca7223688d6f312ade801471fabc6de6b3"
     },
     "tests/e2e/home.spec.ts:110-138@d56be82": {
       "first": "test(\"the page makes zero off-origin requests\", async ({ page, baseURL }) => {",
       "last": "});",
+      "occurrences": 1,
       "sha256": "362b9ec40f7b33930cdbd5284dfaa6a8a1e9f9398b080c41097ac6da0516c7b0"
     },
     "tests/e2e/home.spec.ts:140-150@d56be82": {
       "first": "test(\"reflows at 320 CSS pixels without horizontal page scrolling\", async ({ page }) => {",
       "last": "});",
+      "occurrences": 1,
       "sha256": "bba8da273c7177178f83664987da7c135f080da95464ed3d6f34de0f57ca6f9b"
     },
     "tests/e2e/home.spec.ts:141-141@d56be82": {
       "first": "await page.setViewportSize({ width: 320, height: 900 });",
       "last": "await page.setViewportSize({ width: 320, height: 900 });",
+      "occurrences": 1,
       "sha256": "16aecf6dbb8f0b8371516f4e4bffc9613a79b57aea8b1e4a489c25c8f962ed1d"
     },
     "tests/e2e/home.spec.ts:188-199@d56be82": {
       "first": "for (const theme of [\"light\", \"dark\"] as const) {",
       "last": "}",
+      "occurrences": 1,
       "sha256": "88e562693f55b2dea42586664fcec5fde27c74d1e7d6a92c4145c31b05539508"
     },
     "tests/e2e/home.spec.ts:39-52@d56be82": {
       "first": "test(\"the skip link is the first thing a keyboard reaches\", async ({ page }) => {",
       "last": "});",
+      "occurrences": 1,
       "sha256": "67e37516853a775d370d604bdad961ef4ea520d930dfb69e13064386048a14fd"
     },
     "tests/home-golden.test.ts:30-41@d56be82": {
       "first": "it(\"matches the committed golden byte for byte\", () => {",
       "last": "});",
+      "occurrences": 1,
       "sha256": "1cb31ae3c0111ca9fa258f2396ea190ad0fdc2336d260fef50c110e8af50125d"
     },
     "tests/home-golden.test.ts:43-67@d56be82": {
       "first": "it(\"renders each surface exactly once, counted rather than inferred\", () => {",
       "last": "});",
+      "occurrences": 2,
       "sha256": "143c7e39b84720bdd5550f43032412b8bff14c6c0ec6310d439f18bf64b4401e"
     },
     "tests/server.test.ts:109-176@d56be82": {
       "first": "it(\"owns no stylesheet and no visual treatment of its own\", async () => {",
       "last": "});",
+      "occurrences": 1,
       "sha256": "2b0f7997da338f5b467e223af9a8fdbcd0e309fd9ab3e0a736bcc8a405b5b1bf"
     },
     "tests/server.test.ts:178-200@d56be82": {
       "first": "it(\"references no origin but its own\", async () => {",
       "last": "});",
+      "occurrences": 1,
       "sha256": "bb1d33e638d524305f65b4656af2b6175a1476bbdf83d7bb9effa4303931dfc3"
     },
     "tests/server.test.ts:73-81@d56be82": {
       "first": "it(\"serves the same bytes to every request\", async () => {",
       "last": "});",
+      "occurrences": 1,
       "sha256": "f7893037d9f5b311b9bae8a6e89356d62e59efb1a94378f4b0296fb7edcf5f8b"
     },
     "tests/server.test.ts:83-107@d56be82": {
       "first": "it(\"renders once per surface per process, not once per app\", async () => {",
       "last": "});",
+      "occurrences": 1,
       "sha256": "d2a3bcba2a3a9a91a71cc3984231f12bfd3cd26935a024fcc38b0d49c73b943b"
     },
     "tsconfig.json:20-20@d56be82": {
       "first": "\"include\": [\"src/**/*.ts\", \"src/**/*.tsx\"],",
       "last": "\"include\": [\"src/**/*.ts\", \"src/**/*.tsx\"],",
+      "occurrences": 2,
       "sha256": "bc8dcf9a06f6d1d2d7eb085bc258a7a63b17411f036c9b34304072206a2f10ea"
     },
     "tsconfig.json:4-5@d56be82": {
       "first": "\"jsx\": \"react-jsx\",",
       "last": "\"jsxImportSource\": \"react\",",
+      "occurrences": 1,
       "sha256": "1f8be9382c0119665a65a07a87c532bf8e7cd5ce7544e46433598c1d3262ec85"
     }
   },

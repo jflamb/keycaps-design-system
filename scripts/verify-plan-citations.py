@@ -1,55 +1,40 @@
 #!/usr/bin/env python3
-"""Check the migration plan's consumer citations against the commit it pins.
+"""Check the migration plan's consumer citations.
 
-Two modes:
+    pnpm verify:citations          plan against docs/adoption/citations.json
+    pnpm verify:citations:refresh  regenerate that manifest from a real clone
 
-    verify   (default) check the plan against `docs/adoption/citations.json`
-    refresh  regenerate that manifest from a real consumer clone
+## What this does and does not prove
 
-The manifest exists because this repository is public and `mcp-dnsimple` is
-private: a public repo's `GITHUB_TOKEN` cannot read across, and a cross-repo PAT
-would be absent on every fork pull request, so the gate would fail for exactly
-the contributors least able to fix it. The manifest is not a compromise, though,
-because **the evidence commit is immutable** — what a citation points at, at a
-fixed commit, never changes. Snapshotting it is sound, and `refresh` is the step
-that reads the real repository.
+`verify` proves the plan and the manifest agree. It does **not** prove the
+manifest came from the consumer: this repository is public, `mcp-dnsimple` is
+private, and a public workflow token cannot read across — a cross-repo PAT would
+be missing on every fork pull request, so the gate would fail hardest for the
+contributors least able to fix it.
 
-Adding or moving a citation without running `refresh` fails `verify`, so the two
-cannot drift apart quietly.
+So the manifest is a **maintainer-refreshed, human-reviewed snapshot**. The
+`sha256`, `first`, and `last` fields are there for a reviewer reading the diff,
+not for CI, which cannot check them. Anyone with commit access can write a
+manifest that says anything; what CI catches is the plan and the manifest
+drifting apart, which is the failure that actually keeps happening. Authenticated
+provenance would need a signed attestation produced inside the private repository,
+and that is not built.
 
-Why this exists, and the two ways it has already been wrong:
+Commit immutability is what makes the snapshot durable — a fixed commit's content
+cannot change underneath it — but immutability is not authentication, and this
+docstring says so because the previous three versions of this script each claimed
+more than they checked.
 
-1. Its first version read the consumer's *working tree* and silently skipped
-   files it could not find — reproducing the exact failure the plan's
-   `git show origin/main:<path>` rule prevents, and passing while doing it.
-2. Its second version decided scope by requiring an `mcp-dnsimple/` prefix, so
-   roughly twenty-seven citations written in running prose — `src/branding.tsx`,
-   `tests/server.test.ts`, `.github/workflows/e2e.yml` — were skipped in silence
-   while it reported success.
+## Scope
 
-Both failures share a shape: quietly checking less than it claimed. So scope is
-now decided by resolution rather than by spelling, and anything genuinely
-ambiguous is an error rather than a shrug.
+Every consumer citation in the Phase 3 material is written `mcp-dnsimple/…`, and
+`refresh` enforces that: an unqualified path that resolves at the pinned commit
+is an error telling you to qualify it. That is what lets `verify` — which has no
+clone — apply a total rule instead of guessing. A scoped citation missing from
+the manifest fails. Nothing unscoped is treated as this consumer's.
 
-A citation is this consumer's when the path resolves at the pinned commit and
-does not also exist in this repository. When it resolves in both —
-`package.json`, `tsconfig.json` — the citation must say `mcp-dnsimple/`
-explicitly, and failing to is an error. When it resolves in neither, it belongs
-to one of the four other repositories the plan cites, and the count of those is
-printed rather than hidden.
-
-What it checks:
-
-  * the range resolves at the pinned commit, read through `git show`, never disk
-  * it does not begin on a blank line or part-way through a statement
-  * a cited test range begins at its `it(`/`test(`, ends at its own closing
-    brace, and contains at least one `expect(`
-
-What it does NOT check, stated plainly because overclaiming for a check is the
-habit this whole tool is a correction for: whether the cited test proves the
-sentence it is cited for. That is a human judgment, and a green run is not
-evidence of it. Non-test ranges get the blank-line and mid-statement checks and
-nothing structural beyond them.
+Occurrences are counted, not set-collapsed. The same range cited in two places is
+two occurrences, and deleting one of them fails.
 """
 
 from __future__ import annotations
@@ -60,14 +45,13 @@ import os
 import re
 import subprocess
 import sys
+from collections import Counter
 from pathlib import Path
+from typing import Iterator, NamedTuple
 
 REPO = Path(__file__).resolve().parent.parent
 PLAN = REPO / "docs/adoption/migration-plan.md"
 MANIFEST = REPO / "docs/adoption/citations.json"
-
-# Overridable so CI can check the consumer out anywhere; defaults to the sibling
-# clone a developer will have. Never silently skipped when absent — see `main`.
 CONSUMER = Path(
     os.environ.get("KEYCAPS_CONSUMER_REPO", str(REPO.parent / "mcp-dnsimple"))
 ).expanduser()
@@ -82,8 +66,49 @@ EVIDENCE_PIN = re.compile(r"Evidence commit: `jflamb/mcp-dnsimple@(?P<ref>[0-9a-
 CLOSING = (")", "}", "]", ";", ">")
 
 
+class Citation(NamedTuple):
+    path: str
+    scoped: bool
+    start: int
+    end: int
+    ref: str
+
+    @property
+    def key(self) -> str:
+        return f"{self.path}:{self.start}-{self.end}@{self.ref}"
+
+
+def citations(plan: str, default_ref: str) -> Iterator[Citation]:
+    """The one parser. Both modes read the plan through it, so they cannot
+    diverge on scope or on which file a bare continuation belongs to — which they
+    already did once, over exactly that."""
+    path: str | None = None
+    scoped = False
+    ref: str | None = None
+
+    for match in CITATION.finditer(plan):
+        if match.group("path"):
+            path, scoped, ref = match.group("path"), bool(match.group("scoped")), None
+
+        raw_start = match.group("start") or match.group("bare_start")
+        if raw_start is None or path is None:
+            continue
+
+        # A citation may name the pre-migration commit immediately after itself,
+        # as ``at `0f84dc6```. Forward-only and short, so a sha mentioned earlier
+        # in the paragraph is not applied here; then remembered for this file's
+        # bare continuations.
+        historic = re.match(r"\s+at `([0-9a-f]{7,40})`", plan[match.end() : match.end() + 24])
+        if historic:
+            ref = historic.group(1)
+
+        start = int(raw_start)
+        end = int(match.group("end") or match.group("bare_end") or raw_start)
+        yield Citation(path, scoped, start, end, ref or default_ref)
+
+
 def show(ref: str, path: str) -> str | None:
-    """The file at `ref`, or None when it is not there. Never reads the disk."""
+    """The file at `ref`, or None. Reads git, never the working tree."""
     result = subprocess.run(
         ["git", "-C", str(CONSUMER), "show", f"{ref}:{path}"],
         capture_output=True,
@@ -93,177 +118,171 @@ def show(ref: str, path: str) -> str | None:
     return result.stdout if result.returncode == 0 else None
 
 
-def refresh() -> int:
-    """Regenerate the manifest from a real consumer clone."""
-    plan = PLAN.read_text()
-
+def evidence_ref(plan: str) -> str | None:
     pin = EVIDENCE_PIN.search(plan)
-    if not pin:
-        print("the plan declares no evidence commit for its consumer citations")
-        return 1
-    evidence_ref = pin.group("ref")
+    return pin.group("ref") if pin else None
 
-    if not (CONSUMER / ".git").exists():
-        print(f"the consumer repository is not at {CONSUMER}")
-        print("set KEYCAPS_CONSUMER_REPO to a clone that contains the pinned commit")
+
+def refresh() -> int:
+    plan = PLAN.read_text()
+    pinned = evidence_ref(plan)
+    if not pinned:
+        print("the plan declares no evidence commit")
         return 1
-    if show(evidence_ref, "package.json") is None:
-        print(f"{CONSUMER} does not contain the pinned commit {evidence_ref}")
+    if not (CONSUMER / ".git").exists():
+        print(f"no consumer repository at {CONSUMER}; set KEYCAPS_CONSUMER_REPO")
+        return 1
+    if show(pinned, "package.json") is None:
+        print(f"{CONSUMER} does not contain the pinned commit {pinned}")
         return 1
 
     failures: list[str] = []
-    snapshot: dict[str, dict[str, str]] = {}
-    resolved: dict[str, int] = {}
-    out_of_scope = 0
-    current_path: str | None = None
-    current_ref: str | None = None
-    current_scoped = False
+    snapshot: dict[str, dict[str, object]] = {}
+    occurrences: Counter[str] = Counter()
+    per_ref: Counter[str] = Counter()
+    other_repos = 0
 
-    for citation in CITATION.finditer(plan):
-        if citation.group("path"):
-            current_path, current_ref = citation.group("path"), None
-            # Carried, so a bare continuation of an explicitly scoped path is not
-            # re-flagged as ambiguous.
-            current_scoped = bool(citation.group("scoped"))
+    for citation in citations(plan, pinned):
+        content = show(citation.ref, citation.path)
 
-        raw_start = citation.group("start") or citation.group("bare_start")
-        if raw_start is None or current_path is None:
-            continue
-
-        path = current_path
-        start = int(raw_start)
-        end = int(citation.group("end") or citation.group("bare_end") or raw_start)
-
-        # A citation may name the pre-migration commit immediately after itself,
-        # as ``at `0f84dc6```. Looking only forward, and only a few characters,
-        # keeps a sha mentioned earlier in the paragraph from being applied here;
-        # the ref is then remembered for that file's bare continuations.
-        historic = re.match(r"\s+at `([0-9a-f]{7,40})`", plan[citation.end() : citation.end() + 24])
-        if historic:
-            current_ref = historic.group(1)
-        ref = current_ref or evidence_ref
-
-        content = show(ref, path)
-        if content is None:
-            # Not this consumer's file. Only a mistake if it was claimed to be.
-            if current_scoped:
-                failures.append(f"{path} does not exist at {ref} (cited {citation.group(0)})")
+        if not citation.scoped:
+            if content is None:
+                other_repos += 1
+                continue
+            if (REPO / citation.path).exists():
+                failures.append(
+                    f"{citation.path}:{citation.start} resolves in both repositories — "
+                    "qualify it as `mcp-dnsimple/`"
+                )
             else:
-                out_of_scope += 1
+                # Resolves only in the consumer, so it *is* a consumer citation
+                # written without its prefix. Qualifying it is what lets `verify`
+                # apply a total rule rather than inferring scope it cannot see.
+                failures.append(
+                    f"{citation.path}:{citation.start} is a consumer citation without its "
+                    "prefix — qualify it as `mcp-dnsimple/`"
+                )
             continue
 
-        if not current_scoped and (REPO / path).exists():
-            failures.append(
-                f"{path}:{start} is ambiguous — it resolves in both repositories, "
-                "so the citation has to say `mcp-dnsimple/`"
-            )
+        if content is None:
+            failures.append(f"{citation.path} does not exist at {citation.ref} ({citation.key})")
             continue
 
         lines = content.split("\n")
-        resolved[ref] = resolved.get(ref, 0) + 1
-
-        if end > len(lines):
-            failures.append(f"{path}:{start}-{end} runs past the file's {len(lines)} lines at {ref}")
+        if citation.end > len(lines):
+            failures.append(
+                f"{citation.key} runs past the file's {len(lines)} lines"
+            )
             continue
 
-        first, last = lines[start - 1].strip(), lines[end - 1].strip()
+        first, last = lines[citation.start - 1].strip(), lines[citation.end - 1].strip()
         if not first:
-            failures.append(f"{path}:{start} begins on a blank line")
+            failures.append(f"{citation.key} begins on a blank line")
         elif first.startswith(CLOSING):
-            failures.append(f"{path}:{start} begins part-way through a statement — {first[:56]}")
+            failures.append(f"{citation.key} begins part-way through a statement — {first[:56]}")
 
-        snapshot[f"{path}:{start}-{end}@{ref}"] = {
-            "sha256": hashlib.sha256("\n".join(lines[start - 1 : end]).encode()).hexdigest(),
+        if citation.path.startswith("tests/") and citation.start != citation.end:
+            body = "\n".join(lines[citation.start - 1 : citation.end])
+            if not re.match(r"(it|test)\(", first) and "for (const" not in first:
+                failures.append(f"{citation.key} is not the start of a test — {first[:56]}")
+            if last not in ("});", "}"):
+                failures.append(f"{citation.key} does not end at a closing brace — {last[:56]}")
+            if "expect(" not in body:
+                failures.append(f"{citation.key} is cited as proof but asserts nothing")
+
+        occurrences[citation.key] += 1
+        per_ref[citation.ref] += 1
+        snapshot[citation.key] = {
+            "sha256": hashlib.sha256("\n".join(lines[citation.start - 1 : citation.end]).encode()).hexdigest(),
             "first": first,
             "last": last,
         }
-
-        if path.startswith("tests/") and start != end:
-            body = "\n".join(lines[start - 1 : end])
-            if not re.match(r"(it|test)\(", first) and "for (const" not in first:
-                failures.append(f"{path}:{start} is not the start of a test — {first[:56]}")
-            if last not in ("});", "}"):
-                failures.append(f"{path}:{end} is not a closing brace — {last[:56]}")
-            if "expect(" not in body:
-                failures.append(f"{path}:{start}-{end} is cited as proof but asserts nothing")
-
-    for ref, count in sorted(resolved.items()):
-        label = "evidence commit" if ref == evidence_ref else "pre-migration commit"
-        print(f"{count} citations resolved at {ref} ({label})")
-    print(f"{out_of_scope} ranges belong to other repositories and are not this script's to check")
 
     if failures:
         print("\n".join(f"  ✗ {failure}" for failure in failures))
         return 1
 
+    for key in snapshot:
+        snapshot[key]["occurrences"] = occurrences[key]
+
     MANIFEST.write_text(
-        json.dumps({"evidence": evidence_ref, "citations": snapshot}, indent=2, sort_keys=True) + "\n"
+        json.dumps(
+            {
+                "_comment": (
+                    "A maintainer-refreshed snapshot, not an authenticated one. CI checks that "
+                    "the plan and this file agree; it cannot check that this file came from the "
+                    "consumer, because that repository is private and this one is public. Review "
+                    "the diff. Regenerate with `pnpm verify:citations:refresh`."
+                ),
+                "evidence": pinned,
+                "citations": snapshot,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
     )
-    print(f"wrote {len(snapshot)} citations to {MANIFEST.relative_to(REPO)}")
+    unique_per_ref: Counter[str] = Counter(key.rsplit("@", 1)[1] for key in snapshot)
+    print(f"{sum(occurrences.values())} occurrences of {len(snapshot)} unique ranges")
+    for ref, count in sorted(per_ref.items()):
+        label = "evidence commit" if ref == pinned else "pre-migration commit"
+        print(f"  {count} occurrences of {unique_per_ref[ref]} unique ranges at {ref} ({label})")
+    print(f"  {other_repos} ranges belong to the plan's four other consumer repositories")
+    print(f"wrote {MANIFEST.relative_to(REPO)}")
     return 0
 
 
 def verify() -> int:
-    """Check the plan against the committed manifest. Needs no consumer clone."""
     if not MANIFEST.exists():
         print(f"{MANIFEST.relative_to(REPO)} is missing — run `pnpm verify:citations:refresh`")
         return 1
 
     plan = PLAN.read_text()
     manifest = json.loads(MANIFEST.read_text())
+    recorded = manifest["citations"]
 
-    pin = EVIDENCE_PIN.search(plan)
-    if not pin:
-        print("the plan declares no evidence commit for its consumer citations")
+    pinned = evidence_ref(plan)
+    if not pinned:
+        print("the plan declares no evidence commit")
         return 1
-    if pin.group("ref") != manifest["evidence"]:
+    if pinned != manifest["evidence"]:
         print(
-            f"the plan pins {pin.group('ref')} and the manifest was built at "
-            f"{manifest['evidence']} — run `pnpm verify:citations:refresh`"
+            f"the plan pins {pinned}, the manifest was built at {manifest['evidence']} — "
+            "run `pnpm verify:citations:refresh`"
         )
         return 1
 
-    # Every citation the plan makes has to be one the manifest recorded. A new or
-    # moved range without a refresh fails here, which is what keeps the snapshot
-    # honest rather than merely present.
-    # Which paths belong to the consumer is itself read from the manifest, since
-    # verify mode has no clone to resolve it against. A citation on one of those
-    # paths must be recorded exactly; a citation on any other path is another
-    # repository's and not this check's business.
-    consumer_paths = {key.rsplit(":", 1)[0] for key in manifest["citations"]}
-
-    wanted = set()
-    current_path: str | None = None
-    current_ref: str | None = None
-    for citation in CITATION.finditer(plan):
-        if citation.group("path"):
-            current_path, current_ref = citation.group("path"), None
-        raw_start = citation.group("start") or citation.group("bare_start")
-        if raw_start is None or current_path is None:
+    # Total rule: a scoped citation is this consumer's and must be recorded. It
+    # does not matter whether its path already appears in the manifest, which is
+    # how a newly cited file used to slip through unnoticed.
+    cited: Counter[str] = Counter()
+    per_ref: Counter[str] = Counter()
+    for citation in citations(plan, pinned):
+        if not citation.scoped:
             continue
-        if current_path not in consumer_paths:
-            continue
-        historic = re.match(r"\s+at `([0-9a-f]{7,40})`", plan[citation.end() : citation.end() + 24])
-        if historic:
-            current_ref = historic.group(1)
-        start = int(raw_start)
-        end = int(citation.group("end") or citation.group("bare_end") or raw_start)
-        wanted.add(f"{current_path}:{start}-{end}@{current_ref or manifest['evidence']}")
+        cited[citation.key] += 1
+        per_ref[citation.ref] += 1
 
-    unrecorded = sorted(wanted - set(manifest["citations"]))
-    stale = sorted(set(manifest["citations"]) - wanted)
+    failures = [f"{key} is cited but not in the manifest" for key in sorted(set(cited) - set(recorded))]
+    failures += [f"{key} is in the manifest but no longer cited" for key in sorted(set(recorded) - set(cited))]
+    failures += [
+        f"{key} is cited {cited[key]} times, the manifest records {recorded[key].get('occurrences')}"
+        for key in sorted(set(cited) & set(recorded))
+        if cited[key] != recorded[key].get("occurrences")
+    ]
 
-    if unrecorded:
-        print("\n".join(f"  ✗ {key} is cited but not in the manifest" for key in unrecorded))
-        print("run `pnpm verify:citations:refresh`")
-        return 1
-    if stale:
-        print("\n".join(f"  ✗ {key} is in the manifest but no longer cited" for key in stale))
+    if failures:
+        print("\n".join(f"  ✗ {failure}" for failure in failures))
         print("run `pnpm verify:citations:refresh`")
         return 1
 
-    print(f"{len(wanted)} consumer citations match the manifest at {manifest['evidence']}")
-    print("the ranges themselves were verified against the consumer when the manifest was written")
+    unique_per_ref: Counter[str] = Counter(key.rsplit("@", 1)[1] for key in cited)
+    print(f"{sum(cited.values())} occurrences of {len(cited)} unique ranges match the manifest")
+    for ref, count in sorted(per_ref.items()):
+        label = "evidence commit" if ref == manifest["evidence"] else "pre-migration commit"
+        print(f"  {count} occurrences of {unique_per_ref[ref]} unique ranges at {ref} ({label})")
+    print("the ranges were checked against the consumer when the manifest was refreshed,")
+    print("not here — this proves plan/manifest agreement, not provenance")
     return 0
 
 

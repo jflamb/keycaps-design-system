@@ -656,21 +656,21 @@ where it was observed.
 - **No client React, rendered at startup, once per surface per process.**
   `mcp-dnsimple/src/server.ts:442-466` renders eagerly in `createApp` rather than
   in the request handler and serves the memoised string at `:463-465`, through
-  `renderHomePageOnce` (`src/branding.tsx:604-620`). The cardinality is once *per
+  `renderHomePageOnce` (`mcp-dnsimple/src/branding.tsx:604-620`). The cardinality is once *per
   surface* per process, because the memo is keyed on the serialized surface.
   `mcp-dnsimple/tests/home-golden.test.ts:43-67` is the proof, and it counts an
   injected clock's calls rather than comparing timestamps — two uncached renders
   inside one millisecond produce the same ISO string, so a timestamp comparison
-  can pass for the wrong reason. `tests/server.test.ts:83-107` proves the wiring,
+  can pass for the wrong reason. `mcp-dnsimple/tests/server.test.ts:83-107` proves the wiring,
   that `createApp` reaches the memo at all, and `:73-81` the weaker claim that
   one app serves every request the same bytes. This is the ADR's own carve-out for this repo — "`mcp-dnsimple` already
   builds with `tsc` and can render at module load"
   ([ADR 0002](../decisions/0002-consumer-delivery.md), line 136) — rather than the
   build-time render the ADR's general statement at line 37 describes; the literal
   module load of `branding.tsx` is too early, because the surface counts come
-  from a metadata server `src/index.ts:18-19` builds during startup.
+  from a metadata server `mcp-dnsimple/src/index.ts:18-19` builds during startup.
 - **A committed golden**, `mcp-dnsimple/tests/__golden__/home.html`, compared
-  against a pinned model in `tests/home-golden.test.ts:30-41`. The model lives in
+  against a pinned model in `mcp-dnsimple/tests/home-golden.test.ts:30-41`. The model lives in
   `tests/__golden__/model.json` because the container verifier needs the same
   values and two copies of a fixture drift. The comparison is exact rather than a
   diff with a timestamp normalised out: the page has one value that varies per
@@ -678,7 +678,7 @@ where it was observed.
 - **Zero class names outside `kc-`, no page-owned stylesheet, and no page-owned
   visual treatment** — `mcp-dnsimple/tests/server.test.ts:109-176`. Three separate
   assertions, and the third is narrower than an earlier draft of this section
-  claimed. The page *does* own CSS: `src/branding.tsx:131-161` sets inline styles
+  claimed. The page *does* own CSS: `mcp-dnsimple/src/branding.tsx:131-161` sets inline styles
   for composition — how many cards sit in a row, and how far apart. What it owns
   none of is treatment, and the test holds it there by requiring every inline
   declaration to be a layout property, with the only two exceptions pinned to
@@ -708,7 +708,7 @@ where it was observed.
   the golden pins a model no deployment has. Each swap asserts it fired —
   `mcp-dnsimple/scripts/verify-container.mjs` (206 lines; canonicalisation at
   `:75-103`),
-  run in CI by the `container` job at `.github/workflows/e2e.yml:74-95`, which
+  run in CI by the `container` job at `mcp-dnsimple/.github/workflows/e2e.yml:74-95`, which
   invokes it at `:95`. Nothing
   is normalised away: the version and surface counts are read back from the
   container's `/health` and the render timestamp from the served page's own
@@ -732,9 +732,9 @@ workspace link, deliberately. `mcp-dnsimple/tsconfig.json` sets
 `skipLibCheck: true`, and a linked dependency type-checks against something other
 than the artifact npm ships — which is the precise blind spot that let 0.1.2
 resolve every export to `any`. `mcp-dnsimple/src/keycaps-contract.ts` (64 lines) is the retained proof: `IsAny`
-probes across the root at `src/keycaps-contract.ts:45-49` and the `./static`
+probes across the root at `mcp-dnsimple/src/keycaps-contract.ts:45-49` and the `./static`
 subpath at `:53`, plus two `@ts-expect-error` directives on invalid prop values
-at `src/keycaps-contract.ts:57` and `:61`. Both are
+at `mcp-dnsimple/src/keycaps-contract.ts:57` and `:61`. Both are
 covered by `npm run build` and `npm run typecheck` (`mcp-dnsimple/package.json:11` and `:14`)
 because `mcp-dnsimple/tsconfig.json:20` includes the file. It is types-only, covered
 by `npm run typecheck` and `npm run build`, and it fails loudly in the right
@@ -2193,7 +2193,7 @@ here rather than silently corrected there.
     forty lines: read `tokens.css` out of `node_modules`, take the first `:root`
     block, follow `var()` aliases to a literal, and interpolate
     (`mcp-dnsimple/src/keycaps-assets.ts:64-104`, consumed at
-    `src/branding.tsx:47-55`). The allowlist in `mcp-dnsimple/.keycaps-lint.json`
+    `mcp-dnsimple/src/branding.tsx:47-55`). The allowlist in `mcp-dnsimple/.keycaps-lint.json`
     is now empty and `keycaps-css-lint` reports 37 files clean. Recorded because the criterion is quoted in the phase map as a known
     exception, and it is no longer one.
 
@@ -2238,16 +2238,16 @@ here rather than silently corrected there.
     - enabled JSX and widened the compiler's inputs to `.tsx`
       (`mcp-dnsimple/tsconfig.json:4-5` and `:20`);
     - added the `/fonts` static route the inlined `fonts.css` resolves against
-      (`src/server.ts:467-484`);
+      (`mcp-dnsimple/src/server.ts:467-484`);
     - added the stylesheet-inlining and token-reading module the page cannot
       render without (`src/keycaps-assets.ts`, 104 lines);
     - emptied the drift allowlist (`mcp-dnsimple/.keycaps-lint.json:7`);
     - widened the ESLint globs (`mcp-dnsimple/eslint.config.js:6` and `:66`) and the lint
       script (`mcp-dnsimple/package.json:17`) to `.tsx`;
     - and added two CI workflows' worth of gate — the browser job at
-      `.github/workflows/e2e.yml:27-72` and the container job at `:74-95`, plus
+      `mcp-dnsimple/.github/workflows/e2e.yml:27-72` and the container job at `:74-95`, plus
       the `push` trigger on `main` at `:14-21` and its counterpart on
-      `.github/workflows/quality.yml:3-10`.
+      `mcp-dnsimple/.github/workflows/quality.yml:3-10`.
 
     Reverting the commit works and is clean; reverting one function leaves a page
     that references components nothing installs, compiled by a `tsc` that no
