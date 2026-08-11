@@ -241,6 +241,12 @@
       "occurrences": 1,
       "sha256": "67e37516853a775d370d604bdad961ef4ea520d930dfb69e13064386048a14fd"
     },
+    "tests/e2e/home.spec.ts:62-101@d56be82": {
+      "first": "test(\"the copy key reacts and fills in this host, with no React attached\", async ({",
+      "last": "});",
+      "occurrences": 1,
+      "sha256": "57ccdee9c1bb73bd8a68b38a5334f399c0d1c51a28a3424ebb62e3c8eac12b73"
+    },
     "tests/home-golden.test.ts:30-41@d56be82": {
       "first": "it(\"matches the committed golden byte for byte\", () => {",
       "last": "});",

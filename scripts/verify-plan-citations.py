@@ -27,11 +27,12 @@ more than they checked.
 
 ## Scope
 
-Every consumer citation in the Phase 3 material is written `mcp-dnsimple/…`, and
-`refresh` enforces that: an unqualified path that resolves at the pinned commit
-is an error telling you to qualify it. That is what lets `verify` — which has no
-clone — apply a total rule instead of guessing. A scoped citation missing from
-the manifest fails. Nothing unscoped is treated as this consumer's.
+Every consumer citation in the Phase 3 material is written `mcp-dnsimple/…`.
+Both modes enforce that syntax within Phase 3 and its corrections, using the
+document's section boundaries rather than a clone or the manifest. `refresh`
+also rejects an unqualified path elsewhere if it resolves at the pinned commit.
+That is what lets `verify` — which has no clone — apply a total rule instead of
+guessing. A scoped citation missing from the manifest fails.
 
 Occurrences are counted, not set-collapsed. The same range cited in two places is
 two occurrences, and deleting one of them fails.
@@ -64,6 +65,10 @@ CITATION = re.compile(
 )
 EVIDENCE_PIN = re.compile(r"Evidence commit: `jflamb/mcp-dnsimple@(?P<ref>[0-9a-f]{7,40})`")
 CLOSING = (")", "}", "]", ";", ">")
+PHASE_3_START = "## Phase 3 — `mcp-dnsimple`"
+PHASE_3_END = "\n## Phase 4 —"
+CORRECTIONS_START = "\n34. **`mcp-dnsimple`"
+CORRECTIONS_END = re.compile(r"\n38\. \*\*")
 
 
 class Citation(NamedTuple):
@@ -88,7 +93,12 @@ def citations(plan: str, default_ref: str) -> Iterator[Citation]:
 
     for match in CITATION.finditer(plan):
         if match.group("path"):
-            path, scoped, ref = match.group("path"), bool(match.group("scoped")), None
+            candidate_scoped = bool(match.group("scoped"))
+            # An unscoped, non-ranged code span such as `static.css` is prose,
+            # not a citation target. Letting it retarget a later bare range once
+            # silently dropped a real browser-test citation from the manifest.
+            if match.group("start") is not None or candidate_scoped:
+                path, scoped, ref = match.group("path"), candidate_scoped, None
 
         raw_start = match.group("start") or match.group("bare_start")
         if raw_start is None or path is None:
@@ -105,6 +115,31 @@ def citations(plan: str, default_ref: str) -> Iterator[Citation]:
         start = int(raw_start)
         end = int(match.group("end") or match.group("bare_end") or raw_start)
         yield Citation(path, scoped, start, end, ref or default_ref)
+
+
+def consumer_sections(plan: str) -> Iterator[tuple[str, str]]:
+    """Material whose ranged file references must name mcp-dnsimple explicitly."""
+    phase_start = plan.find(PHASE_3_START)
+    phase_end = plan.find(PHASE_3_END, phase_start + 1)
+    if phase_start < 0 or phase_end < 0:
+        raise ValueError("the plan is missing the Phase 3 or Phase 4 boundary")
+    yield "Phase 3", plan[phase_start:phase_end]
+
+    corrections_start = plan.find(CORRECTIONS_START)
+    if corrections_start < 0:
+        raise ValueError("the plan is missing correction 34")
+    following = CORRECTIONS_END.search(plan, corrections_start + 1)
+    corrections_end = following.start() if following else len(plan)
+    yield "corrections 34–37", plan[corrections_start:corrections_end]
+
+
+def unqualified_consumer_citations(plan: str, default_ref: str) -> list[tuple[str, Citation]]:
+    return [
+        (section_name, citation)
+        for section_name, section in consumer_sections(plan)
+        for citation in citations(section, default_ref)
+        if not citation.scoped
+    ]
 
 
 def show(ref: str, path: str) -> str | None:
@@ -142,10 +177,20 @@ def refresh() -> int:
     per_ref: Counter[str] = Counter()
     other_repos = 0
 
+    scoped_material_failures: set[str] = set()
+    for section_name, citation in unqualified_consumer_citations(plan, pinned):
+        failures.append(
+            f"{section_name} citation {citation.path}:{citation.start}-{citation.end} "
+            "is unqualified — write the full `mcp-dnsimple/…` path"
+        )
+        scoped_material_failures.add(citation.key)
+
     for citation in citations(plan, pinned):
         content = show(citation.ref, citation.path)
 
         if not citation.scoped:
+            if citation.key in scoped_material_failures:
+                continue
             if content is None:
                 other_repos += 1
                 continue
@@ -169,9 +214,9 @@ def refresh() -> int:
             continue
 
         lines = content.split("\n")
-        if citation.end > len(lines):
+        if not 1 <= citation.start <= citation.end <= len(lines):
             failures.append(
-                f"{citation.key} runs past the file's {len(lines)} lines"
+                f"{citation.key} is not within the file's 1-{len(lines)} line range"
             )
             continue
 
@@ -252,9 +297,9 @@ def verify() -> int:
         )
         return 1
 
-    # Total rule: a scoped citation is this consumer's and must be recorded. It
-    # does not matter whether its path already appears in the manifest, which is
-    # how a newly cited file used to slip through unnoticed.
+    # Total rule: consumer-owned sections may contain no unqualified ranged
+    # citations, and every scoped citation must be recorded. Neither rule relies
+    # on paths already appearing in the manifest.
     cited: Counter[str] = Counter()
     per_ref: Counter[str] = Counter()
     for citation in citations(plan, pinned):
@@ -263,7 +308,12 @@ def verify() -> int:
         cited[citation.key] += 1
         per_ref[citation.ref] += 1
 
-    failures = [f"{key} is cited but not in the manifest" for key in sorted(set(cited) - set(recorded))]
+    failures = [
+        f"{section_name} citation {citation.path}:{citation.start}-{citation.end} "
+        "is unqualified — write the full `mcp-dnsimple/…` path"
+        for section_name, citation in unqualified_consumer_citations(plan, pinned)
+    ]
+    failures += [f"{key} is cited but not in the manifest" for key in sorted(set(cited) - set(recorded))]
     failures += [f"{key} is in the manifest but no longer cited" for key in sorted(set(recorded) - set(cited))]
     failures += [
         f"{key} is cited {cited[key]} times, the manifest records {recorded[key].get('occurrences')}"

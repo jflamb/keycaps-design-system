@@ -695,7 +695,7 @@ where it was observed.
   included (`mcp-dnsimple/tests/e2e/home.spec.ts:188-199`), plus 320-pixel reflow
   (`mcp-dnsimple/tests/e2e/home.spec.ts:140-150`, the viewport set at `:141`),
   keyboard reach to the skip link (`:39-52`), and the press arriving from the
-  inlined `static.css` (`:62-101`) — nine tests, wired into CI
+  inlined `static.css` (`mcp-dnsimple/tests/e2e/home.spec.ts:62-101`) — nine tests, wired into CI
   at `mcp-dnsimple/.github/workflows/e2e.yml`. `quality.yml`'s **check list** is
   untouched as this phase's Validation requires; its trigger is not, because both
   workflows were `pull_request`-only and two commits reached `main` directly
