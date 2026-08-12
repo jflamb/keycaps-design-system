@@ -301,6 +301,12 @@
       "occurrences": 1,
       "sha256": "ff952a01aff3172689badc42e9d361970f5c47a3496ba6ced588b53a7e565092"
     },
+    "mcp-unifi/package.json:25-30@88c063c": {
+      "first": "\"devDependencies\": {",
+      "last": "\"@playwright/test\": \"^1.62.1\",",
+      "occurrences": 1,
+      "sha256": "3962b1c0ae90aa25c29e171d57b4f20d776302e3242e8b8d0c513d1df25ce0f6"
+    },
     "mcp-unifi/site/index.html:21-133@9faaa1c": {
       "first": "<a class=\"skip-link\" href=\"#main-content\">Skip to main content</a>",
       "last": "</main>",
@@ -325,27 +331,51 @@
       "occurrences": 1,
       "sha256": "402e5b86e02b6dfd860b39e8a71c699e77feeb6bf6f7b32f7ad46dd7ef90ee1e"
     },
-    "mcp-unifi/src/site-page.tsx:133-166@fcd3fcb": {
+    "mcp-unifi/src/site-page.tsx:122-164@88c063c": {
+      "first": "<div style={heroLayout}>",
+      "last": "</section>",
+      "occurrences": 1,
+      "sha256": "26d56776a3e88fb80f337e3a4afb685d20910cd4f42c750ce9a8b920e0ef65cf"
+    },
+    "mcp-unifi/src/site-page.tsx:167-195@88c063c": {
       "first": "<section aria-labelledby=\"local-title\" style={sectionStack}>",
       "last": "</section>",
       "occurrences": 1,
-      "sha256": "4e43a06089862eaad158c73f77b725136f1041efec769c6b9ca95ea2c9fdb4dd"
+      "sha256": "d94ce55cbf5f080c5aea31afbb31a027195989f70c2e13dff6cfc1b376dd847d"
     },
-    "mcp-unifi/src/site-page.tsx:201-223@fcd3fcb": {
+    "mcp-unifi/src/site-page.tsx:230-254@88c063c": {
       "first": "/**",
-      "last": "title: \"mcp-unifi \u2014 Read-first UniFi network operations\",",
+      "last": "});",
       "occurrences": 1,
-      "sha256": "91ee2b37858af6acd315d7eedfc41a0bb69c10c630a89aa42f1ad770061c0219"
+      "sha256": "896c76796e13489f6b5762221c2c42529242802af9cc277d30810279c264eec5"
     },
-    "mcp-unifi/src/site-page.tsx:94-130@fcd3fcb": {
-      "first": "<PageHeader",
-      "last": "</Card>",
+    "mcp-unifi/src/site-page.tsx:64-93@88c063c": {
+      "first": "const runtimeSteps: ReadonlyArray<{",
+      "last": "];",
       "occurrences": 1,
-      "sha256": "50d650e6dd9d38334e869cd07e9fe829ccaabbc50593c8686da46ab08b856b2c"
+      "sha256": "0809baff09b6b818f54128a5eb3a044755b04db3f2e46b5ab39239cb40844e1e"
+    },
+    "mcp-unifi/src/site.css:6-66@88c063c": {
+      "first": ".runtime-diagram {",
+      "last": "}",
+      "occurrences": 2,
+      "sha256": "44b89b06a289e0bb6455ce3338c7f526e091bee89417d9951ed2b5c6a113371c"
+    },
+    "mcp-unifi/tests/e2e/site.spec.ts:100-111@88c063c": {
+      "first": "test(\"uses system light and dark themes without adding JavaScript\", async ({ page }) => {",
+      "last": "});",
+      "occurrences": 1,
+      "sha256": "b9ff94005cd7f8b3f25b98df995a1a5482c084c7550a2724fe0531637937365b"
+    },
+    "mcp-unifi/tests/e2e/site.spec.ts:113-142@88c063c": {
+      "first": "test(\"renders intrinsic runtime and supported-area grids without positional connectors\", async ({",
+      "last": "});",
+      "occurrences": 1,
+      "sha256": "8b1f602390e09ab983d853a4e8d7585dd4e2d2749080c4c936ad632c8189a914"
     }
   },
   "evidence": {
     "mcp-dnsimple": "f24c6ee",
-    "mcp-unifi": "fcd3fcb"
+    "mcp-unifi": "88c063c"
   }
 }
