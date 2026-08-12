@@ -878,12 +878,15 @@ no data-layer or route changes to unwind.
 
 ## Phase 4 — `mcp-unifi` (Mode 1)
 
-> **Evidence commit: `jflamb/mcp-unifi@fcd3fcb`.** This is the durable
-> `origin/main` commit containing the Phase 4 migration. Every current-state
-> consumer citation in this section and corrections 38–41 resolves against it;
-> pre-migration citations say `at 9faaa1c` explicitly. The later design-polish
-> commits are still local-only, so they are review input rather than citation
-> evidence until their branch is published.
+> **Evidence commit: `jflamb/mcp-unifi@88c063c`.** This is the durable
+> `origin/main` commit containing the complete Phase 4 migration and its
+> published design polish. Every current-state consumer citation in this section
+> and corrections 38–41 resolves against it; pre-migration citations say
+> `at 9faaa1c` explicitly.
+
+**Status: shipped.** The Mode 1 migration, Keycaps 0.2.0 integration, reviewed
+composition, intrinsic layout correction, CI gate, and Pages artifact are all
+landed on `mcp-unifi`'s `origin/main`. Phase 5 has not begun.
 
 **Why second:** the same page shape as Phase 3, so the component mapping is
 mostly proven, but it adds two genuinely new things — a prerender script for a
@@ -983,13 +986,13 @@ site with no build step, and this repo's first dark theme.
 - Verify the two in-page anchors still resolve: `#privacy` and `#terms` are
   sections, not separate pages, despite what
   `.impeccable/surfaces/site-index-html.md` claims.
-- The design-polish branch currently adds a viewport-wide `max-width: 50rem`
-  query for its two Tier 3 patterns. Do not merge that choice by inertia: before
-  the consumer publishes it, replace the supported-area grid with intrinsic
-  `auto-fit`/`minmax()` sizing, and do the same for the ordered runtime path while
-  removing positional connector arrows if they cannot survive wrapping. The
-  ordered list already carries sequence semantically. Keycaps' general
-  single-breakpoint rule does not need revision for one local pattern.
+- The published polish uses intrinsic `auto-fit`/`minmax()` sizing for both Tier
+  3 patterns and no positional connector arrows
+  (`mcp-unifi/src/site.css:6-66`). The ordered list carries sequence
+  semantically, and the browser test proves the grids at 320 and 1280 pixels,
+  including the connector's absence
+  (`mcp-unifi/tests/e2e/site.spec.ts:113-142`). Keycaps' general
+  single-breakpoint rule did not need revision for one local pattern.
 
 ### Rollback
 
@@ -2288,42 +2291,45 @@ here rather than silently corrected there.
     way.
 
 38. **Phase 4's polish review changed the composition without creating two new
-    components.** The durable Phase 4 baseline renders a PageHeader beside a
-    diagnostic Card (`mcp-unifi/src/site-page.tsx:94-130`), followed by a plain
-    ordered runtime path and a plain supported-area list
-    (`mcp-unifi/src/site-page.tsx:133-166`). The unpublished design-polish branch
-    instead puts the PageHeader first, follows it with a flat divided-rows
-    DescriptionList, and gives the ordered runtime path and supported-area list
-    their own tokenized icon treatments.
+    components.** The shipped page puts the PageHeader first and follows it with
+    a flat divided-rows DescriptionList
+    (`mcp-unifi/src/site-page.tsx:122-164`). The ordered runtime path and
+    supported-area list then carry their own tokenized icon treatments
+    (`mcp-unifi/src/site-page.tsx:167-195`).
 
     That reviewed composition is the corrected Phase 4 mapping, with two
     boundaries. The runtime diagram and icon-tile list are **Tier 3 local
     patterns owed upstream**, because `mcp-unifi` is still their only consumer;
     neither becomes a Keycaps component until a second consumer exists. Their
     ten regular Phosphor glyphs do belong in Keycaps now, because the closed icon
-    registry is already the cross-consumer vocabulary and the consumer's direct
-    runtime imports would reopen the seam ADR 0003 closed.
+    registry is already the cross-consumer vocabulary. The shipped consumer
+    names its nine rendered glyphs through `KeycapsIconName`
+    (`mcp-unifi/src/site-page.tsx:64-93`), takes both Keycaps packages at 0.2.0,
+    and has no direct Phosphor dependency
+    (`mcp-unifi/package.json:25-30`). The tenth glyph was the connector removed
+    by the intrinsic-layout correction.
 
-    The branch's `max-width: 50rem` query is not a new Keycaps breakpoint. The
-    concrete consumer recommendation is to use intrinsic `auto-fit`/`minmax()`
-    grids for both local lists and remove positional arrows when wrapping would
-    make them point at the wrong step; the `<ol>` keeps the runtime sequence
-    available without them. One local pattern is not evidence that the system's
-    single-breakpoint rule needs revision.
+    The reviewed branch's `max-width: 50rem` query did not become a new Keycaps
+    breakpoint. The shipped CSS uses intrinsic `auto-fit`/`minmax()` grids for
+    both local lists and removes positional arrows before wrapping can make them
+    point at the wrong step (`mcp-unifi/src/site.css:6-66`); the `<ol>` keeps the
+    runtime sequence available without them. One local pattern was not evidence
+    that the system's single-breakpoint rule needed revision.
 
     The no-script theme choice is deliberate and already durable:
     `renderStaticDocument` receives `themeStorageKey: false`
-    (`mcp-unifi/src/site-page.tsx:201-223`). A page on `jflamb.github.io` cannot
+    (`mcp-unifi/src/site-page.tsx:230-254`). The browser test also asserts both
+    palette responses, zero scripts, and both theme-color variants
+    (`mcp-unifi/tests/e2e/site.spec.ts:100-111`). A page on `jflamb.github.io` cannot
     share the `jflamb-theme` cookie scoped to `jflamb.com`, so a bootstrap would
     add script without restoring the reader's saved choice. System
     `prefers-color-scheme` remains authoritative.
 
-    **Publication follow-up.** Commits `38bb894`, `c39b479`, and `3202d11` are
-    local review evidence, not durable citations. Once that consumer branch is
-    published, advance the Phase 4 evidence pin, add the corresponding
-    `mcp-unifi/<path>:<line>` ranges for the reviewed composition, and run
-    `pnpm verify:citations:refresh`. Until then the manifest intentionally
-    snapshots only `fcd3fcb` and the explicitly historic pre-migration ranges.
+    **Shipped.** The reviewed work from `38bb894`, `c39b479`, and `3202d11` was
+    recovered onto the durable Phase 4 base, integrated with Keycaps 0.2.0, and
+    landed on `origin/main` as the evidence commit above. The manifest now pins
+    the published composition and retains only the explicitly historic
+    pre-migration ranges at `9faaa1c`.
 
 39. **Phase 4 cannot both link `fonts.css` and contain no font files anywhere
     under `site/`.** The old page owns four legacy faces through the four
