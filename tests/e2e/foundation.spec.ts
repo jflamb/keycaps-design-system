@@ -500,7 +500,10 @@ test("the application rail is compact on desktop and keeps drawer targets at 44p
   await page.goto(retirementShell);
   const sidebar = page.getByRole("navigation", { name: "Primary navigation" });
   await expect(sidebar).toBeVisible();
-  expect((await sidebar.getByRole("link", { name: "Overview" }).boundingBox())!.height).toBe(36);
+  expect((await sidebar.getByRole("link", { name: "Overview" }).boundingBox())!.height).toBeCloseTo(
+    36,
+    3,
+  );
   await expect(page.getByRole("button", { name: "Sections" })).toBeHidden();
 
   await page.setViewportSize({ width: 390, height: 844 });
@@ -511,7 +514,10 @@ test("the application rail is compact on desktop and keeps drawer targets at 44p
 
   const drawer = page.getByRole("dialog", { name: "Sections" });
   await expect(drawer).toBeVisible();
-  expect((await drawer.getByRole("link", { name: "Overview" }).boundingBox())!.height).toBe(44);
+  expect((await drawer.getByRole("link", { name: "Overview" }).boundingBox())!.height).toBeCloseTo(
+    44,
+    3,
+  );
 });
 
 test("the new surfaces reflow at 320 CSS pixels", async ({ page }) => {
