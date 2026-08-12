@@ -1,3 +1,96 @@
+/* AppShell consumer examples. Shared shell and navigation styles now live in
+   the component package; only application-specific content remains here. */
+.kc-app-shell[data-app-shell-draft="rail"] .kc-app-shell__header {
+  position: relative;
+  z-index: 1;
+}
+
+.kc-app-shell-draft__mobile-drawer .kc-dialog__body > nav {
+  min-inline-size: min(18rem, 72vw);
+}
+
+.kc-app-shell-draft__main-stack {
+  display: grid;
+  gap: var(--kc-space-6);
+}
+
+.kc-app-shell-draft__workbench-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(17rem, 1fr);
+  gap: var(--kc-space-5);
+}
+
+.kc-app-shell-draft__decision-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  column-gap: var(--kc-space-6);
+}
+
+.kc-app-shell-draft__decision-grid section {
+  display: grid;
+  align-content: start;
+  gap: var(--kc-space-3);
+  padding-block: var(--kc-space-5);
+  border-block-start: 1px solid var(--kc-color-divider);
+}
+
+.kc-app-shell-draft__decision-grid h2,
+.kc-app-shell-draft__decision-grid p {
+  margin: 0;
+}
+
+.kc-app-shell-draft__decision-grid h2 {
+  font-family: var(--kc-font-body);
+  font-size: var(--kc-font-size-md);
+  line-height: var(--kc-line-height-body);
+}
+
+.kc-app-shell-draft__answer {
+  font-family: var(--kc-font-display);
+  font-size: var(--kc-font-size-xl);
+  line-height: var(--kc-line-height-heading);
+}
+
+.kc-app-shell-draft__retirement-brand {
+  display: grid;
+  gap: 0;
+}
+
+.kc-app-shell-draft__retirement-brand > span {
+  font-family: var(--kc-font-body);
+  font-size: var(--kc-font-size-xs);
+  font-weight: var(--kc-font-weight-body);
+  line-height: var(--kc-line-height-micro);
+}
+
+@media (max-width: 52rem) {
+  .kc-app-shell-draft__workbench-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 40rem) {
+  .kc-app-shell[data-app-shell-draft="rail"] .kc-app-shell__brand {
+    max-inline-size: min(15rem, 55vw);
+    font-size: var(--kc-font-size-lg);
+  }
+
+  .kc-app-shell[data-app-shell-draft="rail"] .kc-app-shell__actions {
+    inline-size: 100%;
+    margin-inline-start: 0;
+  }
+
+  .kc-app-shell[data-app-shell-draft="rail"]
+    .kc-app-shell__actions
+    > :last-child {
+    margin-inline-start: auto;
+  }
+
+  .kc-app-shell-draft__retirement-brand > span {
+    display: none;
+  }
+}
+
 /* The documentation frame, held to the same rules as the components.
    Storybook styles its docs frame with runtime-injected Emotion classes, which
    land after this file in the cascade. Class names are doubled here so these

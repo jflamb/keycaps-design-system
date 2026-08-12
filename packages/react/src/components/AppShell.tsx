@@ -1,5 +1,6 @@
-import type { HTMLAttributes, ReactNode } from "react";
+import { Children, useId, type HTMLAttributes, type ReactNode } from "react";
 import { Link as AriaLink, type LinkProps as AriaLinkProps } from "react-aria-components";
+import { Button, type ButtonProps } from "./Button.js";
 import { SkipLink } from "./SkipLink.js";
 import { cx } from "../utils.js";
 
@@ -120,6 +121,41 @@ export function AppShellNav({ className, label, ...props }: AppShellNavProps) {
   );
 }
 
+export interface AppShellNavGroupProps extends HTMLAttributes<HTMLDivElement> {
+  /** Visible label for this set of destinations. Omit for an unlabelled home group. */
+  label?: ReactNode;
+}
+
+/**
+ * A visible group inside a sidebar navigation. Direct children become list
+ * items, so consumers keep one consistent, semantic directory without
+ * rebuilding the label/list relationship.
+ */
+export function AppShellNavGroup({
+  children,
+  className,
+  label,
+  ...props
+}: AppShellNavGroupProps) {
+  const generatedId = useId();
+  const labelId = label == null ? undefined : `kc-app-shell-nav-group-${generatedId}`;
+
+  return (
+    <div {...props} className={cx("kc-app-shell__nav-group", className)}>
+      {label == null ? null : (
+        <p className="kc-app-shell__nav-label" id={labelId}>
+          {label}
+        </p>
+      )}
+      <ul aria-labelledby={labelId} className="kc-app-shell__nav-list">
+        {Children.toArray(children).map((child, index) => (
+          <li key={index}>{child}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export interface AppShellNavLinkProps extends Omit<AriaLinkProps, "className"> {
   className?: string;
   /** Marks the destination the reader is already on. Sets `aria-current="page"`. */
@@ -149,6 +185,35 @@ export function AppShellNavLink({
   );
 }
 
+/** Short trailing context such as a count, age, or time. */
+export function AppShellNavMeta({ className, ...props }: HTMLAttributes<HTMLSpanElement>) {
+  return <span {...props} className={cx("kc-app-shell__nav-meta", className)} />;
+}
+
+/**
+ * Opens the small-screen navigation drawer supplied by the consumer. It is
+ * hidden while the persistent sidebar is visible and shown at the shell's
+ * sidebar breakpoint.
+ */
+export function AppShellNavTrigger({
+  children = "Sections",
+  className,
+  size = "small",
+  variant = "secondary",
+  ...props
+}: ButtonProps) {
+  return (
+    <Button
+      {...props}
+      className={cx("kc-app-shell__nav-trigger", className)}
+      size={size}
+      variant={variant}
+    >
+      {children}
+    </Button>
+  );
+}
+
 export interface AppShellSidebarProps extends HTMLAttributes<HTMLElement> {
   /** Accessible name. Required when the sidebar is navigation. */
   label?: string;
@@ -159,11 +224,20 @@ export interface AppShellSidebarProps extends HTMLAttributes<HTMLElement> {
    * @default "nav"
    */
   as?: "nav" | "aside";
+  /** Uses the 36px row floor appropriate to a persistent desktop directory. */
+  density?: "default" | "compact";
+  /** Hides the persistent rail when the shell reflows for a small screen. */
+  collapsible?: boolean;
+  /** Keeps the rail in view while its reader scrolls. */
+  isSticky?: boolean;
 }
 
 export function AppShellSidebar({
   as = "nav",
   className,
+  collapsible,
+  density = "default",
+  isSticky,
   label,
   ...props
 }: AppShellSidebarProps) {
@@ -171,6 +245,9 @@ export function AppShellSidebar({
     ...props,
     "aria-label": label,
     className: cx("kc-app-shell__sidebar", className),
+    ...(collapsible ? { "data-collapsible": true } : null),
+    ...(density === "compact" ? { "data-density": "compact" } : null),
+    ...(isSticky ? { "data-sticky": true } : null),
   };
   return as === "aside" ? <aside {...shared} /> : <nav {...shared} />;
 }
@@ -196,8 +273,19 @@ export function AppShellMain({ className, id = "kc-main", ...props }: AppShellMa
   return <main {...props} className={cx("kc-app-shell__main", className)} id={id} />;
 }
 
-export function AppShellBody({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div {...props} className={cx("kc-app-shell__body", className)} />;
+export interface AppShellBodyProps extends HTMLAttributes<HTMLDivElement> {
+  /** Uses the persistent 13–14rem rail layout approved for application shells. */
+  sidebarLayout?: boolean;
+}
+
+export function AppShellBody({ className, sidebarLayout, ...props }: AppShellBodyProps) {
+  return (
+    <div
+      {...props}
+      className={cx("kc-app-shell__body", className)}
+      {...(sidebarLayout ? { "data-sidebar-layout": true } : null)}
+    />
+  );
 }
 
 export function AppShellFooter({ className, ...props }: HTMLAttributes<HTMLElement>) {

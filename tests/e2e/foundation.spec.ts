@@ -490,6 +490,30 @@ test("the app shell puts a working skip link before everything else", async ({ p
   await expect(page.getByRole("main")).toBeVisible();
 });
 
+test("the application rail is compact on desktop and keeps drawer targets at 44px", async ({
+  page,
+}) => {
+  const retirementShell =
+    "/iframe.html?id=components-app-shell--retirement-dashboard-sidebar-draft&viewMode=story&globals=theme:light";
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto(retirementShell);
+  const sidebar = page.getByRole("navigation", { name: "Primary navigation" });
+  await expect(sidebar).toBeVisible();
+  expect((await sidebar.getByRole("link", { name: "Overview" }).boundingBox())!.height).toBe(36);
+  await expect(page.getByRole("button", { name: "Sections" })).toBeHidden();
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(sidebar).toBeHidden();
+  const trigger = page.getByRole("button", { name: "Sections" });
+  await expect(trigger).toBeVisible();
+  await trigger.click();
+
+  const drawer = page.getByRole("dialog", { name: "Sections" });
+  await expect(drawer).toBeVisible();
+  expect((await drawer.getByRole("link", { name: "Overview" }).boundingBox())!.height).toBe(44);
+});
+
 test("the new surfaces reflow at 320 CSS pixels", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 900 });
 
