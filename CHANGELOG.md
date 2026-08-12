@@ -4,6 +4,17 @@ All notable changes to the fixed-version Keycaps package train are documented he
 
 ## Unreleased
 
+## 0.2.1 — 2026-08-11
+
+### Added
+
+- **A supported compact sidebar pattern for `AppShell`.** `AppShellBody sidebarLayout` owns the persistent 13–14rem rail geometry; `AppShellSidebar` adds `density="compact"`, `isSticky`, and `collapsible`; and `AppShellNavTrigger` appears only after the rail reflows away. The desktop directory uses the reviewed 36px row floor while navigation rendered in the mobile `Dialog` keeps the default 44px target.
+- **Grouped application navigation.** `AppShellNavGroup` renders a visible label with a correctly associated list, and `AppShellNavMeta` carries trailing counts, ages, and times without making consumers rebuild Keycaps navigation structure or styling.
+
+### Changed
+
+- **`AppShell` advances to beta.** Its left-rail and small-screen drawer composition is now documented and covered by component, Storybook, static-render, reflow, and accessibility checks for the Assistant Workbench and Retirement Dashboard application shapes.
+
 ## 0.2.0 — 2026-08-11
 
 ### Added

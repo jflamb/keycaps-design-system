@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { useState, type ReactNode } from "react";
 import { expect, within } from "storybook/test";
 import {
   AppShell,
@@ -7,10 +8,14 @@ import {
   AppShellHeader,
   AppShellMain,
   AppShellNav,
+  AppShellNavGroup,
   AppShellNavLink,
+  AppShellNavMeta,
+  AppShellNavTrigger,
   AppShellSidebar,
 } from "./AppShell.js";
 import { Badge } from "./Badge.js";
+import { Banner } from "./Banner.js";
 import { Button, LinkButton } from "./Button.js";
 import { Card, CardBody, CardHeader, CardTitle } from "./Card.js";
 import {
@@ -20,6 +25,8 @@ import {
   DescriptionTerm,
 } from "./DescriptionList.js";
 import { EmptyState } from "./EmptyState.js";
+import { Dialog } from "./Dialog.js";
+import { ThemeToggle } from "./ThemeToggle.js";
 import { Icon } from "../icons.js";
 import { PageHeader } from "./PageHeader.js";
 
@@ -35,7 +42,7 @@ const meta = {
     docs: {
       description: {
         component: [
-          `<span class="kc-badge" data-tone="warning">Experimental</span> See ${RELEASE_STATUS_LINK} for what that covers.`,
+          `<span class="kc-badge" data-tone="info">Beta</span> See ${RELEASE_STATUS_LINK} for what that covers.`,
           "",
           "The frame every application page sits in: a bar, a body, a footer, and a skip link before all of them. All five consumer repos carry a bespoke one — `.topbar`/`.layout`, `.app-shell`, `.knowledge-shell`, `.site-header` — and no two are alike. That is five repos routing around a hole rather than ignoring the system.",
           "",
@@ -43,7 +50,7 @@ const meta = {
           "",
           "**The skip link is rendered by default and first in the DOM.** Two of the five consumers have none at all; making it the shell's responsibility is the only way that floor holds across five codebases.",
           "",
-          "The sidebar split uses flex wrapping rather than a second media query — the system is single-breakpoint, and a sidebar that reflows on its own content's terms is what the Intrinsic Maximum Rule asks for anyway. Drag the frame narrow to watch it drop.",
+          "For application navigation, `AppShellBody sidebarLayout` provides the persistent left rail, `AppShellSidebar density=\"compact\"` uses the reviewed 36px desktop directory row, and `AppShellNavTrigger` appears when a collapsible rail reflows away. Render the same groups in a start-side `Dialog` to retain the 44px mobile target.",
           "",
           "When both are present, textual brand and navigation items share a baseline by default. The bar and action slot otherwise stay centered, so navigation-free marketing headers, buttons, badges, and logo marks keep their own geometry when the bar wraps.",
         ].join("\n"),
@@ -292,6 +299,390 @@ export const WithSidebar: Story = {
         </AppShellMain>
       </AppShellBody>
     </AppShell>
+  ),
+};
+
+type DraftDestination = {
+  id: string;
+  label: string;
+  meta?: string;
+};
+
+type DraftGroup = {
+  id: string;
+  label?: string;
+  items: readonly DraftDestination[];
+};
+
+const workbenchGroups = [
+  {
+    id: "work",
+    label: "Your work",
+    items: [
+      { id: "overview", label: "Overview" },
+      { id: "approvals", label: "Approvals", meta: "3" },
+      { id: "activity", label: "Activity" },
+    ],
+  },
+  {
+    id: "household",
+    label: "Household",
+    items: [
+      { id: "orders", label: "Orders" },
+      { id: "bills", label: "Bills", meta: "2 due" },
+    ],
+  },
+  {
+    id: "system",
+    label: "System",
+    items: [{ id: "latest-run", label: "Latest run", meta: "8:30" }],
+  },
+] as const satisfies readonly DraftGroup[];
+
+const retirementGroups = [
+  {
+    id: "home",
+    items: [{ id: "overview", label: "Overview" }],
+  },
+  {
+    id: "now",
+    label: "Now",
+    items: [
+      { id: "net-worth", label: "Net worth" },
+      { id: "spending", label: "Spending" },
+      { id: "cash-flow", label: "Cash flow" },
+      { id: "holdings", label: "Holdings" },
+    ],
+  },
+  {
+    id: "plan",
+    label: "The plan",
+    items: [
+      { id: "ask", label: "Ask" },
+      { id: "plan", label: "Plan" },
+      { id: "decisions", label: "Decisions", meta: "2 mo" },
+      { id: "timeline", label: "Timeline" },
+      { id: "healthcare", label: "Healthcare" },
+      { id: "taxes", label: "Taxes" },
+      { id: "legacy", label: "Legacy" },
+      { id: "changes", label: "Changes", meta: "10 mo" },
+      { id: "sensitivity", label: "Sensitivity" },
+    ],
+  },
+] as const satisfies readonly DraftGroup[];
+
+function DraftNavigation({
+  activeId,
+  groups,
+  onNavigate,
+}: {
+  activeId: string;
+  groups: readonly DraftGroup[];
+  onNavigate: (id: string) => void;
+}) {
+  return (
+    <>
+      {groups.map((group) => (
+        <AppShellNavGroup key={group.id} label={group.label}>
+          {group.items.map((item) => (
+            <AppShellNavLink
+              href={`#${item.id}`}
+              isCurrent={item.id === activeId}
+              key={item.id}
+              onPress={() => onNavigate(item.id)}
+            >
+              <span>{item.label}</span>
+              {item.meta ? <AppShellNavMeta>{item.meta}</AppShellNavMeta> : null}
+            </AppShellNavLink>
+          ))}
+        </AppShellNavGroup>
+      ))}
+    </>
+  );
+}
+
+function DraftApplicationShell({
+  actions,
+  brand,
+  children,
+  groups,
+  initialId = "overview",
+  mobileDescription,
+  renderMain,
+}: {
+  actions: ReactNode;
+  brand: ReactNode;
+  children?: never;
+  groups: readonly DraftGroup[];
+  initialId?: string;
+  mobileDescription: string;
+  renderMain: (activeId: string, onNavigate: (id: string) => void) => ReactNode;
+}) {
+  const [activeId, setActiveId] = useState(initialId);
+  const [isNavigationOpen, setNavigationOpen] = useState(false);
+
+  const navigate = (id: string) => {
+    setActiveId(id);
+    setNavigationOpen(false);
+  };
+
+  return (
+    <AppShell data-app-shell-draft="rail">
+      <AppShellHeader
+        actions={
+          <>
+            <AppShellNavTrigger
+              onPress={() => setNavigationOpen(true)}
+            >
+              Sections
+            </AppShellNavTrigger>
+            {actions}
+          </>
+        }
+        brand={brand}
+      />
+      <AppShellBody sidebarLayout>
+        <AppShellSidebar
+          collapsible
+          density="compact"
+          isSticky
+          label="Primary navigation"
+        >
+          <DraftNavigation activeId={activeId} groups={groups} onNavigate={navigate} />
+        </AppShellSidebar>
+        <AppShellMain>{renderMain(activeId, navigate)}</AppShellMain>
+      </AppShellBody>
+      <Dialog
+        className="kc-app-shell-draft__mobile-drawer"
+        description={mobileDescription}
+        isOpen={isNavigationOpen}
+        onOpenChange={setNavigationOpen}
+        placement="inline-start"
+        title="Sections"
+      >
+        <nav aria-label="Primary navigation">
+          <DraftNavigation activeId={activeId} groups={groups} onNavigate={navigate} />
+        </nav>
+      </Dialog>
+    </AppShell>
+  );
+}
+
+const destinationLabel = (groups: readonly DraftGroup[], activeId: string) =>
+  groups.flatMap((group) => group.items).find((item) => item.id === activeId)?.label ?? "Overview";
+
+/**
+ * First-draft application shell for Assistant Workbench. The top-level routes
+ * move into a grouped left rail while identity, theme, and account controls
+ * remain global utilities in the header.
+ */
+export const AssistantWorkbenchSidebarDraft: Story = {
+  render: () => (
+    <DraftApplicationShell
+      actions={
+        <>
+          <ThemeToggle cookieDomain=".jflamb.com" size="small" variant="secondary" />
+          <Button size="small" variant="secondary">
+            Jaime
+          </Button>
+        </>
+      }
+      brand={
+        <>
+          <span>Assistant Workbench</span>
+          <Badge icon tone="success">
+            Enter protected
+          </Badge>
+        </>
+      }
+      groups={workbenchGroups}
+      mobileDescription="Move between your work, household activity, and system history."
+      renderMain={(activeId, onNavigate) => {
+        const title = destinationLabel(workbenchGroups, activeId);
+        return (
+          <div className="kc-app-shell-draft__main-stack">
+            <PageHeader
+              title={title}
+              description={
+                activeId === "overview"
+                  ? "What Ellis handled, and what needs your decision."
+                  : `Assistant Workbench ${title.toLowerCase()} in one focused view.`
+              }
+            />
+            {activeId === "overview" ? (
+              <>
+                <DescriptionList divided layout="grid">
+                  <DescriptionListItem>
+                    <DescriptionTerm>Awaiting you</DescriptionTerm>
+                    <DescriptionDetails>3 approvals</DescriptionDetails>
+                  </DescriptionListItem>
+                  <DescriptionListItem>
+                    <DescriptionTerm>Expiring soon</DescriptionTerm>
+                    <DescriptionDetails>1 request</DescriptionDetails>
+                  </DescriptionListItem>
+                  <DescriptionListItem>
+                    <DescriptionTerm>Cleared recently</DescriptionTerm>
+                    <DescriptionDetails>8 items</DescriptionDetails>
+                  </DescriptionListItem>
+                </DescriptionList>
+                <div className="kc-app-shell-draft__workbench-grid">
+                  <Card aria-labelledby="draft-needs-jaime">
+                    <CardHeader>
+                      <CardTitle id="draft-needs-jaime">Needs Jaime</CardTitle>
+                      <Badge icon tone="warning">
+                        3 waiting
+                      </Badge>
+                    </CardHeader>
+                    <CardBody>
+                      <p>Nothing consequential proceeds until you sign off.</p>
+                      <Button onPress={() => onNavigate("approvals")}>Review approvals</Button>
+                    </CardBody>
+                  </Card>
+                  <Card aria-labelledby="draft-assistant-activity">
+                    <CardHeader>
+                      <CardTitle id="draft-assistant-activity">Assistant activity</CardTitle>
+                    </CardHeader>
+                    <CardBody>
+                      <DescriptionList divided>
+                        <DescriptionListItem>
+                          <DescriptionTerm>Last check</DescriptionTerm>
+                          <DescriptionDetails>8:30 PM</DescriptionDetails>
+                        </DescriptionListItem>
+                        <DescriptionListItem>
+                          <DescriptionTerm>Next check</DescriptionTerm>
+                          <DescriptionDetails>9:00 PM</DescriptionDetails>
+                        </DescriptionListItem>
+                      </DescriptionList>
+                    </CardBody>
+                  </Card>
+                </div>
+              </>
+            ) : (
+              <EmptyState
+                title={`${title} shell state`}
+                description="This draft changes the application frame and navigation only; the existing page content will migrate in place."
+              />
+            )}
+          </div>
+        );
+      }}
+    />
+  ),
+};
+
+/**
+ * First-draft application shell for Retirement Dashboard. It preserves the
+ * current rail's hierarchy and badges, while moving its narrow-screen directory
+ * into a start-side modal instead of a clipped horizontal scroller.
+ */
+export const RetirementDashboardSidebarDraft: Story = {
+  render: () => (
+    <DraftApplicationShell
+      actions={
+        <>
+          <Button size="small" variant="secondary">
+            Assumptions
+          </Button>
+          <ThemeToggle
+            size="small"
+            storageKey="retirement-dashboard-theme"
+            variant="secondary"
+          />
+          <Button size="small" variant="secondary">
+            Full plan PDF
+          </Button>
+          <Button size="small" variant="quiet">
+            Sign out
+          </Button>
+        </>
+      }
+      brand={
+        <span className="kc-app-shell-draft__retirement-brand">
+          <strong>Retirement</strong>
+          <span>Private planning model</span>
+        </span>
+      }
+      groups={retirementGroups}
+      mobileDescription="Move between current finances and every part of the retirement plan."
+      renderMain={(activeId, onNavigate) => {
+        const title = destinationLabel(retirementGroups, activeId);
+        return (
+          <div className="kc-app-shell-draft__main-stack">
+            <Banner
+              title="Current measured spending is required"
+              tone="warning"
+            >
+              Connect or refresh Tiller data before relying on the recommendation.
+            </Banner>
+            <PageHeader
+              title={activeId === "overview" ? "Review the decision" : title}
+              description={
+                activeId === "overview"
+                  ? "The answer, the work ahead, and the plan's movement since the last save."
+                  : `The ${title.toLowerCase()} view within the selected retirement plan.`
+              }
+            />
+            {activeId === "overview" ? (
+              <div className="kc-app-shell-draft__decision-grid">
+                <section>
+                  <h2>When can we retire, and what does that plan look like?</h2>
+                  <p className="kc-app-shell-draft__answer">Recommendation unavailable</p>
+                  <p>A current Tiller spending window is required before the model can answer.</p>
+                  <LinkButton
+                    href="#plan"
+                    onPress={() => onNavigate("plan")}
+                    variant="link"
+                  >
+                    Open plan
+                  </LinkButton>
+                </section>
+                <section>
+                  <h2>What has to be done, and by when?</h2>
+                  <p className="kc-app-shell-draft__answer">8 open</p>
+                  <p>Next: finish the military service deposit and confirm it posted.</p>
+                  <LinkButton
+                    href="#decisions"
+                    onPress={() => onNavigate("decisions")}
+                    variant="link"
+                  >
+                    Open decisions
+                  </LinkButton>
+                </section>
+                <section>
+                  <h2>Has the answer moved since the last saved plan?</h2>
+                  <p className="kc-app-shell-draft__answer">10 months later</p>
+                  <p>Compare the current inputs with the plan saved June 19, 2026.</p>
+                  <LinkButton
+                    href="#changes"
+                    onPress={() => onNavigate("changes")}
+                    variant="link"
+                  >
+                    Open changes
+                  </LinkButton>
+                </section>
+                <section>
+                  <h2>Where does the money come from and go?</h2>
+                  <p className="kc-app-shell-draft__answer">2028–2066</p>
+                  <p>Income, spending, taxes, and balances for every modeled year.</p>
+                  <LinkButton
+                    href="#timeline"
+                    onPress={() => onNavigate("timeline")}
+                    variant="link"
+                  >
+                    Open timeline
+                  </LinkButton>
+                </section>
+              </div>
+            ) : (
+              <EmptyState
+                title={`${title} shell state`}
+                description="This draft preserves the planner's current information architecture while standardizing its frame and navigation."
+              />
+            )}
+          </div>
+        );
+      }}
+    />
   ),
 };
 

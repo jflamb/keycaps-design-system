@@ -1263,6 +1263,57 @@ h3.kc-page-header__title {
   box-shadow: inset 3px 0 0 var(--kc-color-accent-border);
 }
 
+.kc-app-shell__nav-group + .kc-app-shell__nav-group {
+  margin-block-start: var(--kc-space-5);
+  padding-block-start: var(--kc-space-4);
+  border-block-start: 1px solid var(--kc-color-divider);
+}
+
+.kc-app-shell__nav-label {
+  margin: 0 0 var(--kc-space-2);
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-caps);
+  font-weight: var(--kc-font-weight-micro);
+  line-height: var(--kc-line-height-micro);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.kc-app-shell__nav-list {
+  display: grid;
+  gap: var(--kc-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kc-app-shell__nav-list .kc-app-shell__nav-link {
+  inline-size: 100%;
+  justify-content: space-between;
+}
+
+.kc-app-shell__nav-meta {
+  flex: none;
+  padding: 1px var(--kc-space-2);
+  border: 1px solid var(--kc-color-divider);
+  border-radius: var(--kc-radius-pill);
+  background: var(--kc-color-surface);
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-xs);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--kc-line-height-micro);
+}
+
+.kc-app-shell__nav-link[aria-current="page"] .kc-app-shell__nav-meta {
+  border-color: var(--kc-color-accent-border);
+  background: var(--kc-color-accent-surface);
+  color: var(--kc-color-accent-text);
+}
+
+.kc-app-shell__nav-trigger {
+  display: none;
+}
+
 .kc-app-shell__actions {
   display: flex;
   flex-wrap: wrap;
@@ -1278,12 +1329,35 @@ h3.kc-page-header__title {
   min-inline-size: 0;
 }
 
+.kc-app-shell__body[data-sidebar-layout] {
+  display: grid;
+  grid-template-columns: clamp(13rem, 16vw, 14rem) minmax(0, 1fr);
+  align-items: stretch;
+}
+
 .kc-app-shell__sidebar {
   flex: 1 1 14rem;
   min-inline-size: 0;
   padding: var(--kc-space-5);
   border-inline-end: 1px solid var(--kc-color-divider);
   background: var(--kc-color-surface-raised);
+}
+
+.kc-app-shell__sidebar[data-density="compact"] .kc-app-shell__nav-link {
+  min-block-size: 36px;
+}
+
+.kc-app-shell__sidebar[data-sticky] {
+  position: sticky;
+  inset-block-start: 0;
+  align-self: start;
+  max-block-size: 100dvh;
+  overflow-y: auto;
+}
+
+.kc-app-shell__body[data-sidebar-layout] .kc-app-shell__main {
+  max-inline-size: none;
+  margin-inline: 0;
 }
 
 /* The grow factor is what makes the split behave without a query: the content
@@ -1304,6 +1378,20 @@ h3.kc-page-header__title {
   border-block-start: 1px solid var(--kc-color-divider);
   color: var(--kc-color-text-muted);
   font-size: var(--kc-font-size-sm);
+}
+
+@media (max-width: 52rem) {
+  .kc-app-shell__body[data-sidebar-layout] {
+    display: block;
+  }
+
+  .kc-app-shell__body[data-sidebar-layout] > .kc-app-shell__sidebar[data-collapsible] {
+    display: none;
+  }
+
+  .kc-app-shell__nav-trigger {
+    display: inline-flex;
+  }
 }
 
 /* ---- Data table --------------------------------------------------------- */

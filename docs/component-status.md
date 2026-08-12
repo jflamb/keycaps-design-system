@@ -11,7 +11,7 @@
 | Banner | Beta | Semantic HTML plus React Aria Button | Status/alert role, dismiss name and action |
 | Badge | Beta | Semantic HTML | Text-preserved status tones, distinct icon shape per tone, pill shape |
 | Card | Beta | Semantic HTML, React Aria Link when linked | Heading structure and composition, whole-card and title-link navigation |
-| AppShell | Experimental | Semantic HTML, React Aria Link for nav | Landmark structure, named navigation, `aria-current`, skip link by construction, 320px reflow, axe in light and dark |
+| AppShell | Beta | Semantic HTML, React Aria Link for nav | Landmark structure, named and grouped navigation, compact desktop rail, 44px mobile drawer targets, `aria-current`, skip link by construction, 320px reflow, axe in light and dark |
 | PageHeader | Experimental | Semantic HTML | Heading level independent of size, eyebrow excluded from the outline |
 | EmptyState | Experimental | Semantic HTML | Heading level, axe |
 | DescriptionList | Experimental | Semantic HTML | `dl > div > dt/dd` grouping preserved, three layouts, 320px reflow |

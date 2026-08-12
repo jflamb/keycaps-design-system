@@ -9,11 +9,16 @@ import { Form } from "react-aria-components";
 import { describe, expect, it, vi } from "vitest";
 import {
   AppShell,
+  AppShellBody,
   AppShellFooter,
   AppShellHeader,
   AppShellMain,
   AppShellNav,
+  AppShellNavGroup,
   AppShellNavLink,
+  AppShellNavMeta,
+  AppShellNavTrigger,
+  AppShellSidebar,
   Badge,
   Banner,
   Button,
@@ -505,6 +510,41 @@ describe("Tier 1 components", () => {
     );
     expect(screen.getByRole("link", { name: "Approvals" })).not.toHaveAttribute(
       "aria-current",
+    );
+  });
+
+  it("renders grouped compact rail navigation with labelled lists and trailing context", () => {
+    render(
+      <AppShellBody sidebarLayout>
+        <AppShellSidebar collapsible density="compact" isSticky label="Primary navigation">
+          <AppShellNavGroup label="The plan">
+            <AppShellNavLink href="/decisions" isCurrent>
+              Decisions <AppShellNavMeta>2 mo</AppShellNavMeta>
+            </AppShellNavLink>
+          </AppShellNavGroup>
+        </AppShellSidebar>
+      </AppShellBody>,
+    );
+
+    const sidebar = screen.getByRole("navigation", { name: "Primary navigation" });
+    expect(sidebar).toHaveAttribute("data-collapsible", "true");
+    expect(sidebar).toHaveAttribute("data-density", "compact");
+    expect(sidebar).toHaveAttribute("data-sticky", "true");
+    expect(sidebar.closest(".kc-app-shell__body")).toHaveAttribute(
+      "data-sidebar-layout",
+      "true",
+    );
+    expect(screen.getByRole("list")).toHaveAccessibleName("The plan");
+    expect(screen.getByRole("link", { name: "Decisions 2 mo" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+  });
+
+  it("provides a small-screen navigation trigger without reducing drawer row targets", () => {
+    render(<AppShellNavTrigger aria-haspopup="dialog">Sections</AppShellNavTrigger>);
+    expect(screen.getByRole("button", { name: "Sections" })).toHaveClass(
+      "kc-app-shell__nav-trigger",
     );
   });
 
