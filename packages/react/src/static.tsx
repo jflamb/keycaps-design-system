@@ -16,6 +16,7 @@
 
 import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { createThemeBootstrapScript, KEYCAPS_THEME_COLORS } from "./theme.js";
 
 /** Thrown when a static render contains a component that cannot degrade to CSS. */
 export class StaticRenderError extends Error {
@@ -102,30 +103,6 @@ function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (character) => escapes[character] ?? character);
 }
 
-/**
- * The no-flash theme bootstrap.
- *
- * It has to be blocking and in the head, because the alternative is a white
- * frame before the dark theme lands. It reads a cookie first and then
- * `localStorage`, which is the existing jflamb theme-preference contract that
- * ADR 0001 committed to preserving — a cookie scoped to the parent domain is
- * what lets two jflamb.com surfaces agree about the reader's choice.
- *
- * When nothing is stored it writes nothing, and `prefers-color-scheme` in the
- * token layer decides. That is deliberate: the system preference is the default
- * and an explicit `data-theme` is an override, never the other way round.
- */
-function themeBootstrap(storageKey: string): string {
-  return (
-    `(function(){try{` +
-    `var k=${JSON.stringify(storageKey)};` +
-    `var m=document.cookie.match(new RegExp("(?:^|; )"+k+"=([^;]*)"));` +
-    `var t=m?decodeURIComponent(m[1]):localStorage.getItem(k);` +
-    `if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;` +
-    `}catch(e){}})()`
-  );
-}
-
 export interface RenderStaticDocumentOptions extends RenderStaticOptions {
   /** The page. Usually an `AppShell`. */
   children: ReactNode;
@@ -180,9 +157,9 @@ export interface RenderStaticDocumentOptions extends RenderStaticOptions {
  * difference between one implementation and two — which is the entire point of
  * ADR 0002, applied to the document as well as to the components.
  *
- * `theme-color` ships as a pair with `media` attributes rather than a single
- * value. A single one is what makes a phone's browser chrome stay pale while the
- * page under it is dark.
+ * With a stored-preference bootstrap, one meta element is synchronized with
+ * the resolved theme. A script-free page receives the light/dark media pair
+ * instead, so browser chrome follows the same system preference as the tokens.
  */
 export function renderStaticDocument({
   allowInteractive,
@@ -209,13 +186,16 @@ export function renderStaticDocument({
     parts.push(`<meta name="description" content="${escapeHtml(description)}">`);
   }
 
-  parts.push(
-    '<meta name="theme-color" content="#f5f5f3" media="(prefers-color-scheme: light)">',
-    '<meta name="theme-color" content="#15181d" media="(prefers-color-scheme: dark)">',
-  );
-
-  if (themeStorageKey !== false) {
-    parts.push(`<script>${themeBootstrap(themeStorageKey)}</script>`);
+  if (themeStorageKey === false) {
+    parts.push(
+      `<meta name="theme-color" content="${KEYCAPS_THEME_COLORS.light}" media="(prefers-color-scheme: light)">`,
+      `<meta name="theme-color" content="${KEYCAPS_THEME_COLORS.dark}" media="(prefers-color-scheme: dark)">`,
+    );
+  } else {
+    parts.push(
+      `<meta name="theme-color" content="${KEYCAPS_THEME_COLORS.light}">`,
+      `<script>${createThemeBootstrapScript({ storageKey: themeStorageKey })}</script>`,
+    );
   }
 
   for (const href of stylesheets) {

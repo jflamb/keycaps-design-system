@@ -21,6 +21,26 @@ Install `react` and `react-dom` in the consuming application. Import the token l
 
 Documentation: <https://jflamb.github.io/keycaps-design-system/>
 
+## Theme bootstrap for hydrated apps
+
+`ThemeToggle` cycles system, light, and dark and persists the explicit choices.
+Hydrated consumers should also place the package-owned bootstrap in the document
+head so the same preference is applied before the first frame:
+
+```ts
+import { createThemeBootstrapScript } from "@jflamb/keycaps-react/theme";
+
+const script = createThemeBootstrapScript({
+  storageKey: "jflamb-theme",
+  themeColorSelector: "#theme-color",
+});
+```
+
+Render `script` as a blocking inline script after the selected theme-color meta
+and before stylesheets or deferred application modules. The helper reads a
+valid cookie first, falls back to localStorage, and keeps browser chrome correct
+after explicit choices and operating-system changes in system mode.
+
 ## License
 
 MIT — see `LICENSE`.

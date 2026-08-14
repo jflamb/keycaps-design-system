@@ -41,6 +41,7 @@ import type {
   StatusTone,
 } from "@jflamb/keycaps-react";
 import type { renderStaticDocument } from "@jflamb/keycaps-react/static";
+import type { createThemeBootstrapScript } from "@jflamb/keycaps-react/theme";
 
 /** True only when `T` is `any`. `1 & any` is `any`, and `0 extends any` holds. */
 type IsAny<T> = 0 extends 1 & T ? true : false;
@@ -61,6 +62,7 @@ type _SelectOptionsPropResolves = Resolved<IsAny<SelectProps["options"]>>;
 // The `./static` subpath is a separate entry point with its own declaration
 // file, so it needs its own proof.
 type _StaticEntryResolves = Resolved<IsAny<typeof renderStaticDocument>>;
+type _ThemeEntryResolves = Resolved<IsAny<typeof createThemeBootstrapScript>>;
 
 // @ts-expect-error "ghost" is not a ButtonVariant. If this stops erroring, the
 // union has collapsed to `any` and every variant prop in every consumer is

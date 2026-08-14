@@ -16,7 +16,7 @@ const PURPOSE: Record<string, string> = {
   "@jflamb/keycaps-tokens/tokens.css":
     "The custom properties alone: primitives, both semantic themes, and the forced-colors mapping. No reset, no fonts.",
   "@jflamb/keycaps-tokens/fonts.css":
-    "The @font-face declarations for Piazzolla, Sofia Sans and Lilex. Local WOFF2; nothing is fetched at runtime. Local WOFF2; nothing is fetched at runtime.",
+    "The @font-face declarations for Piazzolla, Sofia Sans and Lilex. Local WOFF2; nothing is fetched at runtime.",
   "@jflamb/keycaps-tokens/base.css":
     "Box sizing, the 320px floor, body type, heading face, link color, focus ring, .kc-sr-only, .kc-skip-link, and the reduced-motion guard. Zero-specificity :where() selectors, so your own styles win.",
   "@jflamb/keycaps-tokens/prose.css":
@@ -30,6 +30,8 @@ const PURPOSE: Record<string, string> = {
     "Component styling. Required — the components ship no inline styles. Every interactive state is a React Aria data attribute, so this file alone is inert on hover, press, and focus.",
   "@jflamb/keycaps-react/static":
     "renderStatic and renderStaticDocument, for rendering components to HTML at build time. A separate bundle, because it pulls in react-dom/server.",
+  "@jflamb/keycaps-react/theme":
+    "createThemeBootstrapScript and KEYCAPS_THEME_COLORS, for pre-first-frame Mode 2 theme application and browser-chrome synchronization without importing React.",
   "@jflamb/keycaps-react/static.css":
     "The :hover, :active, and :focus-visible rules that mirror those data attributes, for a page that ships no client React. Import it only from a prerender path — loading it in a React app is harmless but pointless, and loading it nowhere is what makes hand-authored markup visibly inert.",
 };

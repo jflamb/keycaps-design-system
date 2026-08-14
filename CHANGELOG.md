@@ -4,6 +4,21 @@ All notable changes to the fixed-version Keycaps package train are documented he
 
 ## Unreleased
 
+## 0.2.2 — 2026-08-14
+
+### Added
+
+- **A Mode 2 theme head artifact at `@jflamb/keycaps-react/theme`.** `createThemeBootstrapScript` returns a blocking, self-contained script for hydrated applications. It reads a valid cookie before localStorage, applies `light` or `dark` to the root before the first frame, leaves an absent choice in the three-state `system` mode, and synchronizes a caller-selected `meta[name="theme-color"]` after root and operating-system changes. `KEYCAPS_THEME_COLORS` provides the package-owned pre-CSS fallbacks, with a drift test pinning them to the token layer's light and dark surface values.
+
+### Changed
+
+- **`ThemeToggle` now synchronizes browser chrome.** Its new `themeColorSelector` prop defaults to `meta[name="theme-color"]`, can be disabled with `false`, and updates the selected meta after every explicit or system choice and after OS preference changes in system mode. Storage remains three-state and cookie-first on reads; `cookieDomain=".jflamb.com"` remains the explicit shared-surface write arrangement.
+- **`renderStaticDocument` reuses the same bootstrap implementation.** Documents with stored preferences receive one synchronized theme-color meta; script-free documents (`themeStorageKey: false`) retain light/dark media variants. The Mode 1 and Mode 2 heads therefore no longer carry separate copies of the preference logic or palette values.
+
+### Security
+
+- Locked Storybook/Vite's transitive `nanoid` to 3.3.18, clearing the repository's high-severity audit gate for GHSA-2v37-7h3g-55p8.
+
 ## 0.2.1 — 2026-08-11
 
 ### Added
