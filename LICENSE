@@ -22,10 +22,12 @@ SOFTWARE.
 
 ---
 
-The Latin WOFF2 font assets redistributed in `packages/tokens/fonts` (and
+The Latin WOFF2 font assets redistributed from `packages/tokens/fonts` (and
 published inside `@jflamb/keycaps-tokens` at `dist/fonts/`) are not covered by
 the MIT license above. They remain under the SIL Open Font License, Version
-1.1, and their license texts travel with the binaries:
+1.1. The bundled font software is Piazzolla, Sofia Sans, and Lilex. Its license
+texts travel with the binaries:
 
-- Fraunces — `LICENSE-FRAUNCES.txt`
-- Nunito Sans — `LICENSE-NUNITO-SANS.txt`
+- Piazzolla — `dist/fonts/LICENSE-PIAZZOLLA.txt`
+- Sofia Sans — `dist/fonts/LICENSE-SOFIA-SANS.txt`
+- Lilex — `dist/fonts/LICENSE-LILEX.txt`

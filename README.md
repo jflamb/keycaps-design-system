@@ -66,6 +66,6 @@ MIT — see [LICENSE](LICENSE).
 The Latin WOFF2 assets redistributed in `packages/tokens/fonts` are the one
 exception: Piazzolla, Sofia Sans and Lilex stay under the SIL Open Font License 1.1,
 and their license texts ship beside the binaries in
-`@jflamb/keycaps-tokens/dist/fonts/`. Neither font declares a Reserved Font
+`@jflamb/keycaps-tokens/dist/fonts/`. None of the fonts declares a Reserved Font
 Name, so the Latin subsetting and WOFF2 conversion carry no renaming
 obligation.

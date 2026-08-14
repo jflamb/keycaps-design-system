@@ -4,6 +4,16 @@ All notable changes to the fixed-version Keycaps package train are documented he
 
 ## Unreleased
 
+## 0.2.3 — 2026-08-14
+
+### Fixed
+
+- **The token package's font redistribution notice now matches what it ships.** The package-root `LICENSE` had retained Fraunces and Nunito Sans after the 0.1.0 font change, even though the package has always shipped Piazzolla, Sofia Sans and Lilex at the current version. The notice now names all three current families and points to their actual `dist/fonts/LICENSE-*.txt` files.
+
+### Changed
+
+- **Font-license integrity is a release gate derived from the packed package.** The verifier reads the built `@font-face` declarations rather than maintaining another font list, then requires exact WOFF2 and OFL inventories in source, generated `dist`, the package notice, and `npm pack --dry-run`. Its negative tests cover missing notice references, unreferenced shipped OFLs, and stale family names.
+
 ## 0.2.2 — 2026-08-14
 
 ### Added
