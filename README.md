@@ -45,7 +45,7 @@ It styles bare HTML inside a `.kc-prose` container and is not part of the defaul
 
 ## Theme contract
 
-Keycaps follows the system color scheme by default. Set `data-theme="light"` or `data-theme="dark"` on the root element for an explicit choice. Existing jflamb apps can retain the `jflamb-theme` preference key; Keycaps only defines the CSS contract and does not write cookies or local storage.
+Keycaps follows the system color scheme by default. Set `data-theme="light"` or `data-theme="dark"` on the root element for an explicit choice. `ThemeToggle` owns the three-state persistence contract, and `createThemeBootstrapScript` from `@jflamb/keycaps-react/theme` applies the same cookie-first preference before a hydrated app paints while synchronizing `meta[name="theme-color"]`.
 
 ## Status
 

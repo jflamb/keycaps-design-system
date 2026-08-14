@@ -467,6 +467,17 @@ This is a considered exception to the general advice against colored side border
 The visual system reaches non-React projects two ways, and the split is
 structural rather than documentary.
 
+Hydrated Mode 2 applications also take their pre-first-frame theme behavior from
+Keycaps. `createThemeBootstrapScript` is rendered as a blocking inline script in
+the document head, after the caller's theme-color meta and before styles or the
+deferred application module. It reads a valid cookie first and localStorage
+second, leaves an absent preference to `prefers-color-scheme`, and synchronizes
+browser chrome from the active `--kc-color-surface` after CSS is available.
+`ThemeToggle` writes that same three-state storage contract and updates the same
+caller-selected meta element. A component system that owns the theme attribute
+but makes every hydrated consumer copy the bootstrap has two implementations of
+one behavior.
+
 `styles.css` expresses every interactive state through React Aria's data
 attributes and contains no `:hover`, `:active`, or `:focus-visible` rule. A
 hand-written `.kc-button` therefore renders correctly at rest and does nothing on

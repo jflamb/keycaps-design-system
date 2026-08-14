@@ -107,9 +107,9 @@ export {
 export { SkipLink, type SkipLinkProps } from "./components/SkipLink.js";
 export {
   ThemeToggle,
-  type ThemePreference,
   type ThemeToggleProps,
 } from "./components/ThemeToggle.js";
+export type { ThemePreference } from "./theme.js";
 export {
   Icon,
   StatusIcon,

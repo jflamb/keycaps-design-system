@@ -48,6 +48,8 @@
   "include": [
     "src/index.ts",
     "src/static.tsx",
+    "src/theme.ts",
+    "src/theme-runtime.ts",
     "src/components/**/*.tsx",
     "src/icons.tsx",
     "src/utils.ts"

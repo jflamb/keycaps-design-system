@@ -63,6 +63,10 @@ import {
   renderStaticDocument,
   StaticRenderError,
 } from "./static.js";
+import {
+  createThemeBootstrapScript,
+  KEYCAPS_THEME_COLORS,
+} from "./theme.js";
 
 const readSource = (name: string) =>
   readFileSync(fileURLToPath(new URL(name, import.meta.url)), "utf8");
@@ -616,7 +620,7 @@ describe("the static-render path", () => {
     expect(html).toContain('content="A &amp; B"');
   });
 
-  it("emits a document with the theme bootstrap and both theme-color variants", () => {
+  it("emits a document with the synchronized theme bootstrap", () => {
     const html = renderStaticDocument({
       title: "mcp-dnsimple",
       stylesheets: ["/kc/tokens.css", "/kc/styles.css", "/kc/static.css"],
@@ -625,7 +629,11 @@ describe("the static-render path", () => {
     expect(html.startsWith("<!doctype html>")).toBe(true);
     expect(html).toContain('<html lang="en">');
     expect(html).toContain("jflamb-theme");
-    expect(html).toContain('media="(prefers-color-scheme: dark)"');
+    expect(html).toContain(
+      `<meta name="theme-color" content="${KEYCAPS_THEME_COLORS.light}">`,
+    );
+    expect(html).toContain(KEYCAPS_THEME_COLORS.dark);
+    expect(html).not.toContain('media="(prefers-color-scheme: dark)"');
     expect(html).toContain('<link rel="stylesheet" href="/kc/static.css">');
   });
 
@@ -637,6 +645,71 @@ describe("the static-render path", () => {
     });
     expect(html).not.toContain("jflamb-theme");
     expect(html).not.toContain("<script>");
+    expect(html).toContain('media="(prefers-color-scheme: dark)"');
+  });
+});
+
+describe("the Mode 2 theme bootstrap", () => {
+  const setupMeta = (selector = "theme-color") => {
+    document.head.querySelectorAll('meta[name="theme-color"]').forEach((meta) => meta.remove());
+    const meta = document.createElement("meta");
+    meta.id = selector;
+    meta.name = "theme-color";
+    document.head.append(meta);
+    return meta;
+  };
+
+  const clearThemeCookie = () => {
+    document.cookie = "jflamb-theme=; Max-Age=0; Path=/";
+  };
+
+  it("applies localStorage before paint and initializes browser chrome", () => {
+    clearThemeCookie();
+    window.localStorage.setItem("jflamb-theme", "dark");
+    const meta = setupMeta();
+
+    window.eval(createThemeBootstrapScript());
+
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    expect(meta).toHaveAttribute("content", KEYCAPS_THEME_COLORS.dark);
+  });
+
+  it("gives a valid cookie priority over localStorage", () => {
+    window.localStorage.setItem("jflamb-theme", "dark");
+    document.cookie = "jflamb-theme=light; Path=/";
+    const meta = setupMeta();
+
+    window.eval(createThemeBootstrapScript());
+
+    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(meta).toHaveAttribute("content", KEYCAPS_THEME_COLORS.light);
+    clearThemeCookie();
+  });
+
+  it("supports a caller-selected meta element and an escaped storage key", () => {
+    clearThemeCookie();
+    const meta = setupMeta("app-chrome");
+    window.localStorage.setItem("theme.key", "dark");
+    const script = createThemeBootstrapScript({
+      storageKey: "theme.key",
+      themeColorSelector: "#app-chrome",
+    });
+
+    expect(script).not.toContain("</script>");
+    window.eval(script);
+
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    expect(meta).toHaveAttribute("content", KEYCAPS_THEME_COLORS.dark);
+  });
+
+  it("pins the bootstrap colors to the token layer's surface values", () => {
+    const tokens = readFileSync(resolve(process.cwd(), "../tokens/src/tokens.css"), "utf8");
+    const cloud = /--kc-color-cloud:\s*(#[0-9a-f]{6})/i.exec(tokens)?.[1];
+    const explicitDark = /:root\[data-theme="dark"\][\s\S]*?--kc-color-surface:\s*(#[0-9a-f]{6})/i.exec(
+      tokens,
+    )?.[1];
+
+    expect(KEYCAPS_THEME_COLORS).toEqual({ light: cloud, dark: explicitDark });
   });
 });
 
@@ -760,11 +833,20 @@ describe("ThemeToggle", () => {
   const setup = () => {
     document.documentElement.removeAttribute("data-theme");
     window.localStorage.clear();
+    document.head.querySelectorAll('meta[name="theme-color"]').forEach((meta) => meta.remove());
     return userEvent.setup();
+  };
+
+  const themeColorMeta = () => {
+    const meta = document.createElement("meta");
+    meta.name = "theme-color";
+    document.head.append(meta);
+    return meta;
   };
 
   it("starts from the system preference and hands the attribute back to it", async () => {
     const user = setup();
+    const meta = themeColorMeta();
     render(<ThemeToggle />);
     const key = screen.getByRole("button");
 
@@ -774,10 +856,24 @@ describe("ThemeToggle", () => {
     expect(document.documentElement.hasAttribute("data-theme")).toBe(false);
     await user.click(key);
     expect(document.documentElement.dataset.theme).toBe("light");
+    expect(meta).toHaveAttribute("content", KEYCAPS_THEME_COLORS.light);
     await user.click(key);
     expect(document.documentElement.dataset.theme).toBe("dark");
+    expect(meta).toHaveAttribute("content", KEYCAPS_THEME_COLORS.dark);
     await user.click(key);
     expect(document.documentElement.hasAttribute("data-theme")).toBe(false);
+    expect(meta).toHaveAttribute("content", KEYCAPS_THEME_COLORS.light);
+  });
+
+  it("synchronizes a caller-selected theme-color meta element", async () => {
+    const user = setup();
+    const meta = themeColorMeta();
+    meta.id = "app-chrome";
+    render(<ThemeToggle themeColorSelector="#app-chrome" />);
+
+    await user.click(screen.getByRole("button"));
+
+    expect(meta).toHaveAttribute("content", KEYCAPS_THEME_COLORS.light);
   });
 
   it("names both where the reader is and what the next press does", async () => {

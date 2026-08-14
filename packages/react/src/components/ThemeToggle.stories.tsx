@@ -21,6 +21,8 @@ const meta = {
           "",
           "**`storageKey` must match the page's bootstrap**, or the choice survives the click and not the reload.",
           "",
+          "**Browser chrome is part of the contract.** `themeColorSelector` defaults to `meta[name=\"theme-color\"]`; the control synchronizes it after every choice and after operating-system changes in system mode. Use the same selector with `createThemeBootstrapScript` from `@jflamb/keycaps-react/theme` so the first frame is correct too.",
+          "",
           "This is a Mode 2 component. `renderStatic` refuses it: a theme key on a page with no client runtime cannot do the one thing it is for, and unlike a Banner whose dismiss is dead but whose message still reads, there is nothing left of this one without the script.",
         ].join("\n"),
       },
@@ -37,6 +39,12 @@ const meta = {
         "Write a cookie on this domain instead of `localStorage`, for a preference shared across surfaces.",
       control: "text",
       table: { type: { summary: "string" } },
+    },
+    themeColorSelector: {
+      description:
+        "Theme-color meta selector shared with the Mode 2 head bootstrap, or false to disable synchronization.",
+      control: "text",
+      table: { defaultValue: { summary: 'meta[name="theme-color"]' } },
     },
     variant: {
       description: "Emphasis. `quiet` is usual in header chrome.",

@@ -108,9 +108,10 @@ from a prerender path and nowhere else — leaving it out of `styles.css` is wha
 keeps hand-authored markup inert, and the guarantee is structural rather than
 documentary.
 
-`renderStaticDocument` also emits the no-flash theme bootstrap and both
-`theme-color` variants, so a statically rendered page gets the dark theme without
-each project reinventing the head.
+`renderStaticDocument` also emits the no-flash theme bootstrap and synchronized
+`theme-color`; when scripting is disabled it emits the light/dark media pair
+instead. A statically rendered page gets the correct browser chrome without each
+project reinventing the head.
 
 `Select` and `Popover` are not eligible. Their behavior cannot degrade to CSS —
 a listbox that cannot open is not a degraded Select, it is a broken one — and
@@ -137,17 +138,59 @@ element for an explicit choice:
 <html data-theme="dark">   <!-- explicit dark -->
 ```
 
-Keycaps defines only the CSS contract. **It writes no cookies and no browser
-storage.** Persisting a preference is the app's job — existing jflamb
-applications may continue storing theirs under the `jflamb-theme` key, and
-Keycaps will not interfere with it.
+`ThemeToggle` owns the three-state write contract: explicit light or dark is
+stored, while returning to system clears the override. Pass `cookieDomain` to
+share the preference across agreed sibling surfaces (for example
+`.jflamb.com`); without it the component uses localStorage.
 
-One narrow exception, and it only *reads*: `renderStaticDocument` emits a
-blocking bootstrap that looks for `jflamb-theme` in a cookie and then in
-`localStorage`, and sets `data-theme` if it finds `"light"` or `"dark"`. That is
-the no-flash guard a statically rendered page needs and cannot write for itself.
-Pass `themeStorageKey: false` to omit it entirely and leave
-`prefers-color-scheme` to decide.
+Hydrated Mode 2 applications pair it with a blocking head script from the
+dedicated, React-free subpath:
+
+```ts
+import { createThemeBootstrapScript } from "@jflamb/keycaps-react/theme";
+
+const keycapsThemeScript = createThemeBootstrapScript({
+  storageKey: "jflamb-theme",
+  themeColorSelector: "#theme-color",
+});
+```
+
+Put `<meta id="theme-color" name="theme-color" content="">` before the
+inline script and the stylesheet or deferred app module after it. The generated
+artifact reads a valid cookie first, falls back to localStorage, applies an
+explicit preference before paint, and keeps the selected meta synchronized from
+the active surface token after `ThemeToggle` and OS changes. The fallback colors
+come from `KEYCAPS_THEME_COLORS`, also exported by the subpath, rather than a
+consumer copy.
+
+For Vite, inject the classic script during the HTML transform so it remains
+blocking instead of importing it from the deferred application entry:
+
+```ts
+import { createThemeBootstrapScript } from "@jflamb/keycaps-react/theme";
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  plugins: [{
+    name: "keycaps-theme-bootstrap",
+    transformIndexHtml: {
+      order: "pre",
+      handler: () => [{
+        tag: "script",
+        children: createThemeBootstrapScript({
+          storageKey: "jflamb-theme",
+          themeColorSelector: "#theme-color",
+        }),
+        injectTo: "head",
+      }],
+    },
+  }],
+});
+```
+
+Mode 1 gets the same artifact through `renderStaticDocument`. Pass
+`themeStorageKey: false` to omit scripting entirely; the document then receives
+light and dark `theme-color` media variants and `prefers-color-scheme` decides.
 
 The attribute belongs on the root element and nowhere else. Nesting a
 `data-theme` inside the page does not scope the theme, because the token

@@ -2,6 +2,15 @@ import { useCallback, useEffect, useState } from "react";
 import { Button, type ButtonProps } from "./Button.js";
 import { Icon } from "../icons.js";
 import type { KeycapsIconName } from "../icons.js";
+import type { ThemePreference } from "../theme.js";
+import {
+  applyThemePreference,
+  DEFAULT_THEME_COLOR_SELECTOR,
+  readStoredThemePreference,
+  storeThemePreference,
+  subscribeToSystemTheme,
+  syncThemeColor,
+} from "../theme-runtime.js";
 
 /**
  * What the reader has chosen, which is not the same as what they see.
@@ -14,8 +23,6 @@ import type { KeycapsIconName } from "../icons.js";
  * writes a value there is no way back to following the system, and the reader
  * has silently lost the setting that tracks their evening.
  */
-export type ThemePreference = "system" | "light" | "dark";
-
 const ORDER: readonly ThemePreference[] = ["system", "light", "dark"];
 
 const GLYPH = {
@@ -62,62 +69,18 @@ export interface ThemeToggleProps extends ForwardedButtonProps {
    * across surfaces that never agreed to share one.
    */
   cookieDomain?: string;
+  /**
+   * The theme-color meta element synchronized by this control. Match the
+   * selector passed to `createThemeBootstrapScript`; pass `false` to disable
+   * browser-chrome synchronization.
+   *
+   * @default 'meta[name="theme-color"]'
+   */
+  themeColorSelector?: string | false;
   /** The preference to start from before anything is read. @default "system" */
   defaultValue?: ThemePreference;
   /** Called after the choice changes, for an app with its own theme plumbing. */
   onChange?: (value: ThemePreference) => void;
-}
-
-/*
- * `window.localStorage` rather than the bare global, deliberately. Node has its
- * own `localStorage` global now, unavailable unless the process was started
- * with `--localstorage-file`, and it shadows the one jsdom installs on `window`.
- * Reaching through `window` gets the document's storage in a browser, jsdom's
- * under test, and nothing on a server — where the `document` guard has already
- * returned.
- */
-function readStored(storageKey: string): ThemePreference | null {
-  if (typeof document === "undefined") return null;
-  const pattern = new RegExp(`(?:^|; )${storageKey.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}=([^;]*)`);
-  const cookie = pattern.exec(document.cookie);
-  const raw = cookie
-    ? decodeURIComponent(cookie[1]!)
-    : ((): string | null => {
-        try {
-          return window.localStorage.getItem(storageKey);
-        } catch {
-          // Storage can throw outright when cookies are blocked. A theme
-          // control is not worth taking the page down for.
-          return null;
-        }
-      })();
-  return raw === "light" || raw === "dark" ? raw : null;
-}
-
-function store(storageKey: string, value: ThemePreference, cookieDomain?: string): void {
-  if (typeof document === "undefined") return;
-  const clearing = value === "system";
-  if (cookieDomain) {
-    const domain = `; Domain=${cookieDomain}`;
-    document.cookie = clearing
-      ? `${storageKey}=; Max-Age=0; Path=/${domain}; SameSite=Lax`
-      : `${storageKey}=${encodeURIComponent(value)}; Max-Age=31536000; Path=/${domain}; SameSite=Lax`;
-    return;
-  }
-  try {
-    if (clearing) window.localStorage.removeItem(storageKey);
-    else window.localStorage.setItem(storageKey, value);
-  } catch {
-    // Same reasoning as the read: the click still takes effect for this page.
-  }
-}
-
-function apply(value: ThemePreference): void {
-  if (typeof document === "undefined") return;
-  const root = document.documentElement;
-  // Removing the attribute is what hands control back to the media query.
-  if (value === "system") delete root.dataset.theme;
-  else root.dataset.theme = value;
 }
 
 /**
@@ -138,6 +101,7 @@ function apply(value: ThemePreference): void {
 export function ThemeToggle({
   storageKey = "jflamb-theme",
   cookieDomain,
+  themeColorSelector = DEFAULT_THEME_COLOR_SELECTOR,
   defaultValue = "system",
   onChange,
   className,
@@ -149,18 +113,20 @@ export function ThemeToggle({
   // frame have to agree, and the bootstrap has already put the right theme on
   // the document by now — this only catches the control up to it.
   useEffect(() => {
-    setPreference(readStored(storageKey) ?? "system");
-  }, [storageKey]);
+    setPreference(readStoredThemePreference(storageKey) ?? "system");
+    syncThemeColor(themeColorSelector);
+    return subscribeToSystemTheme(themeColorSelector);
+  }, [storageKey, themeColorSelector]);
 
   const advance = useCallback(() => {
     setPreference((current) => {
       const next = ORDER[(ORDER.indexOf(current) + 1) % ORDER.length]!;
-      apply(next);
-      store(storageKey, next, cookieDomain);
+      applyThemePreference(next, themeColorSelector);
+      storeThemePreference(storageKey, next, cookieDomain);
       onChange?.(next);
       return next;
     });
-  }, [cookieDomain, onChange, storageKey]);
+  }, [cookieDomain, onChange, storageKey, themeColorSelector]);
 
   const upcoming = ORDER[(ORDER.indexOf(preference) + 1) % ORDER.length]!;
 

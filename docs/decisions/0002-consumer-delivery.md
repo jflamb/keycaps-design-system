@@ -42,6 +42,15 @@ component CSS with no client React. Applies to `mcp-dnsimple` and `mcp-unifi`.
 components directly, mounted as islands where a full rewrite is not warranted.
 Applies to `assistant-workbench`, `retirement-dashboard`, and `knowledge`.
 
+**Mode 2 owns its pre-hydration theme head too.** Hydrated applications use
+`createThemeBootstrapScript` from `@jflamb/keycaps-react/theme` as a blocking
+inline head script. It reads the same cookie-first, localStorage-fallback
+contract `ThemeToggle` writes, applies an explicit theme before paint, and keeps
+a caller-selected `meta[name="theme-color"]` synchronized after toggle and
+operating-system changes. A consumer-local bootstrap would be the document-head
+version of a component fork: shared behavior copied because the package stopped
+one layer too early.
+
 **Hand-authored component markup is not a supported path.** A consumer may write
 markup against the token layer and against `prose.css`, which styles bare HTML by
 tag inside `.kc-prose` and is designed for exactly that. A consumer may not

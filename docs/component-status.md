@@ -16,7 +16,7 @@
 | EmptyState | Experimental | Semantic HTML | Heading level, axe |
 | DescriptionList | Experimental | Semantic HTML | `dl > div > dt/dd` grouping preserved, three layouts, 320px reflow |
 | SkipLink | Experimental | Semantic HTML | Clipped at rest, 44px key when focused, jumps to the shell's main region |
-| ThemeToggle | Beta | React Aria Button | Three states including system, name announces current and next, storage arrangement as a prop, refused by `renderStatic` |
+| ThemeToggle | Beta | React Aria Button plus `@jflamb/keycaps-react/theme` head bootstrap | Three states including system, cookie-first/localStorage storage contract, pre-first-frame application, synchronized caller-selected `theme-color` after toggle and OS changes, refused by `renderStatic` |
 | Icon | Beta | Semantic SVG | Closed name union, decorative-vs-named accessibility contract, every glyph draws a distinct shape, status shapes match the prose masks |
 | CodeBlock | Experimental | Semantic HTML | Keyboard-reachable scroll region, syntax roles carried by attribute |
 | DataTable | Experimental | Semantic HTML | Named keyboard-reachable scroll region, `scope` on both header cells by construction, numeric alignment, `tfoot` totals, declaration-for-declaration parity with `prose.css`, static render, 320px reflow, axe in light and dark |
@@ -47,3 +47,8 @@ both halves of the static-render guarantee: that hand-authored `.kc-` markup is
 inert under `styles.css` alone, and that the same markup becomes a working key
 once `static.css` is loaded. Stable status still requires documented
 VoiceOver/Safari and Windows screen-reader/browser verification.
+
+Mode 2 theme coverage additionally executes the generated bootstrap before the
+stylesheet, proves cookie-first and localStorage fallback reads, verifies the
+first-frame root/meta pair, exercises all three `ThemeToggle` states, and changes
+the emulated operating-system preference after returning to system mode.
