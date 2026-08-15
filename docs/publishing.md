@@ -13,17 +13,11 @@ Keycaps uses two separate publication boundaries:
 
 The expected Pages URL is `https://jflamb.github.io/keycaps-design-system/`.
 
-## First npm release
+## npm publication setup
 
-The `@jflamb/keycaps-tokens` and `@jflamb/keycaps-react` names do not yet exist on npm, and this checkout is not authenticated to npm.
+Both packages exist on npm and use trusted publishing through the `npm` GitHub environment. No stored registry token is part of the current release path.
 
-1. Confirm the npm account or organization owns the `@jflamb` scope.
-2. Create a short-lived granular npm access token that can publish packages in that scope.
-3. Add it to the GitHub `npm` environment as a secret named `NPM_TOKEN`.
-4. Confirm the package license. The packages currently use `UNLICENSED`, which is appropriate for Jaime-only reuse but does not grant reuse rights to third parties.
-5. Publish a GitHub Release tagged `v0.1.0`.
-
-The workflow checks the tag, package versions, token peer range, complete test gate, package builds, and provenance before publishing tokens first and React second.
+The workflow checks the tag, fixed package versions, token peer range, complete test gate, package builds, font/OFL/package-notice parity, packed contents, and provenance before publishing tokens first and React second.
 
 ## Move to npm trusted publishing
 
@@ -38,10 +32,10 @@ Then delete the `NPM_TOKEN` secret. The workflow already grants `id-token: write
 
 ## Prepare a later release
 
-1. Run `pnpm version:set 0.2.0` using the intended semantic version.
+1. Run `pnpm version:set <version>` using the intended semantic version.
 2. Update `CHANGELOG.md` and add or revise component-status notes.
-3. Run `pnpm release:verify -- v0.2.0`.
+3. Run `pnpm release:verify -- v<version>`.
 4. Run `pnpm check` and `pnpm release:dry-run`.
-5. Merge the version change to `main`, then publish a GitHub Release tagged `v0.2.0`.
+5. Review and merge the exact validated head to `main`, then publish a GitHub Release tagged `v<version>` from that merged revision.
 
 Both packages intentionally share one version until independent release cadence provides a clear benefit.

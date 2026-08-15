@@ -108,6 +108,14 @@ dependency update for the Keycaps packages, grouped and auto-merging on green CI
 The `dependabot.yml` in this repo watches Keycaps' own dependencies and does
 nothing for this; the config has to live in each consumer.
 
+**Redistribution integrity.** The token package's font notice is part of its
+delivery contract, not release prose maintained by inspection. The release gate
+derives font families and WOFF2 paths from the built `fonts.css`, derives the OFL
+filenames from those families, and requires exact agreement across source,
+generated `dist`, the package-root notice, and `npm pack`. Adding, replacing, or
+removing a face therefore changes one implementation inventory and makes every
+stale redistribution artifact a build failure.
+
 **Enforcement where the divergence happens.** This repo's coverage is strong —
 `tests/e2e/foundation.spec.ts` asserts the press coupling invariant, transform-only
 geometry, and the reduced-motion substitution. None of it was ever in scope for
