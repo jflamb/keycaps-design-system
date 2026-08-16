@@ -20,7 +20,7 @@
     "vite": "8.2.1"
   },
   "scripts": {
-    "build": "STORYBOOK_DISABLE_TELEMETRY=1 storybook build --quiet",
+    "build": "STORYBOOK_DISABLE_TELEMETRY=1 storybook build --quiet && node ../../scripts/publish-email-theme.mjs",
     "clean": "rm -rf storybook-static",
     "dev": "STORYBOOK_DISABLE_TELEMETRY=1 storybook dev -p 6006 --host 127.0.0.1 --no-open",
     "typecheck": "tsc --noEmit"

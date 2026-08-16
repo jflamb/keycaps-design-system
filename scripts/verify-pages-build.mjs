@@ -87,6 +87,15 @@ try {
     throw new Error(`Missing directory index returned ${missingIndex.status()}; expected 404.`);
   }
 
+  const emailThemeResponse = await page.request.get(`${origin}${basePath}email-theme.json`);
+  if (!emailThemeResponse.ok()) {
+    throw new Error(`Email theme returned ${emailThemeResponse.status()}; expected 200.`);
+  }
+  const emailTheme = await emailThemeResponse.json();
+  if (emailTheme.schema !== "keycaps-email-theme/v1" || !emailTheme.digest) {
+    throw new Error("Pages did not publish a versioned Keycaps email theme.");
+  }
+
   // The manager is the deployed landing page, so its branding is part of the
   // artifact. The served <title> is what a link preview and a cold tab show
   // before Storybook rewrites it per story; a regression here is what

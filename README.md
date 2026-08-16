@@ -8,6 +8,11 @@ It has three layers:
 - `@jflamb/keycaps-react`: owned React components built on React Aria Components.
 - `@jflamb/keycaps-storybook`: component guidance, interaction examples, and accessibility documentation.
 
+Email is a generated projection of the token layer rather than another component
+implementation. `@jflamb/keycaps-tokens/email-theme.json` provides flattened,
+versioned values for constrained mail renderers, and the same artifact is
+published with Storybook for installed runtimes that need automatic refresh.
+
 Keycaps is the visual authority for the projects that consume it. [DESIGN.md](DESIGN.md) is the specification — palette and its semantic reservations, the type pairing, press physics, and the named rules components are held to. The visual language originated in the `app-auth` design directory, but that is history rather than a source to check against.
 
 Consuming projects are consumers, never second sources of truth. Astryx is not a runtime dependency, and the deprecated MCP console is out of scope.

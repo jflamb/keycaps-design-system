@@ -1,6 +1,6 @@
 {
   "name": "@jflamb/keycaps-tokens",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Framework-neutral Keycaps design tokens and locally hosted fonts.",
   "license": "MIT AND OFL-1.1",
   "homepage": "https://jflamb.github.io/keycaps-design-system/",
@@ -18,6 +18,7 @@
   "files": [
     "dist",
     "bin",
+    "email-theme-v1.schema.json",
     "LICENSE",
     "README.md"
   ],
@@ -31,6 +32,8 @@
     "./fonts.css": "./dist/fonts.css",
     "./base.css": "./dist/base.css",
     "./prose.css": "./dist/prose.css",
+    "./email-theme.json": "./dist/email-theme.json",
+    "./email-theme-v1.schema.json": "./email-theme-v1.schema.json",
     "./legacy.css": "./dist/legacy.css",
     "./fonts/*": "./dist/fonts/*"
   },
