@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jflamb.github.io/keycaps-design-system/email-theme-v1.schema.json",
+  "title": "Keycaps email theme v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema",
+    "keycapsVersion",
+    "tokensSha256",
+    "tokens",
+    "email",
+    "digest"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "https://jflamb.github.io/keycaps-design-system/email-theme-v1.schema.json"
+    },
+    "schema": { "const": "keycaps-email-theme/v1" },
+    "keycapsVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "tokensSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "tokens": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "colors",
+        "fonts",
+        "fontSizes",
+        "lineHeights",
+        "fontWeights",
+        "space",
+        "radii",
+        "dimensions"
+      ],
+      "properties": {
+        "colors": { "$ref": "#/$defs/stringMap" },
+        "fonts": { "$ref": "#/$defs/stringMap" },
+        "fontSizes": { "$ref": "#/$defs/stringMap" },
+        "lineHeights": { "$ref": "#/$defs/stringMap" },
+        "fontWeights": { "$ref": "#/$defs/stringMap" },
+        "space": { "$ref": "#/$defs/stringMap" },
+        "radii": { "$ref": "#/$defs/stringMap" },
+        "dimensions": { "$ref": "#/$defs/stringMap" }
+      }
+    },
+    "email": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxWidth",
+        "outerPaddingBlock",
+        "outerPaddingInline",
+        "contentPaddingBlockStart",
+        "contentPaddingInline",
+        "contentPaddingBlockEnd",
+        "titleSize",
+        "messageTitleSize",
+        "sectionTitleSize",
+        "leadSize",
+        "itemTitleSize",
+        "brandTitleSize",
+        "brandKeyWidth",
+        "brandKeyHeight"
+      ],
+      "properties": {
+        "maxWidth": { "type": "string" },
+        "outerPaddingBlock": { "type": "string" },
+        "outerPaddingInline": { "type": "string" },
+        "contentPaddingBlockStart": { "type": "string" },
+        "contentPaddingInline": { "type": "string" },
+        "contentPaddingBlockEnd": { "type": "string" },
+        "titleSize": { "type": "string" },
+        "messageTitleSize": { "type": "string" },
+        "sectionTitleSize": { "type": "string" },
+        "leadSize": { "type": "string" },
+        "itemTitleSize": { "type": "string" },
+        "brandTitleSize": { "type": "string" },
+        "brandKeyWidth": { "type": "string" },
+        "brandKeyHeight": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "stringMap": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    }
+  }
+}

@@ -4,6 +4,17 @@ All notable changes to the fixed-version Keycaps package train are documented he
 
 ## Unreleased
 
+## 0.3.0 — 2026-08-16
+
+### Added
+
+- **A generated Keycaps email theme.** `@jflamb/keycaps-tokens/email-theme.json`
+  flattens required light semantic colors, current font roles, typography,
+  spacing, shape, and email layout values into a versioned, digested artifact.
+  Font and color edits propagate from `tokens.css`; missing required tokens fail
+  the build. The Storybook Pages artifact publishes the same JSON for installed
+  mail runtimes that refresh independently of a consumer release.
+
 ## 0.2.3 — 2026-08-14
 
 ### Fixed

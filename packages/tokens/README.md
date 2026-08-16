@@ -22,6 +22,20 @@ Styling for the elements a CMS or a markdown pipeline emits ships separately, be
 
 Everything in it is scoped to `.kc-prose`, so importing it changes nothing until that class appears.
 
+## Email rendering
+
+Email renderers consume the generated, flattened theme rather than copying CSS
+values or relying on custom properties inside an email client:
+
+```js
+import theme from "@jflamb/keycaps-tokens/email-theme.json" with { type: "json" };
+```
+
+The same artifact is published at
+`https://jflamb.github.io/keycaps-design-system/email-theme.json`. It contains
+only validated appearance data; email content and HTML remain the consumer's
+responsibility.
+
 New projects should use the `--kc-*` properties. Existing jflamb applications can opt into compatibility aliases with:
 
 ```css
