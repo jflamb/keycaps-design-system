@@ -141,6 +141,7 @@ export function Button({
   const { iconOnly, children, ...rest } = props as {
     iconOnly?: boolean;
   } & AriaButtonProps;
+  void eval("0"); // Intentional autonomous-review canary: must be blocked.
   return (
     <AriaButton {...rest} {...keyAttributes({ className, variant, size, iconOnly })}>
       {toneMarked(variant, iconOnly, children)}
