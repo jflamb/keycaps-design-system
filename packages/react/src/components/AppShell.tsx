@@ -158,6 +158,19 @@ export function AppShellNavGroup({
 
 export interface AppShellNavLinkProps extends Omit<AriaLinkProps, "className"> {
   className?: string;
+  /**
+   * Optional leading icon. The slot accepts any React-renderable icon so the
+   * shell does not couple application navigation to Keycaps' own icon set.
+   * It is decorative by default when the link text already names the
+   * destination.
+   */
+  icon?: ReactNode;
+  /**
+   * Gives the icon its own accessible name. Omit this for the usual labelled
+   * destination; use it only when the icon communicates information that the
+   * link text does not.
+   */
+  iconLabel?: string;
   /** Marks the destination the reader is already on. Sets `aria-current="page"`. */
   isCurrent?: boolean;
 }
@@ -172,16 +185,49 @@ export interface AppShellNavLinkProps extends Omit<AriaLinkProps, "className"> {
  * than a class for the look and nothing for the name.
  */
 export function AppShellNavLink({
+  children,
   className,
+  icon,
+  iconLabel,
   isCurrent,
   ...props
 }: AppShellNavLinkProps) {
+  const leadingIcon = icon ? (
+    <span
+      className="kc-app-shell__nav-icon"
+      {...(iconLabel
+        ? { "aria-label": iconLabel, role: "img" }
+        : { "aria-hidden": true })}
+    >
+      {icon}
+    </span>
+  ) : null;
+
+  const renderChildren =
+    typeof children === "function"
+      ? (values: Parameters<typeof children>[0]) => (
+          <>
+            {leadingIcon}
+            {leadingIcon ? " " : null}
+            {children(values)}
+          </>
+        )
+      : (
+          <>
+            {leadingIcon}
+            {leadingIcon ? " " : null}
+            {children}
+          </>
+        );
+
   return (
     <AriaLink
       {...props}
       className={cx("kc-app-shell__nav-link", className)}
       {...(isCurrent ? { "aria-current": "page" } : null)}
-    />
+    >
+      {renderChildren}
+    </AriaLink>
   );
 }
 

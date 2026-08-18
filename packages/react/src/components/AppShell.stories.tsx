@@ -302,8 +302,82 @@ export const WithSidebar: Story = {
   ),
 };
 
+/**
+ * Ordered groups may be labelled or unlabelled. Navigation icons accept any
+ * React element, stay decorative beside a complete text label, and preserve
+ * current, disabled, and trailing-meta states.
+ */
+export const GroupedNavigationStates: Story = {
+  render: () => (
+    <AppShell style={{ minBlockSize: "auto" }}>
+      <AppShellBody sidebarLayout>
+        <AppShellSidebar density="compact" label="Primary navigation">
+          <AppShellNavGroup>
+            <AppShellNavLink
+              href="#overview"
+              icon={<Icon name="tree-structure" />}
+              isCurrent
+            >
+              Overview
+            </AppShellNavLink>
+          </AppShellNavGroup>
+          <AppShellNavGroup label="Household">
+            <AppShellNavLink
+              href="#orders"
+              icon={<Icon name="cloud-arrow-up" />}
+            >
+              Orders <AppShellNavMeta>3 active</AppShellNavMeta>
+            </AppShellNavLink>
+            <AppShellNavLink href="#bills" icon={<Icon name="info" />}>
+              Bills
+            </AppShellNavLink>
+          </AppShellNavGroup>
+          <AppShellNavGroup label="System">
+            <AppShellNavLink
+              href="#connection"
+              icon={<span aria-hidden="true">◆</span>}
+              isDisabled
+            >
+              Connection unavailable
+            </AppShellNavLink>
+          </AppShellNavGroup>
+        </AppShellSidebar>
+        <AppShellMain>
+          <PageHeader
+            title="Navigation states"
+            description="A package-owned example of grouped application destinations."
+          />
+        </AppShellMain>
+      </AppShellBody>
+    </AppShell>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const navigation = canvas.getByRole("navigation", {
+      name: "Primary navigation",
+    });
+    await expect(
+      navigation.querySelectorAll(".kc-app-shell__nav-group"),
+    ).toHaveLength(3);
+    await expect(canvas.getByRole("list", { name: "Household" })).toBeVisible();
+    await expect(canvas.getByRole("link", { name: "Overview" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    await expect(
+      canvas.getByRole("link", { name: "Connection unavailable" }),
+    ).toHaveAttribute("aria-disabled", "true");
+    await expect(
+      navigation.querySelectorAll(
+        '.kc-app-shell__nav-icon[aria-hidden="true"]',
+      ),
+    ).toHaveLength(4);
+  },
+};
+
 type DraftDestination = {
   id: string;
+  icon?: ReactNode;
   label: string;
   meta?: string;
 };
@@ -319,23 +393,35 @@ const workbenchGroups = [
     id: "work",
     label: "Your work",
     items: [
-      { id: "overview", label: "Overview" },
-      { id: "approvals", label: "Approvals", meta: "3" },
-      { id: "activity", label: "Activity" },
+      { id: "overview", icon: <Icon name="tree-structure" />, label: "Overview" },
+      {
+        id: "approvals",
+        icon: <Icon name="check-circle" />,
+        label: "Approvals",
+        meta: "3",
+      },
+      { id: "activity", icon: <Icon name="hard-drives" />, label: "Activity" },
     ],
   },
   {
     id: "household",
     label: "Household",
     items: [
-      { id: "orders", label: "Orders" },
-      { id: "bills", label: "Bills", meta: "2 due" },
+      { id: "orders", icon: <Icon name="cloud-arrow-up" />, label: "Orders" },
+      { id: "bills", icon: <Icon name="info" />, label: "Bills", meta: "2 due" },
     ],
   },
   {
     id: "system",
     label: "System",
-    items: [{ id: "latest-run", label: "Latest run", meta: "8:30" }],
+    items: [
+      {
+        id: "latest-run",
+        icon: <Icon name="terminal-window" />,
+        label: "Latest run",
+        meta: "8:30",
+      },
+    ],
   },
 ] as const satisfies readonly DraftGroup[];
 
@@ -387,6 +473,7 @@ function DraftNavigation({
           {group.items.map((item) => (
             <AppShellNavLink
               href={`#${item.id}`}
+              icon={item.icon}
               isCurrent={item.id === activeId}
               key={item.id}
               onPress={() => onNavigate(item.id)}

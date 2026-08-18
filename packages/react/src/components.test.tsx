@@ -545,6 +545,46 @@ describe("Tier 1 components", () => {
     );
   });
 
+  it("renders library-agnostic navigation icons as decorative by default", () => {
+    render(
+      <AppShellNav label="Sections">
+        <AppShellNavLink
+          href="/orders"
+          icon={<svg data-testid="consumer-icon" viewBox="0 0 16 16" />}
+        >
+          Orders
+        </AppShellNavLink>
+      </AppShellNav>,
+    );
+
+    const icon = screen.getByTestId("consumer-icon").parentElement;
+    expect(icon).toHaveClass("kc-app-shell__nav-icon");
+    expect(icon).toHaveAttribute("aria-hidden", "true");
+    expect(screen.getByRole("link", { name: "Orders" })).toBeVisible();
+  });
+
+  it("supports an explicitly named navigation icon and disabled destination", () => {
+    render(
+      <AppShellNav label="Sections">
+        <AppShellNavLink
+          href="/status"
+          icon={<span aria-hidden="true">!</span>}
+          iconLabel="Requires connection"
+          isDisabled
+        >
+          Live status
+        </AppShellNavLink>
+      </AppShellNav>,
+    );
+
+    expect(screen.getByRole("img", { name: "Requires connection" })).toBeVisible();
+    const link = screen.getByRole("link", {
+      name: "Requires connection Live status",
+    });
+    expect(link).toHaveAttribute("aria-disabled", "true");
+    expect(link).toHaveAttribute("data-disabled", "true");
+  });
+
   it("provides a small-screen navigation trigger without reducing drawer row targets", () => {
     render(<AppShellNavTrigger aria-haspopup="dialog">Sections</AppShellNavTrigger>);
     expect(screen.getByRole("button", { name: "Sections" })).toHaveClass(

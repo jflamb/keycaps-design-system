@@ -1254,6 +1254,11 @@ h3.kc-page-header__title {
   outline-offset: var(--kc-focus-ring-offset);
 }
 
+.kc-app-shell__nav-link[data-disabled] {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
 /* The Select option's selection treatment, not the coral key. A sidebar is a
    list of options and navigating somewhere commits to nothing — the same call
    the documentation site's own chrome makes. */
@@ -1289,11 +1294,26 @@ h3.kc-page-header__title {
 
 .kc-app-shell__nav-list .kc-app-shell__nav-link {
   inline-size: 100%;
-  justify-content: space-between;
+  justify-content: flex-start;
+}
+
+.kc-app-shell__nav-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+}
+
+.kc-app-shell__nav-icon > :where(svg, img) {
+  inline-size: 100%;
+  block-size: 100%;
 }
 
 .kc-app-shell__nav-meta {
   flex: none;
+  margin-inline-start: auto;
   padding: 1px var(--kc-space-2);
   border: 1px solid var(--kc-color-divider);
   border-radius: var(--kc-radius-pill);
@@ -1628,6 +1648,7 @@ h3.kc-page-header__title {
   }
 
   .kc-button[data-disabled],
+  .kc-app-shell__nav-link[data-disabled],
   .kc-select__option[data-disabled] {
     color: GrayText;
     opacity: 1;
