@@ -1,5 +1,22 @@
 # @jflamb/keycaps-react
 
+## Application shell navigation
+
+`AppShellNavGroup` owns labelled lists and the separator between ordered groups.
+`AppShellNavLink` accepts an optional icon slot without choosing an icon library:
+
+```tsx
+<AppShellNavGroup label="Household">
+  <AppShellNavLink href="/orders" icon={<PackageIcon />} isCurrent>
+    Orders
+  </AppShellNavLink>
+</AppShellNavGroup>
+```
+
+Icons are decorative by default because the link text names the destination.
+Use `iconLabel` only when the icon communicates information not present in that
+text. `isDisabled` uses the existing React Aria disabled-link contract.
+
 Owned Keycaps React components built on React Aria Components.
 
 ```tsx

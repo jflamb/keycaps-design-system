@@ -493,13 +493,18 @@ test("the app shell puts a working skip link before everything else", async ({ p
 test("the application rail is compact on desktop and keeps drawer targets at 44px", async ({
   page,
 }) => {
-  const retirementShell =
-    "/iframe.html?id=components-app-shell--retirement-dashboard-sidebar-draft&viewMode=story&globals=theme:light";
+  const applicationShell =
+    "/iframe.html?id=components-app-shell--assistant-workbench-sidebar-draft&viewMode=story&globals=theme:light";
 
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto(retirementShell);
+  await page.goto(applicationShell);
   const sidebar = page.getByRole("navigation", { name: "Primary navigation" });
   await expect(sidebar).toBeVisible();
+  await expect(sidebar.locator(".kc-app-shell__nav-icon")).toHaveCount(6);
+  await expect(sidebar.locator(".kc-app-shell__nav-icon").first()).toHaveAttribute(
+    "aria-hidden",
+    "true",
+  );
   expect((await sidebar.getByRole("link", { name: "Overview" }).boundingBox())!.height).toBeCloseTo(
     36,
     3,
@@ -514,6 +519,7 @@ test("the application rail is compact on desktop and keeps drawer targets at 44p
 
   const drawer = page.getByRole("dialog", { name: "Sections" });
   await expect(drawer).toBeVisible();
+  await expect(drawer.locator(".kc-app-shell__nav-icon")).toHaveCount(6);
   expect((await drawer.getByRole("link", { name: "Overview" }).boundingBox())!.height).toBeCloseTo(
     44,
     3,
