@@ -6,6 +6,8 @@ test-results/
 .review/
 coverage/
 *.tsbuildinfo
+__pycache__/
+*.py[cod]
 .DS_Store
 
 # Consumer checkouts made by CI for citation verification
