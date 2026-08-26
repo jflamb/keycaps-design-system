@@ -53,6 +53,8 @@ const meta = {
           "For application navigation, `AppShellBody sidebarLayout` provides the persistent left rail, `AppShellSidebar density=\"compact\"` uses the reviewed 36px desktop directory row, and `AppShellNavTrigger` appears when a collapsible rail reflows away. Render the same groups in a start-side `Dialog` to retain the 44px mobile target.",
           "",
           "When both are present, textual brand and navigation items share a baseline by default. The bar and action slot otherwise stay centered, so navigation-free marketing headers, buttons, badges, and logo marks keep their own geometry when the bar wraps.",
+          "",
+          "Use `treatment=\"selector\"` on `AppShellNav` or `AppShellNavGroup` for two to four peer destinations. The track is one inset line and the current destination is a raised face; the component derives and animates its position from `isCurrent`, with no parallel index for the consumer to maintain.",
         ].join("\n"),
       },
     },
@@ -153,6 +155,70 @@ export const Default: Story = {
       "page",
     );
   },
+};
+
+function SelectorNavigation() {
+  const [utility, setUtility] = useState<"activity" | "overview">("overview");
+  const [workspace, setWorkspace] = useState<"decisions" | "inbox" | "sources">(
+    "inbox",
+  );
+
+  return (
+    <AppShell>
+      <AppShellHeader brand="Keycaps Studio">
+        <AppShellNav label="Workspace views" treatment="selector">
+          <AppShellNavLink
+            href="#overview"
+            isCurrent={utility === "overview"}
+            onPress={() => setUtility("overview")}
+          >
+            Overview
+          </AppShellNavLink>
+          <AppShellNavLink
+            href="#activity"
+            isCurrent={utility === "activity"}
+            onPress={() => setUtility("activity")}
+          >
+            Activity
+          </AppShellNavLink>
+        </AppShellNav>
+      </AppShellHeader>
+      <AppShellBody sidebarLayout>
+        <AppShellSidebar label="Workspace navigation">
+          <AppShellNavGroup label="Workspace" treatment="selector">
+            <AppShellNavLink
+              href="#inbox"
+              isCurrent={workspace === "inbox"}
+              onPress={() => setWorkspace("inbox")}
+            >
+              Inbox <AppShellNavMeta>8</AppShellNavMeta>
+            </AppShellNavLink>
+            <AppShellNavLink
+              href="#decisions"
+              isCurrent={workspace === "decisions"}
+              onPress={() => setWorkspace("decisions")}
+            >
+              Decisions <AppShellNavMeta>3</AppShellNavMeta>
+            </AppShellNavLink>
+            <AppShellNavLink
+              href="#sources"
+              isCurrent={workspace === "sources"}
+              onPress={() => setWorkspace("sources")}
+            >
+              Sources
+            </AppShellNavLink>
+          </AppShellNavGroup>
+        </AppShellSidebar>
+        <AppShellMain>
+          <PageHeader surface="tonal" title="Design review" />
+        </AppShellMain>
+      </AppShellBody>
+    </AppShell>
+  );
+}
+
+export const SelectorNavigationTreatment: Story = {
+  render: () => <SelectorNavigation />,
 };
 
 /** A graphic mark must not change the bar's baseline or cross-size. */

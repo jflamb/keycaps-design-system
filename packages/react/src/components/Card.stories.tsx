@@ -29,11 +29,19 @@ const meta = {
           "Use heading levels that preserve the page outline — `CardTitle` renders `h2` by default and accepts `level={3}` or `level={4}`. The visual weight does not change with the level, so pick the level the document needs and nothing shifts.",
           "",
           "In light mode a card casts `--kc-shadow-plate`. In dark mode it casts nothing and depth comes from the surface ladder instead.",
+          "",
+          "Use `surface=\"minimal\"` or `surface=\"tonal\"` when fill alone should group the content. Reserve `surface=\"contrast\"` for one chapter or editorial accent; it is intentionally too strong for a routine grid.",
         ].join("\n"),
       },
     },
   },
   argTypes: {
+    surface: {
+      description: "The card's place in the Layered Plate surface ladder.",
+      control: "inline-radio",
+      options: ["raised", "minimal", "tonal", "contrast"],
+      table: { defaultValue: { summary: '"raised"' } },
+    },
     "aria-labelledby": {
       description:
         "Point this at the `CardTitle` id when the card is a `section` or `article`, so the region takes the title as its accessible name.",
@@ -66,6 +74,29 @@ export const Default: Story = {
         <Button variant="secondary">Choose another</Button>
       </CardFooter>
     </Card>
+  ),
+};
+
+/** One hierarchy expressed by tone, without three bordered boxes or shadows. */
+export const SurfaceLadder: Story = {
+  render: () => (
+    <div className="kc-story-grid">
+      {(["minimal", "tonal", "contrast"] as const).map((surface) => (
+        <Card as="section" aria-labelledby={`${surface}-surface-title`} key={surface} surface={surface}>
+          <CardHeader>
+            <Badge>{surface}</Badge>
+            <CardTitle id={`${surface}-surface-title`} level={3}>
+              {surface === "contrast" ? "Exceptional emphasis" : "Related work"}
+            </CardTitle>
+            <CardDescription>
+              {surface === "contrast"
+                ? "Use once, for a chapter or editorial accent."
+                : "The fill carries the grouping without another border."}
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      ))}
+    </div>
   ),
 };
 

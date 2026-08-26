@@ -1,6 +1,9 @@
 import { createElement, type HTMLAttributes, type ReactNode } from "react";
 import { cx } from "../utils.js";
 
+/** The opening band's place in the Layered Plate surface ladder. */
+export type PageHeaderSurface = "plain" | "tonal" | "contrast";
+
 export interface PageHeaderProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
   /** Controls sitting opposite the title. Wraps below it under about 34rem. */
   actions?: ReactNode;
@@ -17,6 +20,13 @@ export interface PageHeaderProps extends Omit<HTMLAttributes<HTMLElement>, "titl
    * @default 1
    */
   level?: 1 | 2 | 3;
+  /**
+   * The opening band's surface. `tonal` is the normal Layered Plate treatment;
+   * `contrast` is a deliberately rare chapter break.
+   *
+   * @default "plain"
+   */
+  surface?: PageHeaderSurface;
   /** The heading text. */
   title: ReactNode;
   /** One or two sentences under the title. Muted. */
@@ -46,6 +56,7 @@ export function PageHeader({
   divided,
   eyebrow,
   level = 1,
+  surface = "plain",
   title,
   ...props
 }: PageHeaderProps) {
@@ -53,6 +64,7 @@ export function PageHeader({
     <header
       {...props}
       className={cx("kc-page-header", className)}
+      data-surface={surface}
       {...(divided ? { "data-divided": true } : null)}
     >
       <div className="kc-page-header__lead">

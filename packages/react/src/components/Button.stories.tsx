@@ -92,7 +92,7 @@ export const Small: Story = {
     docs: {
       description: {
         story:
-          "The system's only documented exception to the 44×44 minimum target: 36px tall, micro type, tighter padding. The measured height is asserted by the play function below.",
+          "The system's only documented exception to the 44×44 minimum target: 36px tall with the same body-sized label and tighter padding. The measured height is asserted by the play function below.",
       },
     },
   },

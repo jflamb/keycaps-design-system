@@ -1,4 +1,11 @@
-import { Children, useId, type HTMLAttributes, type ReactNode } from "react";
+import {
+  Children,
+  isValidElement,
+  useId,
+  type CSSProperties,
+  type HTMLAttributes,
+  type ReactNode,
+} from "react";
 import { Link as AriaLink, type LinkProps as AriaLinkProps } from "react-aria-components";
 import { Button, type ButtonProps } from "./Button.js";
 import { SkipLink } from "./SkipLink.js";
@@ -76,7 +83,7 @@ export interface AppShellHeaderProps extends HTMLAttributes<HTMLElement> {
    * group. A mark nested inside a link or wrapper does not receive that guard.
    */
   brand?: ReactNode;
-  /** Usually an `AppShellNav`. */
+  /** Usually an `AppShellNav` or the trigger for a collapsible sidebar. */
   children?: ReactNode;
   /**
    * Pins the bar to the top of the viewport. Off by default: a sticky bar costs
@@ -113,17 +120,60 @@ export interface AppShellNavProps extends HTMLAttributes<HTMLElement> {
    * than one `nav`, which any page with a shell and a footer does.
    */
   label: string;
+  /**
+   * `selector` presents destinations as one inset track with a raised current
+   * face. Use it for two to four peer destinations, not a long directory.
+   */
+  treatment?: AppShellNavTreatment;
 }
 
-export function AppShellNav({ className, label, ...props }: AppShellNavProps) {
+export type AppShellNavTreatment = "plain" | "selector";
+
+function getSelectorState(children: ReactNode) {
+  const items = Children.toArray(children);
+  const index = items.findIndex(
+    (child) => isValidElement<{ isCurrent?: boolean }>(child) && child.props.isCurrent,
+  );
+  return { count: Math.max(items.length, 1), index };
+}
+
+export function AppShellNav({
+  children,
+  className,
+  label,
+  style,
+  treatment = "plain",
+  ...props
+}: AppShellNavProps) {
+  const selection = getSelectorState(children);
+  const selectorStyle =
+    treatment === "selector"
+      ? ({
+          ...style,
+          "--kc-app-shell-selector-size": `${100 / selection.count}%`,
+          "--kc-app-shell-selector-offset": `${Math.max(selection.index, 0) * 100}%`,
+        } as CSSProperties)
+      : style;
+
   return (
-    <nav {...props} aria-label={label} className={cx("kc-app-shell__nav", className)} />
+    <nav
+      {...props}
+      aria-label={label}
+      className={cx("kc-app-shell__nav", className)}
+      data-has-selection={selection.index >= 0 || undefined}
+      data-treatment={treatment}
+      style={selectorStyle}
+    >
+      {children}
+    </nav>
   );
 }
 
 export interface AppShellNavGroupProps extends HTMLAttributes<HTMLDivElement> {
   /** Visible label for this set of destinations. Omit for an unlabelled home group. */
   label?: ReactNode;
+  /** Applies the same inset selector treatment as `AppShellNav`. */
+  treatment?: AppShellNavTreatment;
 }
 
 /**
@@ -135,10 +185,19 @@ export function AppShellNavGroup({
   children,
   className,
   label,
+  treatment = "plain",
   ...props
 }: AppShellNavGroupProps) {
   const generatedId = useId();
   const labelId = label == null ? undefined : `kc-app-shell-nav-group-${generatedId}`;
+  const selection = getSelectorState(children);
+  const selectorStyle =
+    treatment === "selector"
+      ? ({
+          "--kc-app-shell-selector-size": `${100 / selection.count}%`,
+          "--kc-app-shell-selector-offset": `${Math.max(selection.index, 0) * 100}%`,
+        } as CSSProperties)
+      : undefined;
 
   return (
     <div {...props} className={cx("kc-app-shell__nav-group", className)}>
@@ -147,7 +206,13 @@ export function AppShellNavGroup({
           {label}
         </p>
       )}
-      <ul aria-labelledby={labelId} className="kc-app-shell__nav-list">
+      <ul
+        aria-labelledby={labelId}
+        className="kc-app-shell__nav-list"
+        data-has-selection={selection.index >= 0 || undefined}
+        data-treatment={treatment}
+        style={selectorStyle}
+      >
         {Children.toArray(children).map((child, index) => (
           <li key={index}>{child}</li>
         ))}
@@ -244,7 +309,7 @@ export function AppShellNavMeta({ className, ...props }: HTMLAttributes<HTMLSpan
 export function AppShellNavTrigger({
   children = "Sections",
   className,
-  size = "small",
+  size = "medium",
   variant = "secondary",
   ...props
 }: ButtonProps) {

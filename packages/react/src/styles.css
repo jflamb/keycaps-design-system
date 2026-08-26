@@ -12,15 +12,13 @@
   border-radius: var(--kc-radius-key);
   color: var(--kc-color-text);
   font-family: var(--kc-font-body);
-  font-size: var(--kc-font-size-sm);
+  font-size: var(--kc-font-size-md);
   font-weight: var(--kc-font-weight-label);
-  /* The Label role's leading is 1.45, and this is the one place it is not used.
-     At 0.875rem that makes the content box 20.3px, which with 10px padding and
-     the 1px/4px borders totals 45.3px — past `--kc-control-min-size`. The button
-     would then size to its content instead of to the 44px floor, and the press
-     depends on `min-block-size` pinning the border box while the wall
-     compresses. Tighter leading is what keeps that floor doing its job. */
-  line-height: 1.2;
+  /* Button labels stay at body size. The Label role supplies their emphasis.
+     At the default 16px body size, 1.1875 resolves to a 19px line box; together
+     with the padding and key edge, that pins the resting border box to the 44px
+     control floor so compressing the edge remains transform-only. */
+  line-height: 1.1875;
   text-decoration: none;
   cursor: pointer;
   transition:
@@ -29,17 +27,11 @@
     background-color var(--kc-duration-press) var(--kc-ease-press);
 }
 
-/* The small size carries Micro type, not a shrunken Label. Weight has to be
-   restated: inheriting the Label weight from `.kc-button` would leave a small
-   button lighter than a regular one, which is backwards — at 0.75rem there is
-   less stroke to read, not more. Micro's leading of 1 is safe here because 12px
-   of content plus 8px padding and the borders stays under the 36px floor. */
+/* Small changes the target geometry, not the label hierarchy. It keeps body-size
+   text and reaches the 36px exception by tightening its block padding. */
 .kc-button[data-size="small"] {
   --kc-button-min-size: 36px;
-  padding: var(--kc-space-2) var(--kc-space-3);
-  font-size: var(--kc-font-size-xs);
-  font-weight: var(--kc-font-weight-micro);
-  line-height: var(--kc-line-height-micro);
+  padding: calc(var(--kc-space-1) + 1px) var(--kc-space-3);
 }
 
 .kc-button[data-variant="primary"] {
@@ -588,7 +580,6 @@
   gap: var(--kc-space-3);
   padding: var(--kc-space-3) var(--kc-space-4);
   border: 1px solid var(--kc-color-info-border);
-  border-inline-start-width: 4px;
   border-radius: var(--kc-radius-sm);
   background: var(--kc-color-info-surface);
   color: var(--kc-color-info-text);
@@ -714,6 +705,41 @@
   color: var(--kc-color-text);
   box-shadow: var(--kc-shadow-plate);
   font-family: var(--kc-font-body);
+}
+
+/* Layered Plate surfaces. The two tonal roles deliberately remove both border
+   and shadow: their fill is the boundary. Contrast is an exceptional inverse
+   accent, not the default way to create hierarchy. */
+.kc-card[data-surface="minimal"],
+.kc-card[data-surface="tonal"],
+.kc-card[data-surface="contrast"] {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.kc-card[data-surface="minimal"] {
+  background: var(--kc-color-surface-minimal);
+}
+
+.kc-card[data-surface="tonal"] {
+  background: var(--kc-color-surface-tonal);
+}
+
+.kc-card[data-surface="contrast"] {
+  background: var(--kc-color-surface-contrast);
+  color: var(--kc-color-on-contrast);
+}
+
+.kc-card[data-surface="contrast"] :is(.kc-card__title, .kc-card__link) {
+  color: var(--kc-color-on-contrast);
+}
+
+.kc-card[data-surface="contrast"] .kc-card__description {
+  color: var(--kc-color-on-contrast-muted);
+}
+
+.kc-card[data-surface="contrast"] .kc-card__footer {
+  border-color: color-mix(in srgb, var(--kc-color-on-contrast) 24%, transparent);
 }
 
 .kc-card__header,
@@ -999,6 +1025,41 @@
   border-block-end: 1px solid var(--kc-color-divider);
 }
 
+.kc-page-header[data-surface="tonal"],
+.kc-page-header[data-surface="contrast"] {
+  padding: var(--kc-space-6);
+  border-radius: var(--kc-radius-plate);
+}
+
+.kc-page-header[data-surface="tonal"] {
+  background: var(--kc-color-surface-tonal);
+}
+
+/* A high-contrast opening is a rare chapter break. `tonal` is the normal
+   Layered Plate treatment for a page header. */
+.kc-page-header[data-surface="contrast"] {
+  background: var(--kc-color-surface-contrast);
+  color: var(--kc-color-on-contrast);
+}
+
+.kc-page-header[data-surface="contrast"]
+  :is(.kc-page-header__eyebrow, .kc-page-header__description) {
+  color: var(--kc-color-on-contrast-muted);
+}
+
+.kc-page-header[data-surface="contrast"] .kc-button[data-variant="secondary"] {
+  border-color: transparent;
+  border-block-end-color: var(--kc-color-border);
+  background: var(--kc-color-on-contrast);
+  color: var(--kc-color-surface-contrast);
+}
+
+.kc-page-header[data-surface="contrast"] .kc-badge {
+  border-color: transparent;
+  background: var(--kc-color-on-contrast);
+  color: var(--kc-color-surface-contrast);
+}
+
 .kc-page-header__lead {
   display: grid;
   flex: 1 1 22rem;
@@ -1210,6 +1271,7 @@ h3.kc-page-header__title {
 
 .kc-app-shell__brand {
   display: flex;
+  min-inline-size: 0;
   align-items: baseline;
   gap: var(--kc-space-2);
   font-family: var(--kc-font-display);
@@ -1324,6 +1386,137 @@ h3.kc-page-header__title {
   line-height: var(--kc-line-height-micro);
 }
 
+/* The selector treatment borrows the key's simplified dimensionality without
+   pretending navigation is a button. One inset line draws the track; the
+   current destination is a raised face that covers it and slides on state
+   change. `AppShellNav` supplies the size and offset from its children. */
+.kc-app-shell__nav[data-treatment="selector"],
+.kc-app-shell__nav-list[data-treatment="selector"] {
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  gap: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--kc-radius-key);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--kc-color-divider);
+}
+
+.kc-app-shell__nav[data-treatment="selector"] {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  block-size: var(--kc-control-min-size);
+}
+
+.kc-app-shell__nav[data-treatment="selector"][data-has-selection]::before,
+.kc-app-shell__nav-list[data-treatment="selector"][data-has-selection]::before {
+  position: absolute;
+  z-index: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--kc-color-divider);
+  border-block-end: 3px solid var(--kc-color-accent-border);
+  border-radius: calc(var(--kc-radius-key) - 2px);
+  background: var(--kc-color-surface-raised);
+  box-shadow: 0 1px 2px
+    color-mix(in srgb, var(--kc-color-text) 18%, transparent);
+  content: "";
+  pointer-events: none;
+  transition: transform var(--kc-duration-settle) var(--kc-ease-settle);
+}
+
+.kc-app-shell__nav[data-treatment="selector"][data-has-selection]::before {
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: var(--kc-app-shell-selector-size);
+  transform: translateX(var(--kc-app-shell-selector-offset));
+}
+
+.kc-app-shell__nav[data-treatment="selector"][data-has-selection]:dir(rtl)::before {
+  inset-inline: auto 0;
+  transform: translateX(calc(0% - var(--kc-app-shell-selector-offset)));
+}
+
+.kc-app-shell__nav-list[data-treatment="selector"][data-has-selection]::before {
+  inset-block-start: 0;
+  inset-inline: 0;
+  block-size: var(--kc-app-shell-selector-size);
+  transform: translateY(var(--kc-app-shell-selector-offset));
+}
+
+.kc-app-shell__nav[data-treatment="selector"] .kc-app-shell__nav-link,
+.kc-app-shell__nav-list[data-treatment="selector"] .kc-app-shell__nav-link {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  min-block-size: var(--kc-control-min-size);
+  border: 0;
+  border-radius: calc(var(--kc-radius-key) - 2px);
+  background: transparent;
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-md);
+  line-height: var(--kc-line-height-label);
+  box-shadow: none;
+  transform: none;
+  transition: color var(--kc-duration-press) var(--kc-ease-press);
+}
+
+.kc-app-shell__nav[data-treatment="selector"] .kc-app-shell__nav-link {
+  justify-content: center;
+}
+
+.kc-app-shell__nav[data-treatment="selector"] .kc-app-shell__nav-link[data-hovered],
+.kc-app-shell__nav-list[data-treatment="selector"] .kc-app-shell__nav-link[data-hovered] {
+  background: transparent;
+  color: var(--kc-color-text);
+}
+
+.kc-app-shell__nav[data-treatment="selector"] .kc-app-shell__nav-link[aria-current="page"],
+.kc-app-shell__nav-list[data-treatment="selector"] .kc-app-shell__nav-link[aria-current="page"] {
+  background: transparent;
+  color: var(--kc-color-accent-text);
+  box-shadow: none;
+}
+
+.kc-app-shell__nav-list[data-treatment="selector"] > li {
+  position: relative;
+  z-index: 1;
+  min-inline-size: 0;
+}
+
+.kc-app-shell__nav-list[data-treatment="selector"] .kc-app-shell__nav-meta {
+  display: inline-flex;
+  min-inline-size: 1.75rem;
+  min-block-size: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--kc-space-2);
+  border-color: transparent;
+  border-radius: var(--kc-radius-sm);
+  background: color-mix(
+    in srgb,
+    var(--kc-color-surface-raised) 94%,
+    var(--kc-color-text) 6%
+  );
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-caps);
+  font-weight: var(--kc-font-weight-label);
+}
+
+.kc-app-shell__nav-list[data-treatment="selector"]
+  .kc-app-shell__nav-link[aria-current="page"]
+  .kc-app-shell__nav-meta {
+  border-color: transparent;
+  background: color-mix(
+    in srgb,
+    var(--kc-color-surface-raised) 88%,
+    var(--kc-color-accent-border) 12%
+  );
+  color: var(--kc-color-accent-text);
+}
+
 .kc-app-shell__nav-link[aria-current="page"] .kc-app-shell__nav-meta {
   border-color: var(--kc-color-accent-border);
   background: var(--kc-color-accent-surface);
@@ -1401,6 +1594,34 @@ h3.kc-page-header__title {
 }
 
 @media (max-width: 52rem) {
+  /* Once a collapsible rail gives way to its trigger, make the header's second
+     row deterministic. Letting three independently-sized flex children wrap
+     by chance produces a different control arrangement at neighboring phone
+     widths and strands the action group at the trailing edge on tablets. */
+  .kc-app-shell__header:has(> .kc-app-shell__nav-trigger) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .kc-app-shell__header:has(> .kc-app-shell__nav-trigger)
+    > .kc-app-shell__brand {
+    grid-column: 1 / -1;
+  }
+
+  .kc-app-shell__header:has(> .kc-app-shell__nav-trigger)
+    > .kc-app-shell__nav-trigger {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .kc-app-shell__header:has(> .kc-app-shell__nav-trigger)
+    > .kc-app-shell__actions {
+    grid-column: 2;
+    margin-inline-start: 0;
+    justify-self: end;
+  }
+
   .kc-app-shell__body[data-sidebar-layout] {
     display: block;
   }
@@ -1628,6 +1849,16 @@ h3.kc-page-header__title {
     color: HighlightText;
     background: Highlight;
     box-shadow: none;
+  }
+
+  .kc-app-shell__nav[data-treatment="selector"],
+  .kc-app-shell__nav-list[data-treatment="selector"] {
+    box-shadow: inset 0 0 0 1px ButtonText;
+  }
+
+  .kc-app-shell__nav[data-treatment="selector"]::before,
+  .kc-app-shell__nav-list[data-treatment="selector"]::before {
+    display: none;
   }
 
   .kc-button[data-focus-visible],

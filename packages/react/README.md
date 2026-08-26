@@ -36,6 +36,11 @@ export function Example() {
 
 Install `react` and `react-dom` in the consuming application. Import the token layer once at the application root, then import the component styles.
 
+Layered Plate is part of the shipping API: use `Card surface="minimal|tonal|contrast"`,
+`PageHeader surface="tonal|contrast"`, and `treatment="selector"` on
+`AppShellNav` or `AppShellNavGroup`. The defaults preserve the original raised
+Card, plain PageHeader, and directory navigation treatments.
+
 Documentation: <https://jflamb.github.io/keycaps-design-system/>
 
 ## Theme bootstrap for hydrated apps

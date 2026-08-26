@@ -21,6 +21,9 @@ const PRESS_TOKENS = [
   "--kc-key-edge-width",
   "--kc-duration-press",
   "--kc-duration-overlay",
+  "--kc-duration-settle",
+  "--kc-settle-offset",
+  "--kc-settle-turn",
   "--kc-chevron-open-turn",
   "--kc-color-key-face-pressed",
 ];
@@ -33,8 +36,9 @@ const DESTINATIONS = [
 ];
 
 /**
- * The press is the system's only expressive gesture, so it is the one thing
- * this page insists you do rather than read. Hold either key.
+ * The press is the system's tactile gesture, so it is the one thing this page
+ * insists you do rather than read. Selector continuity uses the slower settle
+ * tokens documented in the table below.
  */
 export function PressLab() {
   return (

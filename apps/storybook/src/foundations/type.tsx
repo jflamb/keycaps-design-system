@@ -32,14 +32,14 @@ const ROLES: Role[] = [
     id: "label",
     name: "Label",
     usage:
-      "Field labels, button text, descriptions. Semibold rather than bold — a label should be findable, not loud.",
+      "Field labels and descriptions. Buttons use Body size with this role's weight so their actions are not subordinate to nearby copy.",
     sample: "Destination",
   },
   {
     id: "micro",
     name: "Micro",
     usage:
-      "Badges and small keys. At this size, weight is the only hierarchy signal that survives.",
+      "Badges and compact metadata. At this size, weight is the only hierarchy signal that survives.",
     sample: "Keycaps beta",
   },
 ];

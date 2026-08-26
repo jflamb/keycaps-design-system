@@ -116,6 +116,7 @@ const preview: Preview = {
             "Space & shape",
             "Depth & elevation",
             "Motion",
+            "Layered Plate comparison",
             "Consuming Keycaps",
             "Release status",
             "Component showcase",
