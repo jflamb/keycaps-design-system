@@ -39,7 +39,7 @@
     "verify:citations:refresh": "python3 scripts/verify-plan-citations.py --refresh"
   },
   "devDependencies": {
-    "@axe-core/playwright": "4.12.1",
+    "@axe-core/playwright": "4.13.0",
     "@phosphor-icons/core": "2.1.1",
     "@playwright/test": "1.62.1"
   }
