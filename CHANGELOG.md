@@ -15,6 +15,17 @@ All notable changes to the fixed-version Keycaps package train are documented he
 - **The Layered Plate Storybook comparisons consume the public component APIs.** Their light, dark, forced-colors, and reduced-motion examples now document the shipping behavior instead of maintaining parallel presentation-only styles.
 - **Compact application headers now reflow deterministically.** A collapsible AppShell keeps its brand on the first row and aligns the navigation trigger with trailing actions below it; the trigger defaults to the 44px control floor, and banners use the same quiet one-pixel perimeter on every edge.
 
+## 0.3.1 — 2026-08-18
+
+### Added
+
+- **Library-agnostic `AppShellNavLink` icons.** The optional `icon` slot accepts any React-renderable icon and treats it as decorative when the destination label already supplies the link name. `iconLabel` is the explicit escape hatch for the rare icon that communicates additional information.
+- **Disabled application destinations.** The existing React Aria `isDisabled` contract now has matching pointer and forced-colors treatment in the shell navigation.
+
+### Changed
+
+- Grouped navigation keeps icons and labels together while `AppShellNavMeta` remains aligned at the trailing edge. Existing text-only links and group composition remain source-compatible.
+
 ## 0.3.0 — 2026-08-16
 
 ### Added
@@ -195,14 +206,3 @@ The first published release. Both packages enter the fixed version train at
 - Added framework-neutral tokens, local fonts, semantic light/dark themes, reduced-motion support, and forced-color support.
 - Added Button, Field, Select, Popover, Banner, Badge, and Card React components.
 - Added Storybook guidance, unit/accessibility tests, browser verification, and package-consumption proof.
-## 0.3.1 — 2026-08-18
-
-### Added
-
-- **Library-agnostic `AppShellNavLink` icons.** The optional `icon` slot accepts any React-renderable icon and treats it as decorative when the destination label already supplies the link name. `iconLabel` is the explicit escape hatch for the rare icon that communicates additional information.
-- **Disabled application destinations.** The existing React Aria `isDisabled` contract now has matching pointer and forced-colors treatment in the shell navigation.
-
-### Changed
-
-- Grouped navigation keeps icons and labels together while `AppShellNavMeta` remains aligned at the trailing edge. Existing text-only links and group composition remain source-compatible.
-
