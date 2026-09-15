@@ -32,7 +32,7 @@ const ROLES: Role[] = [
     id: "label",
     name: "Label",
     usage:
-      "Field labels and descriptions. Buttons use Body size with this role's weight so their actions are not subordinate to nearby copy.",
+      "Field labels and descriptions. Buttons, navigation links and the skip link use Body size with this role's weight so their actions are not subordinate to nearby copy.",
     sample: "Destination",
   },
   {

@@ -57,6 +57,11 @@ typography:
     fontSize: "0.75rem"
     fontWeight: 760
     lineHeight: 1
+  control:
+    fontFamily: "Sofia Sans, ui-sans-serif, system-ui, -apple-system, sans-serif"
+    fontSize: "1rem"
+    fontWeight: 580
+    lineHeight: 1.1875
 rounded:
   sm: "6px"
   key: "10px"
@@ -75,7 +80,7 @@ components:
   button-primary:
     backgroundColor: "{colors.coral-key}"
     textColor: "{colors.plate}"
-    typography: "{typography.label}"
+    typography: "{typography.control}"
     rounded: "{rounded.key}"
     padding: "calc(0.5rem + 2px) 1.25rem"
     height: "44px"
@@ -84,7 +89,7 @@ components:
   button-secondary:
     backgroundColor: "{colors.plate}"
     textColor: "{colors.graphite}"
-    typography: "{typography.label}"
+    typography: "{typography.control}"
     rounded: "{rounded.key}"
     padding: "calc(0.5rem + 2px) 1.25rem"
     height: "44px"
@@ -92,10 +97,10 @@ components:
     backgroundColor: "{colors.surface-hover}"
   button-quiet:
     textColor: "{colors.signal-deep}"
-    typography: "{typography.label}"
+    typography: "{typography.control}"
     rounded: "{rounded.key}"
   button-small:
-    typography: "{typography.micro}"
+    typography: "{typography.control}"
     padding: "0.5rem 0.75rem"
     height: "36px"
   field-input:
@@ -413,6 +418,7 @@ This is a considered exception to the general advice against colored side border
 **Character:** the frame, not a thing in it.
 
 - **Structure:** a bar, a body, a footer, and a skip link before all of them. The shell contributes no interactive element of its own except a navigation link, so it composes with whatever router an app already has and needs almost nothing on the static path.
+- **Navigation links and the skip link are controls, so they keep the Body text size.** Like a Button, they take only the Label role's weight; the 44px target and the compact 36px rail row are unchanged. A control set smaller than the copy beside it reads as subordinate to it.
 - **The skip link is rendered by construction**, inside its own navigation landmark. Page content outside every landmark is a real gap for anyone moving through a page by landmark, and the one control that exists to help them skip should not be the thing they cannot reach that way.
 - **The sidebar split uses flex wrapping, not a second breakpoint.** The system is single-breakpoint, and a sidebar that reflows on its own content's terms is what the Intrinsic Maximum Rule asks for anyway. The sidebar separates itself by surface tone as well as by a rule, so it still reads as a distinct region once it has wrapped.
 - **The default current destination takes the Select option's treatment** — accent wash with a mint marker on the leading edge — not the coral key. A sidebar is a list of options, and navigating somewhere commits to nothing.

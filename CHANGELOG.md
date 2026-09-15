@@ -22,6 +22,7 @@ All notable changes to the fixed-version Keycaps package train are documented he
 ### Changed
 
 - **Pressable labels use the Body text size throughout the system.** Default and small buttons now keep the shared 16px label size while retaining their existing control heights and dimensional bottom edge.
+- **Navigation links and the skip link use the Body text size too.** The default `AppShellNavLink` treatment and the focused `SkipLink` no longer set the smaller Label size, so every interactive control reads at 16px against the copy around it; the selector navigation treatment already did. Control heights are unchanged.
 - **The Layered Plate Storybook comparisons consume the public component APIs.** Their light, dark, forced-colors, and reduced-motion examples now document the shipping behavior instead of maintaining parallel presentation-only styles.
 - **Compact application headers now reflow deterministically.** A collapsible AppShell keeps its brand on the first row and aligns the navigation trigger with trailing actions below it; the trigger defaults to the 44px control floor, and banners use the same quiet one-pixel perimeter on every edge.
 

@@ -1300,7 +1300,9 @@ h3.kc-page-header__title {
   padding-inline: var(--kc-space-3);
   border-radius: var(--kc-radius-key);
   color: var(--kc-color-text-muted);
-  font-size: var(--kc-font-size-sm);
+  /* A navigation link is a control, so it keeps the Body text size like a
+     Button does. The Label role supplies only its weight. */
+  font-size: var(--kc-font-size-md);
   font-weight: var(--kc-font-weight-label);
   text-decoration: none;
   cursor: pointer;
@@ -1456,7 +1458,6 @@ h3.kc-page-header__title {
   border-radius: calc(var(--kc-radius-key) - 2px);
   background: transparent;
   color: var(--kc-color-text-muted);
-  font-size: var(--kc-font-size-md);
   line-height: var(--kc-line-height-label);
   box-shadow: none;
   transform: none;
