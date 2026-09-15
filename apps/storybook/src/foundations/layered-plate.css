@@ -1,0 +1,556 @@
+.kc-layered-plate {
+  min-block-size: 100vh;
+  padding: clamp(var(--kc-space-5), 4vw, var(--kc-space-10));
+  background: var(--kc-color-surface);
+  color: var(--kc-color-text);
+  font-family: var(--kc-font-body);
+}
+
+.kc-layered-plate__intro {
+  display: grid;
+  gap: var(--kc-space-3);
+  max-inline-size: 68rem;
+  margin: 0 auto var(--kc-space-8);
+}
+
+.kc-layered-plate__intro h1,
+.kc-layered-plate__intro p,
+.kc-layered-plate__treatment-header h2,
+.kc-layered-plate__treatment-description,
+.kc-layered-plate__kicker,
+.kc-layered-plate__card-note,
+.kc-layered-plate__page-followup h3,
+.kc-layered-plate__page-followup p {
+  margin: 0;
+}
+
+.kc-layered-plate__intro h1 {
+  font-family: var(--kc-font-display);
+  font-size: clamp(2rem, 1.35rem + 2.5vw, 3rem);
+  font-weight: var(--kc-font-weight-display);
+  line-height: var(--kc-line-height-heading);
+}
+
+.kc-layered-plate__intro p {
+  max-inline-size: 68ch;
+  color: var(--kc-color-text-muted);
+}
+
+.kc-layered-plate__comparison {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--kc-space-5);
+  max-inline-size: 96rem;
+  margin-inline: auto;
+}
+
+.kc-layered-plate__treatment {
+  display: grid;
+  align-content: start;
+  gap: var(--kc-space-4);
+  min-inline-size: 0;
+  padding: var(--kc-space-4);
+  border: 1px solid var(--kc-color-divider);
+  border-radius: calc(var(--kc-radius-plate) + var(--kc-space-2));
+  background: var(--kc-color-surface-raised);
+}
+
+.kc-layered-plate__treatment[data-treatment="layered"] {
+  border-color: transparent;
+  background: var(--kc-color-surface-minimal);
+}
+
+.kc-layered-plate__treatment-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--kc-space-4);
+}
+
+.kc-layered-plate__treatment-header h2 {
+  font-family: var(--kc-font-display);
+  font-size: var(--kc-font-size-xl);
+  font-weight: var(--kc-font-weight-title);
+  line-height: var(--kc-line-height-heading);
+}
+
+.kc-layered-plate__kicker {
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-caps);
+  font-weight: var(--kc-font-weight-micro);
+  letter-spacing: 0.06em;
+  line-height: var(--kc-line-height-micro);
+  text-transform: uppercase;
+}
+
+.kc-layered-plate__treatment-description {
+  max-inline-size: 58ch;
+  min-block-size: 3em;
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-sm);
+}
+
+.kc-layered-plate__viewport {
+  min-inline-size: 0;
+  overflow: hidden;
+  border: 1px solid var(--kc-color-divider);
+  border-radius: var(--kc-radius-plate);
+  background: var(--kc-color-surface);
+}
+
+.kc-layered-plate__treatment[data-treatment="layered"]
+  .kc-layered-plate__viewport {
+  border-color: transparent;
+  background: var(--kc-color-surface);
+}
+
+.kc-layered-plate__tilted-badge {
+  transform: rotate(-1deg);
+  transform-origin: center;
+}
+
+/* Layout stays local to the comparison fixture; the surface and selector
+   treatments are shipping component APIs. */
+.kc-layered-plate__app-shell {
+  min-block-size: 34rem;
+}
+
+.kc-layered-plate__app-shell .kc-app-shell__body[data-sidebar-layout] {
+  grid-template-columns: 10rem minmax(0, 1fr);
+}
+
+.kc-layered-plate__app-shell .kc-app-shell__main {
+  padding: var(--kc-space-5) var(--kc-space-4) var(--kc-space-6);
+}
+
+.kc-layered-plate__app-stack {
+  display: grid;
+  gap: var(--kc-space-4);
+}
+
+.kc-layered-plate__app-card,
+.kc-layered-plate__app-stack .kc-banner {
+  inline-size: 100%;
+}
+
+[data-treatment="layered"] .kc-layered-plate__app-shell {
+  gap: 0;
+  padding: 0;
+  background: var(--kc-color-surface);
+}
+
+[data-treatment="layered"] .kc-layered-plate__app-shell .kc-app-shell__header {
+  border: 0;
+  border-block-end: 1px solid var(--kc-color-divider);
+  border-radius: 0;
+  background: var(--kc-color-surface-raised);
+}
+
+[data-treatment="layered"] .kc-layered-plate__app-shell .kc-app-shell__body {
+  gap: 0;
+}
+
+[data-treatment="layered"]
+  .kc-layered-plate__app-shell
+  .kc-app-shell__body[data-sidebar-layout] {
+  grid-template-columns: 11rem minmax(0, 1fr);
+}
+
+[data-treatment="layered"] .kc-layered-plate__app-shell .kc-app-shell__sidebar {
+  border: 0;
+  border-inline-end: 1px solid var(--kc-color-divider);
+  border-radius: 0;
+  background: var(--kc-color-surface-raised);
+}
+
+[data-treatment="layered"] .kc-layered-plate__app-shell .kc-app-shell__main {
+  border-radius: 0;
+  background: var(--kc-color-surface);
+}
+
+[data-treatment="layered"] .kc-layered-plate__app-header {
+  margin: 0 0 var(--kc-space-4);
+  animation: kc-layered-settle var(--kc-duration-settle) var(--kc-ease-settle) both;
+}
+
+[data-treatment="layered"] .kc-layered-plate__app-card {
+  animation: kc-layered-settle var(--kc-duration-settle) var(--kc-ease-settle) both;
+}
+
+[data-treatment="layered"] .kc-layered-plate__app-stack .kc-banner {
+  padding: var(--kc-space-6);
+  border-radius: var(--kc-radius-plate);
+}
+
+/* Card proposal: three explicit surface roles rather than one universal box. */
+.kc-layered-plate__treatment--card-grid[data-treatment="layered"] {
+  border-color: var(--kc-color-divider);
+  background: var(--kc-color-surface-raised);
+}
+
+.kc-layered-plate__card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--kc-space-4);
+  padding: var(--kc-space-5);
+}
+
+/* The proposal's cards belong directly to the treatment. One divider marks the
+   transition from its introductory content without adding another plate. */
+.kc-layered-plate__treatment--card-grid[data-treatment="layered"]
+  .kc-layered-plate__viewport {
+  overflow: visible;
+  border: 0;
+  border-block-start: 1px solid var(--kc-color-divider);
+  border-radius: 0;
+  background: transparent;
+}
+
+.kc-layered-plate__treatment--card-grid[data-treatment="layered"]
+  .kc-layered-plate__card-grid {
+  padding: var(--kc-space-5) 0 0;
+}
+
+.kc-layered-plate__grid-card {
+  inline-size: 100%;
+  min-inline-size: 0;
+  padding: var(--kc-space-5);
+}
+
+.kc-layered-plate__grid-card .kc-card__header {
+  min-inline-size: 0;
+}
+
+.kc-layered-plate__grid-card .kc-card__title,
+.kc-layered-plate__grid-card .kc-card__description {
+  overflow-wrap: anywhere;
+}
+
+.kc-layered-plate__card-note {
+  color: var(--kc-color-text-muted);
+  font-size: var(--kc-font-size-sm);
+  font-weight: var(--kc-font-weight-label);
+}
+
+[data-treatment="layered"] .kc-layered-plate__grid-card {
+  animation: kc-layered-settle var(--kc-duration-settle) var(--kc-ease-settle) both;
+}
+
+[data-treatment="layered"] .kc-layered-plate__grid-card:nth-child(2) {
+  animation-delay: 35ms;
+}
+
+[data-treatment="layered"] .kc-layered-plate__grid-card:nth-child(3) {
+  animation-delay: 70ms;
+}
+
+[data-treatment="layered"] .kc-layered-plate__grid-card[data-surface="contrast"] {
+  transform: rotate(-0.65deg);
+}
+
+[data-treatment="layered"]
+  .kc-layered-plate__grid-card[data-surface="contrast"]
+  .kc-layered-plate__card-note {
+  color: var(--kc-color-on-contrast-muted);
+}
+
+[data-treatment="layered"]
+  .kc-layered-plate__grid-card[data-surface="contrast"]
+  .kc-badge {
+  border-color: transparent;
+  background: var(--kc-color-on-contrast);
+  color: var(--kc-color-surface-contrast);
+}
+
+/* PageHeader proposal: a strong chapter surface with unchanged content slots. */
+.kc-layered-plate__page-sample {
+  display: grid;
+  gap: var(--kc-space-5);
+  padding: var(--kc-space-5);
+}
+
+.kc-layered-plate__page-header-surface {
+  padding: var(--kc-space-2);
+}
+
+.kc-layered-plate__page-header {
+  margin: 0;
+}
+
+.kc-layered-plate__page-followup {
+  display: grid;
+  gap: var(--kc-space-2);
+  max-inline-size: 58ch;
+}
+
+.kc-layered-plate__page-followup h3 {
+  font-family: var(--kc-font-display);
+  font-size: var(--kc-font-size-xl);
+  font-weight: var(--kc-font-weight-title);
+  line-height: var(--kc-line-height-heading);
+}
+
+.kc-layered-plate__page-followup p {
+  color: var(--kc-color-text-muted);
+}
+
+/* The PageHeader proposal keeps the baseline's white parent canvas. A single
+   divider introduces the child surface without wrapping it in another plate. */
+.kc-layered-plate__treatment--page-header[data-treatment="layered"] {
+  border-color: var(--kc-color-divider);
+  background: var(--kc-color-surface-raised);
+}
+
+.kc-layered-plate__treatment--page-header[data-treatment="layered"]
+  .kc-layered-plate__viewport {
+  border: 0;
+  border-block-start: 1px solid var(--kc-color-divider);
+  border-radius: 0;
+  background: var(--kc-color-surface-raised);
+}
+
+.kc-layered-plate__treatment--page-header[data-treatment="layered"]
+  .kc-layered-plate__page-sample {
+  padding: var(--kc-space-5) 0 0;
+  background: var(--kc-color-surface-raised);
+}
+
+[data-treatment="layered"] .kc-layered-plate__page-header-surface {
+  padding: 0;
+  animation: kc-layered-settle var(--kc-duration-settle) var(--kc-ease-settle) both;
+}
+
+@keyframes kc-layered-settle {
+  from {
+    opacity: 0;
+    transform: translateY(var(--kc-settle-offset)) rotate(var(--kc-settle-turn));
+  }
+}
+
+:root[data-kc-forced-colors="simulated"]
+  .kc-layered-plate__treatment[data-treatment="layered"],
+:root[data-kc-forced-colors="simulated"]
+  [data-treatment="layered"]
+  :is(
+    .kc-layered-plate__viewport,
+    .kc-app-shell__header,
+    .kc-app-shell__sidebar,
+    .kc-layered-plate__app-header,
+    .kc-layered-plate__app-card,
+    .kc-layered-plate__grid-card,
+    .kc-layered-plate__page-header-surface
+  ) {
+  border: 1px solid ButtonText;
+}
+
+:root[data-kc-forced-colors="simulated"]
+  .kc-layered-plate__treatment--page-header[data-treatment="layered"]
+  .kc-layered-plate__viewport {
+  border: 0;
+  border-block-start: 1px solid ButtonText;
+}
+
+:root[data-kc-forced-colors="simulated"]
+  .kc-layered-plate__treatment--card-grid[data-treatment="layered"]
+  .kc-layered-plate__viewport {
+  border: 0;
+  border-block-start: 1px solid ButtonText;
+}
+
+:root[data-kc-forced-colors="simulated"]
+  [data-treatment="layered"]
+  .kc-layered-plate__app-shell
+  :is(.kc-app-shell__header > .kc-app-shell__nav, .kc-app-shell__nav-list) {
+  border-color: ButtonText;
+  background: Canvas;
+  box-shadow: none;
+}
+
+:root[data-kc-forced-colors="simulated"]
+  [data-treatment="layered"]
+  .kc-layered-plate__app-shell
+  .kc-app-shell__header
+  > .kc-app-shell__nav {
+  border: 0;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px ButtonText;
+}
+
+:root[data-kc-forced-colors="simulated"]
+  [data-treatment="layered"]
+  .kc-layered-plate__app-shell
+  .kc-app-shell__sidebar
+  .kc-app-shell__nav-list {
+  border: 0;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px ButtonText;
+}
+
+:root[data-kc-forced-colors="simulated"]
+  [data-treatment="layered"]
+  .kc-layered-plate__app-shell
+  .kc-app-shell__nav-link[aria-current="page"] {
+  border-color: ButtonText;
+  border-block-end: 3px solid ButtonText;
+  background: ButtonFace;
+  color: ButtonText;
+  box-shadow: none;
+}
+
+:root[data-kc-forced-colors="simulated"]
+  [data-treatment="layered"]
+  .kc-layered-plate__app-shell
+  .kc-app-shell__header
+  > .kc-app-shell__nav::before,
+:root[data-kc-forced-colors="simulated"]
+  [data-treatment="layered"]
+  .kc-layered-plate__app-shell
+  .kc-app-shell__sidebar
+  .kc-app-shell__nav-list::before {
+  border-color: ButtonText;
+  border-block-end-color: ButtonText;
+  background: ButtonFace;
+  box-shadow: none;
+}
+
+:root[data-kc-forced-colors="simulated"]
+  [data-treatment="layered"]
+  .kc-layered-plate__app-shell
+  .kc-app-shell__header
+  > .kc-app-shell__nav
+  .kc-app-shell__nav-link[aria-current="page"] {
+  border: 0;
+  background: transparent;
+}
+
+:root[data-kc-forced-colors="simulated"]
+  [data-treatment="layered"]
+  .kc-layered-plate__app-shell
+  .kc-app-shell__sidebar
+  .kc-app-shell__nav-link[aria-current="page"] {
+  border: 0;
+  background: transparent;
+}
+
+@media (forced-colors: active) {
+  .kc-layered-plate__treatment[data-treatment="layered"],
+  [data-treatment="layered"]
+  :is(
+    .kc-layered-plate__viewport,
+    .kc-app-shell__header,
+    .kc-app-shell__sidebar,
+    .kc-layered-plate__app-header,
+    .kc-layered-plate__app-card,
+    .kc-layered-plate__grid-card,
+    .kc-layered-plate__page-header-surface
+  ) {
+    border: 1px solid ButtonText;
+  }
+
+  .kc-layered-plate__treatment--page-header[data-treatment="layered"]
+    .kc-layered-plate__viewport {
+    border: 0;
+    border-block-start: 1px solid ButtonText;
+  }
+
+  .kc-layered-plate__treatment--card-grid[data-treatment="layered"]
+    .kc-layered-plate__viewport {
+    border: 0;
+    border-block-start: 1px solid ButtonText;
+  }
+
+  [data-treatment="layered"]
+    .kc-layered-plate__app-shell
+    :is(.kc-app-shell__header > .kc-app-shell__nav, .kc-app-shell__nav-list) {
+    border-color: ButtonText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  [data-treatment="layered"]
+    .kc-layered-plate__app-shell
+    .kc-app-shell__header
+    > .kc-app-shell__nav {
+    border: 0;
+    background: transparent;
+    box-shadow: inset 0 0 0 1px ButtonText;
+  }
+
+  [data-treatment="layered"]
+    .kc-layered-plate__app-shell
+    .kc-app-shell__sidebar
+    .kc-app-shell__nav-list {
+    border: 0;
+    background: transparent;
+    box-shadow: inset 0 0 0 1px ButtonText;
+  }
+
+  [data-treatment="layered"]
+    .kc-layered-plate__app-shell
+    .kc-app-shell__nav-link[aria-current="page"] {
+    border-color: ButtonText;
+    border-block-end: 3px solid ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+    box-shadow: none;
+  }
+
+  [data-treatment="layered"]
+    .kc-layered-plate__app-shell
+    .kc-app-shell__header
+    > .kc-app-shell__nav::before,
+  [data-treatment="layered"]
+    .kc-layered-plate__app-shell
+    .kc-app-shell__sidebar
+    .kc-app-shell__nav-list::before {
+    border-color: ButtonText;
+    border-block-end-color: ButtonText;
+    background: ButtonFace;
+    box-shadow: none;
+  }
+
+  [data-treatment="layered"]
+    .kc-layered-plate__app-shell
+    .kc-app-shell__header
+    > .kc-app-shell__nav
+    .kc-app-shell__nav-link[aria-current="page"] {
+    border: 0;
+    background: transparent;
+  }
+
+  [data-treatment="layered"]
+    .kc-layered-plate__app-shell
+    .kc-app-shell__sidebar
+    .kc-app-shell__nav-link[aria-current="page"] {
+    border: 0;
+    background: transparent;
+  }
+}
+
+@media (max-width: 70rem) {
+  .kc-layered-plate__comparison {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 46rem) {
+  .kc-layered-plate__card-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kc-layered-plate__app-shell .kc-app-shell__body[data-sidebar-layout] {
+    display: block;
+  }
+
+  .kc-layered-plate__app-shell .kc-app-shell__sidebar {
+    border-inline-end: 0;
+    border-block-end: 1px solid var(--kc-color-divider);
+  }
+
+  [data-treatment="layered"]
+    .kc-layered-plate__app-shell
+    .kc-app-shell__sidebar {
+    border-inline-end: 0;
+    border-block-end: 1px solid var(--kc-color-divider);
+  }
+}

@@ -199,6 +199,18 @@ describe("Banner, Badge, and Card", () => {
     await user.click(screen.getByRole("button", { name: "Dismiss message" }));
     expect(dismiss).toHaveBeenCalledTimes(1);
   });
+
+  it("exposes the Layered Plate surface role without changing card semantics", () => {
+    render(
+      <Card aria-labelledby="tonal-card-title" surface="tonal">
+        <CardTitle id="tonal-card-title">Tonal grouping</CardTitle>
+      </Card>,
+    );
+
+    const card = screen.getByRole("article", { name: "Tonal grouping" });
+    expect(card).toHaveAttribute("data-surface", "tonal");
+    expect(card).not.toHaveAttribute("role");
+  });
 });
 
 describe("automated accessibility baseline", () => {
@@ -471,6 +483,12 @@ describe("Tier 1 components", () => {
     expect(screen.queryByRole("heading", { name: "Operator" })).toBeNull();
   });
 
+  it("marks a tonal page header as a visual surface without changing its outline", () => {
+    render(<PageHeader surface="tonal" title="Approvals" />);
+    const heading = screen.getByRole("heading", { level: 1, name: "Approvals" });
+    expect(heading.closest("header")).toHaveAttribute("data-surface", "tonal");
+  });
+
   it("renders an empty state at the heading level the outline needs", () => {
     render(<EmptyState level={4} title="No approvals waiting" description="Nothing to do." />);
     expect(
@@ -517,11 +535,50 @@ describe("Tier 1 components", () => {
     );
   });
 
+  it("derives a selector face's geometry from the current destination", async () => {
+    const user = userEvent.setup();
+
+    function SelectorFixture() {
+      const [current, setCurrent] = useState<"activity" | "overview">("overview");
+      return (
+        <AppShellNav label="Workspace views" treatment="selector">
+          <AppShellNavLink
+            href="#overview"
+            isCurrent={current === "overview"}
+            onPress={() => setCurrent("overview")}
+          >
+            Overview
+          </AppShellNavLink>
+          <AppShellNavLink
+            href="#activity"
+            isCurrent={current === "activity"}
+            onPress={() => setCurrent("activity")}
+          >
+            Activity
+          </AppShellNavLink>
+        </AppShellNav>
+      );
+    }
+
+    render(<SelectorFixture />);
+    const nav = screen.getByRole("navigation", { name: "Workspace views" });
+    expect(nav).toHaveAttribute("data-treatment", "selector");
+    expect(nav.style.getPropertyValue("--kc-app-shell-selector-size")).toBe("50%");
+    expect(nav.style.getPropertyValue("--kc-app-shell-selector-offset")).toBe("0%");
+
+    await user.click(screen.getByRole("link", { name: "Activity" }));
+    expect(nav.style.getPropertyValue("--kc-app-shell-selector-offset")).toBe("100%");
+    expect(screen.getByRole("link", { name: "Activity" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+  });
+
   it("renders grouped compact rail navigation with labelled lists and trailing context", () => {
     render(
       <AppShellBody sidebarLayout>
         <AppShellSidebar collapsible density="compact" isSticky label="Primary navigation">
-          <AppShellNavGroup label="The plan">
+          <AppShellNavGroup label="The plan" treatment="selector">
             <AppShellNavLink href="/decisions" isCurrent>
               Decisions <AppShellNavMeta>2 mo</AppShellNavMeta>
             </AppShellNavLink>
@@ -539,6 +596,7 @@ describe("Tier 1 components", () => {
       "true",
     );
     expect(screen.getByRole("list")).toHaveAccessibleName("The plan");
+    expect(screen.getByRole("list")).toHaveAttribute("data-treatment", "selector");
     expect(screen.getByRole("link", { name: "Decisions 2 mo" })).toHaveAttribute(
       "aria-current",
       "page",
@@ -585,11 +643,11 @@ describe("Tier 1 components", () => {
     expect(link).toHaveAttribute("data-disabled", "true");
   });
 
-  it("provides a small-screen navigation trigger without reducing drawer row targets", () => {
+  it("keeps the small-screen navigation trigger at the 44px control floor", () => {
     render(<AppShellNavTrigger aria-haspopup="dialog">Sections</AppShellNavTrigger>);
-    expect(screen.getByRole("button", { name: "Sections" })).toHaveClass(
-      "kc-app-shell__nav-trigger",
-    );
+    const trigger = screen.getByRole("button", { name: "Sections" });
+    expect(trigger).toHaveClass("kc-app-shell__nav-trigger");
+    expect(trigger).toHaveAttribute("data-size", "medium");
   });
 
   it("makes a code block reachable by keyboard, because it scrolls", () => {

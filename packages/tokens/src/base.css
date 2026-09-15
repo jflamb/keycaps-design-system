@@ -102,7 +102,7 @@ body {
   background: var(--kc-color-surface-raised);
   color: var(--kc-color-link);
   font-family: var(--kc-font-body);
-  font-size: var(--kc-font-size-sm);
+  font-size: var(--kc-font-size-md);
   font-weight: var(--kc-font-weight-label);
   text-decoration: none;
 }

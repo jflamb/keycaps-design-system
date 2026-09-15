@@ -23,6 +23,8 @@ const meta = {
           "The eyebrow stays one 8px step from the title. The description starts one 16px composition step below it, so adding body copy does not make the eyebrow and title drift apart.",
           "",
           "Heading **sizes** are declared by this component and nowhere else, which is the same reason the token package ships none — the surface decides how large a heading is, and a page header is a surface. They clamp with the viewport rather than stepping at a breakpoint.",
+          "",
+          "`surface=\"tonal\"` is the normal Layered Plate treatment. `surface=\"contrast\"` is a rare chapter break, not a default hero style.",
         ].join("\n"),
       },
     },
@@ -43,6 +45,12 @@ const meta = {
       description:
         "A rule under the header. Off by default so it does not stack with the app shell's own header border.",
       control: "boolean",
+    },
+    surface: {
+      description: "The opening band's Layered Plate surface role.",
+      control: "inline-radio",
+      options: ["plain", "tonal", "contrast"],
+      table: { defaultValue: { summary: '"plain"' } },
     },
   },
 } satisfies Meta<typeof PageHeader>;
@@ -83,6 +91,30 @@ export const Complete: Story = {
     await expect(canvas.getByRole("heading", { level: 1, name: "Approvals" })).toBeVisible();
     // The eyebrow is a paragraph, not a heading — it must not enter the outline.
     await expect(canvas.queryByRole("heading", { name: "Operator" })).toBeNull();
+  },
+};
+
+/** The normal Layered Plate opening: grouped by tone, not wrapped in another box. */
+export const TonalSurface: Story = {
+  args: {
+    ...Complete.args,
+    surface: "tonal",
+  },
+};
+
+/** A deliberately rare inverse chapter break. */
+export const ContrastSurface: Story = {
+  args: {
+    ...Complete.args,
+    surface: "contrast",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Use at most once in a view when the opening is a true chapter break. Prefer the tonal surface for routine page headers.",
+      },
+    },
   },
 };
 

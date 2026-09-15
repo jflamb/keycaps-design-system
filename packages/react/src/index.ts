@@ -16,6 +16,7 @@ export {
   type AppShellNavLinkProps,
   type AppShellNavGroupProps,
   type AppShellNavProps,
+  type AppShellNavTreatment,
   type AppShellProps,
   type AppShellSidebarProps,
 } from "./components/AppShell.js";
@@ -49,6 +50,7 @@ export {
   type CardElement,
   type CardLinkProps,
   type CardProps,
+  type CardSurface,
   type CardTitleProps,
 } from "./components/Card.js";
 export {
@@ -89,7 +91,11 @@ export {
 export { Disclosure, type DisclosureProps } from "./components/Disclosure.js";
 export { EmptyState, type EmptyStateProps } from "./components/EmptyState.js";
 export { Field, type FieldProps } from "./components/Field.js";
-export { PageHeader, type PageHeaderProps } from "./components/PageHeader.js";
+export {
+  PageHeader,
+  type PageHeaderProps,
+  type PageHeaderSurface,
+} from "./components/PageHeader.js";
 export {
   Popover,
   PopoverTrigger,

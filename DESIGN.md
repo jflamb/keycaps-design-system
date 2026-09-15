@@ -57,6 +57,11 @@ typography:
     fontSize: "0.75rem"
     fontWeight: 760
     lineHeight: 1
+  control:
+    fontFamily: "Sofia Sans, ui-sans-serif, system-ui, -apple-system, sans-serif"
+    fontSize: "1rem"
+    fontWeight: 580
+    lineHeight: 1.1875
 rounded:
   sm: "6px"
   key: "10px"
@@ -75,7 +80,7 @@ components:
   button-primary:
     backgroundColor: "{colors.coral-key}"
     textColor: "{colors.plate}"
-    typography: "{typography.label}"
+    typography: "{typography.control}"
     rounded: "{rounded.key}"
     padding: "calc(0.5rem + 2px) 1.25rem"
     height: "44px"
@@ -84,7 +89,7 @@ components:
   button-secondary:
     backgroundColor: "{colors.plate}"
     textColor: "{colors.graphite}"
-    typography: "{typography.label}"
+    typography: "{typography.control}"
     rounded: "{rounded.key}"
     padding: "calc(0.5rem + 2px) 1.25rem"
     height: "44px"
@@ -92,10 +97,10 @@ components:
     backgroundColor: "{colors.surface-hover}"
   button-quiet:
     textColor: "{colors.signal-deep}"
-    typography: "{typography.label}"
+    typography: "{typography.control}"
     rounded: "{rounded.key}"
   button-small:
-    typography: "{typography.micro}"
+    typography: "{typography.control}"
     padding: "0.5rem 0.75rem"
     height: "36px"
   field-input:
@@ -219,8 +224,8 @@ All three faces are continuously variable — Piazzolla 100–900, Sofia Sans 1�
 - **Display** (580, size set by context, 1.2): `h1` and `h2`. Piazzolla with optical sizing left automatic. Sizes are not tokenized — the surface decides, the face does not.
 - **Title** (640, 1.25rem, 1.2): card titles. The only place Piazzolla appears inside a component rather than in page-level headings.
 - **Body** (400, 1rem, 1.55): default running text and input values. The generous 1.55 leading is what makes dense forms breathable.
-- **Label** (580, 0.875rem, 1.45): field labels, button text, descriptions. Just under semibold, because a label should be findable, not loud. Button text takes the role's weight and size but a tighter 1.2 leading — at 1.45 the content box exceeds `--kc-control-min-size` and the button sizes to its content instead of to the 44px floor, which the press depends on.
-- **Micro** (760, 0.75rem, 1): badges and small keys. Heavier than bold and tight-leaded — at this size, with no ascenders or descenders in all-caps, weight is the only hierarchy signal that survives.
+- **Label** (580, 0.875rem, 1.45): field labels and descriptions. Just under semibold, because a label should be findable, not loud. Button labels use Body size with the Label weight and a tighter 1.2 leading, so controls do not make their action text subordinate to the copy around them.
+- **Micro** (760, 0.75rem, 1): badges and compact metadata. Heavier than bold and tight-leaded — at this size, with no ascenders or descenders in all-caps, weight is the only hierarchy signal that survives.
 
 ### Named Rules
 
@@ -318,6 +323,7 @@ This is a considered exception to the general advice against colored side border
 **Character:** a keycap. Solid, seated, and satisfying exactly once per interaction.
 
 - **Shape:** keycap radius (10px), 44px minimum height, 4px bottom edge.
+- **Label:** Body size (1rem), Label weight, and 1.2 leading in every size. A smaller target does not make its action less important or less readable.
 - **Primary:** coral key face with a `coral-edge` side wall and `plate` text. Hover darkens the face to `coral-deep`.
 - **Secondary:** raised `plate` surface with `fog` borders on all four sides, bottom included. Hover warms to `surface-hover`.
 - **Quiet:** no surface, no borders, `signal-deep` text. Still travels on press.
@@ -325,7 +331,7 @@ This is a considered exception to the general advice against colored side border
 - **The press is transform-only, and that is a constraint, not an accident.** `min-block-size` pins the border box, so compressing the wall redistributes space inside a box that never resizes. The whole key — bottom edge included — translates 3px; the wall shrinking by the same 3px is what makes it read as compression rather than as the object sliding. Animating the box height instead would hold the outer boundary still on paper, and in practice it relayouts every frame and re-centers the key inside any container that centers its items: measured as a 1.1px upward flick followed by a slide that lands 1.5px low. A wobble, not a press. If a future version wants a genuinely fixed lower boundary, it has to come from a compositor-only wall — a scaled pseudo-element — not from animating layout.
 - **Reduced motion:** travel is removed and the edge stays at full 4px; a primary key instead fills with `--kc-color-key-face-pressed`, which resolves to `coral-edge`. The press is still legible, expressed in material instead of movement. The whole substitution lives in the tokens layer (see Motion), so no component implements it and none can forget it.
 - **Focus:** 3px `coral` outline at 3px offset, outside the object so the edge stays readable.
-- **Small size:** 36px height, micro type, tighter padding.
+- **Small size:** 36px height with tighter block padding. It keeps the same body-sized label as the default key.
 - **Danger:** the destructive key, and deliberately *not* a filled key in the danger hue. `danger` (#c7302b) and `coral-key` (#c7452c) differ only in their green channel, so two filled keys on one approvals row — "Approve" beside "Reject" — would be indistinguishable at a glance. The difference is carried by form instead: a raised `plate` surface with `danger-border` sides, a `danger` wall, and `danger` ink, against a filled coral face. Filled versus outlined survives forced colors, monochrome print, and every color vision deficiency; 21 points in one channel does not. It keeps the wall and it travels, so the Pressable Edge Rule's promise holds. Under reduced motion the pressed state fills with the wall color and takes raised-surface ink — the same substitution a primary key makes, not an exception to it.
 - **The destructive key carries the danger shape, and the component supplies it.** Outlining solves the collision with coral and creates a nearer one: against a `secondary` key, a danger key differs only by a pink border and red ink, and under `forced-colors: active` both resolve to the same system colors, leaving no destructive signal at all. Shape is the only carrier that survives, so the danger variant renders the octagon by construction. This is the Tone Trio Rule read strictly — a second carrier a caller can forget to pass is not a second carrier. An icon-only danger key is exempt, because its glyph already *is* the shape and a second mark would crowd a key whose whole label is one.
 - **Icon-only:** a square key at the 44px floor. The glyph is the whole label, so the accessible name has to be supplied, and the type requires it rather than suggesting it.
@@ -338,6 +344,7 @@ This is a considered exception to the general advice against colored side border
 
 - **Corner Style:** plate radius (18px), the largest in the system.
 - **Background:** `plate` on a `cloud` page.
+- **Surface ladder:** `raised` is the existing bordered plate; `minimal` and `tonal` use controlled fills and no shadow or perimeter border; `contrast` is an inverse surface reserved for one chapter or editorial accent. The ladder is hierarchy, not decoration: routine siblings should not alternate surfaces merely for variety.
 - **Shadow Strategy:** `--kc-shadow-plate` in light, none in dark (see Elevation).
 - **Border:** 1px `divider` — lighter than the interactive `fog`, because a card encloses without demanding.
 - **Internal Padding:** step 6 (1.5rem), tightening to step 5 below 30rem. Header, body and footer stack at step 5, and the body stacks its own children at step 5 too — what sits in a card body is whole components, and composition between components is what steps 5 and 6 are for. The footer separates with a `divider` rule and step 4 of top padding.
@@ -411,9 +418,11 @@ This is a considered exception to the general advice against colored side border
 **Character:** the frame, not a thing in it.
 
 - **Structure:** a bar, a body, a footer, and a skip link before all of them. The shell contributes no interactive element of its own except a navigation link, so it composes with whatever router an app already has and needs almost nothing on the static path.
+- **Navigation links and the skip link are controls, so they keep the Body text size.** Like a Button, they take only the Label role's weight; the 44px target and the compact 36px rail row are unchanged. A control set smaller than the copy beside it reads as subordinate to it.
 - **The skip link is rendered by construction**, inside its own navigation landmark. Page content outside every landmark is a real gap for anyone moving through a page by landmark, and the one control that exists to help them skip should not be the thing they cannot reach that way.
 - **The sidebar split uses flex wrapping, not a second breakpoint.** The system is single-breakpoint, and a sidebar that reflows on its own content's terms is what the Intrinsic Maximum Rule asks for anyway. The sidebar separates itself by surface tone as well as by a rule, so it still reads as a distinct region once it has wrapped.
-- **The current destination takes the Select option's treatment** — accent wash with a mint marker on the leading edge — not the coral key. A sidebar is a list of options, and navigating somewhere commits to nothing.
+- **The default current destination takes the Select option's treatment** — accent wash with a mint marker on the leading edge — not the coral key. A sidebar is a list of options, and navigating somewhere commits to nothing.
+- **Selector treatment:** two to four peer destinations may share a transparent track drawn by one inset divider. The current destination is a raised face with a mint bottom edge that covers the track and moves over `--kc-duration-settle`. The component derives the face width and position from its direct children and `isCurrent`; consumers do not maintain a second visual index. A grouped sidebar selector uses the same 44px row height and inline margins. Counts are quiet tonal chips with no colored outline; the selected count borrows the accent at low opacity.
 - **Measure:** the content region carries `min(100%, 72rem)`, centered. A page needs no layout wrapper.
 
 ### Page header
@@ -423,6 +432,7 @@ This is a considered exception to the general advice against colored side border
 - **The heading's own margins are zeroed and the header owns the rhythm.** That follows the Heading Rhythm Rule rather than breaking it: a heading opening its container has nothing above it to separate from, and the space that matters belongs to the header as a block rather than to the heading as a line.
 - **Heading sizes live here**, and only here among the components — the surface decides how large a heading is, and a page header is a surface. They clamp with the viewport rather than stepping at a breakpoint.
 - **Level and size are set independently.** The outline is a document decision; the size is a visual one. The eyebrow is a paragraph in the Micro role, never a heading, so it stays out of the outline.
+- **Surface:** `plain` preserves the open header. `tonal` is the normal Layered Plate treatment: a controlled fill groups the opening without an interstitial container. `contrast` is deliberately rare and belongs only to a genuine chapter break; its high contrast is too forceful for routine page openings.
 
 ### Empty state
 

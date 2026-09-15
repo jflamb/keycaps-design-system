@@ -8,6 +8,12 @@ Framework-neutral Keycaps CSS custom properties, locally hosted Piazzolla, Sofia
 
 Set `data-theme="light"` or `data-theme="dark"` on the root element for an explicit theme. Without an explicit value, Keycaps follows the system color scheme.
 
+The semantic Layered Plate ladder is available as
+`--kc-color-surface-minimal`, `--kc-color-surface-tonal`, and
+`--kc-color-surface-contrast`, with matching inverse text tokens. Selector and
+settling transitions use `--kc-duration-settle` and `--kc-ease-settle`; reduced
+motion resolves that duration and its offset/rotation tokens to zero.
+
 ## Long-form content
 
 Styling for the elements a CMS or a markdown pipeline emits ships separately, because a product surface that renders no articles should not pay for it:

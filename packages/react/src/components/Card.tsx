@@ -12,6 +12,9 @@ import { cx } from "../utils.js";
 /** The element a Card renders. Choose by document semantics, not by appearance. */
 export type CardElement = "article" | "section" | "div" | "a";
 
+/** The card's place in the Layered Plate surface ladder. */
+export type CardSurface = "raised" | "minimal" | "tonal" | "contrast";
+
 export interface CardProps
   extends HTMLAttributes<HTMLElement>,
     Pick<AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "rel" | "target" | "download"> {
@@ -24,6 +27,14 @@ export interface CardProps
    * @default "article"
    */
   as?: CardElement;
+  /**
+   * The card's surface role. `raised` is the existing bordered plate. Use
+   * `minimal` and `tonal` to group with fill instead of another box; reserve
+   * `contrast` for a single chapter or editorial accent.
+   *
+   * @default "raised"
+   */
+  surface?: CardSurface;
   /**
    * Marks the card as the target of a `CardLink` inside it. Sets the hover and
    * focus treatment on the card while the link keeps the accessible name.
@@ -53,13 +64,14 @@ export interface CardProps
  * data attributes and `styles.css` stays free of real interactive selectors.
  */
 export const Card = forwardRef<HTMLElement, CardProps>(function Card(
-  { as = "article", className, isLinked, ...props },
+  { as = "article", className, isLinked, surface = "raised", ...props },
   ref,
 ) {
   const linked = isLinked || as === "a";
   const shared = {
     ...props,
     className: cx("kc-card", className),
+    "data-surface": surface,
     ...(linked ? { "data-linked": true } : null),
   };
 

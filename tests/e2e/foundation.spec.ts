@@ -490,6 +490,39 @@ test("the app shell puts a working skip link before everything else", async ({ p
   await expect(page.getByRole("main")).toBeVisible();
 });
 
+test("interactive controls share the Body text size", async ({ page }) => {
+  const bodyToken = async () =>
+    page.evaluate(() => {
+      const styles = getComputedStyle(document.documentElement);
+      const value = styles.getPropertyValue("--kc-font-size-md").trim();
+      return value.endsWith("rem")
+        ? Number.parseFloat(value) * Number.parseFloat(styles.fontSize)
+        : Number.parseFloat(value);
+    });
+  const fontSize = (selector: string) =>
+    page.locator(selector).first().evaluate((element) =>
+      Number.parseFloat(getComputedStyle(element).fontSize),
+    );
+
+  for (const story of ["primary", "small"] as const) {
+    await page.goto(
+      `/iframe.html?id=components-button--${story}&viewMode=story&globals=theme:light`,
+    );
+    expect(await fontSize(".kc-button"), story).toBeCloseTo(await bodyToken(), 2);
+  }
+
+  await page.goto(
+    "/iframe.html?id=components-app-shell--default&viewMode=story&globals=theme:light",
+  );
+  const expected = await bodyToken();
+  expect(await fontSize(".kc-app-shell__nav-link"), "nav link").toBeCloseTo(expected, 2);
+
+  const skip = page.getByRole("link", { name: "Skip to main content" });
+  await skip.focus();
+  expect(await fontSize(".kc-skip-link"), "skip link").toBeCloseTo(expected, 2);
+  expect((await skip.boundingBox())!.height, "skip link height").toBeGreaterThanOrEqual(44);
+});
+
 test("the application rail is compact on desktop and keeps drawer targets at 44px", async ({
   page,
 }) => {

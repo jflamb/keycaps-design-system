@@ -128,6 +128,13 @@
   --kc-ease-press: ease;
   --kc-duration-overlay: 140ms;
   --kc-ease-overlay: ease-out;
+  /* A slower, softer transition for a selector face changing position or a
+     tonal surface settling into place. It is distinct from a press: the reader
+     is following continuity between states, not feeling a key actuate. */
+  --kc-duration-settle: 210ms;
+  --kc-ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+  --kc-settle-offset: 6px;
+  --kc-settle-turn: 0.45deg;
 
   /* The press gesture. Travel and edge width are one coupled value pair: the
      cap descends exactly as far as its wall shrinks, so the object's lower
@@ -140,6 +147,26 @@
   --kc-color-surface: var(--kc-color-cloud);
   --kc-color-surface-raised: var(--kc-color-plate);
   --kc-color-surface-hover: #f7f7f4;
+  /* The Layered Plate ladder. These roles replace decorative container borders
+     with controlled tonal steps; `contrast` is intentionally exceptional and
+     should mark a chapter or editorial accent, not routine grouping. */
+  --kc-color-surface-minimal: color-mix(
+    in srgb,
+    var(--kc-color-surface-raised) 96%,
+    var(--kc-color-text) 4%
+  );
+  --kc-color-surface-tonal: color-mix(
+    in srgb,
+    var(--kc-color-surface-raised) 92%,
+    var(--kc-color-text) 8%
+  );
+  --kc-color-surface-contrast: var(--kc-color-text);
+  --kc-color-on-contrast: var(--kc-color-surface-raised);
+  --kc-color-on-contrast-muted: color-mix(
+    in srgb,
+    var(--kc-color-on-contrast) 72%,
+    var(--kc-color-surface-contrast)
+  );
   --kc-color-text: var(--kc-color-graphite);
   --kc-color-text-muted: var(--kc-color-slate);
   --kc-color-border: var(--kc-color-fog);
@@ -327,6 +354,9 @@
   :root:not([data-kc-motion="full"]) {
     --kc-duration-press: 0ms;
     --kc-duration-overlay: 0ms;
+    --kc-duration-settle: 0ms;
+    --kc-settle-offset: 0px;
+    --kc-settle-turn: 0deg;
     --kc-press-travel: 0px;
     --kc-press-edge-width: var(--kc-key-edge-width);
     --kc-chevron-open-turn: 0deg;
@@ -341,6 +371,9 @@
 :root[data-kc-motion="reduce"] {
   --kc-duration-press: 0ms;
   --kc-duration-overlay: 0ms;
+  --kc-duration-settle: 0ms;
+  --kc-settle-offset: 0px;
+  --kc-settle-turn: 0deg;
   --kc-press-travel: 0px;
   --kc-press-edge-width: var(--kc-key-edge-width);
   --kc-chevron-open-turn: 0deg;
@@ -357,6 +390,11 @@
     --kc-color-surface: Canvas;
     --kc-color-surface-raised: Canvas;
     --kc-color-surface-hover: Canvas;
+    --kc-color-surface-minimal: Canvas;
+    --kc-color-surface-tonal: Canvas;
+    --kc-color-surface-contrast: Canvas;
+    --kc-color-on-contrast: CanvasText;
+    --kc-color-on-contrast-muted: CanvasText;
     --kc-color-text: CanvasText;
     --kc-color-text-muted: CanvasText;
     --kc-color-border: ButtonText;
