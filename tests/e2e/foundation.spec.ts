@@ -604,6 +604,9 @@ test("icon-gallery captions resolve the supported extra-small type token", async
     await page.goto(
       `/iframe.html?id=components-icon--${story}&viewMode=story&globals=theme:light`,
     );
+    // Storybook renders the story after navigation resolves, and `evaluateAll`
+    // does not wait, so anchor on the first caption before measuring them all.
+    await page.locator("ul code").first().waitFor();
     const type = await page.locator("ul code").evaluateAll((captions) => {
       const rootStyles = getComputedStyle(document.documentElement);
       const token = rootStyles.getPropertyValue("--kc-font-size-xs").trim();
