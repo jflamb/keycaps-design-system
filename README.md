@@ -74,3 +74,5 @@ and their license texts ship beside the binaries in
 `@jflamb/keycaps-tokens/dist/fonts/`. None of the fonts declares a Reserved Font
 Name, so the Latin subsetting and WOFF2 conversion carry no renaming
 obligation.
+
+<!-- Ellis review canary: PR243 local runtime verification. -->
