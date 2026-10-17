@@ -1,0 +1,6 @@
+interface:
+  display_name: "Keycaps Design System"
+  short_description: "Repo-specific patterns and workflows for keycaps-design-system"
+  default_prompt: "Use the keycaps-design-system repo skill to follow existing architecture, testing, and workflow conventions."
+policy:
+  allow_implicit_invocation: true
